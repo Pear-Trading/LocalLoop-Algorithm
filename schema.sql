@@ -2,7 +2,7 @@ CREATE TABLE OriginalTransactions (
   TransactionId INTEGER PRIMARY KEY NOT NULL,
   FromUserId INTEGER NOT NULL,
   ToUserId INTEGER NOT NULL,
-  Value INTEGER
+  Value INTEGER NOT NULL
 );
 
 CREATE TABLE ProcessedTransactions (
