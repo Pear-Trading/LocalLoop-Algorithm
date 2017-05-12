@@ -9,5 +9,11 @@ has dbh => (
   lazy => 1,
 );
 
+#Empty method for subclasses to override if they have any initialisation work
+#todo before the algorithm is run.
+sub init {
+
+}
+
 1;
 

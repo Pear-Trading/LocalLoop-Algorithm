@@ -69,18 +69,31 @@ sub process {
   my $dbh = $self->dbh or die "Database does not exist";  
   
 
-  $self->_initialSetup();  
+  $self->_initialSetup($settings);  
 
   $self->_applyStaticRestrictions($settings);
 
 }
 
+#This is executed once per analysis.
 sub _initialSetup {
-  my $self = shift;
+  my ($self, $settings) = @_;
   my $dbh = $self->dbh;
   
   $dbh->do("DELETE FROM ProcessedTransactions");
   $dbh->do("INSERT INTO ProcessedTransactions (TransactionId , FromUserId, ToUserId, Value) SELECT * FROM OriginalTransactions"); 
+  
+  foreach my $staticRestriction (@{$settings->staticRestrictionsArray}) {
+    $staticRestriction->init();
+  }
+  
+  foreach my $dynamicRestriction (@{$settings->dynamicRestrictionsArray}) {
+    $dynamicRestriction->init();
+  }
+  
+  foreach my $heuristic (@{$settings->heuristicArray}) {
+    $heuristic->init();
+  }
   
 }
 
