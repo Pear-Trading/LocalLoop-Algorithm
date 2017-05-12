@@ -8,13 +8,14 @@ with ('Pear::LocalLoop::Algorithm::IStaticRestriction');
 
 
 sub applyStaticRestriction{
+  #say 'Path-Enter applyStaticRestriction:' . __FILE__ . ', line: ' . __LINE__;
   my $self = shift;
   my $dbh = $self->dbh;
 
   my $tableName = "Tmp_StaticRestrictionRemoveTransactions";
   my $tableNameZero = $tableName ."_0";
-  
-  print "$tableNameZero\n";
+
+  #print "$tableNameZero\n";  
   
   $dbh->do("DROP TABLE IF EXISTS $tableNameZero");
   $dbh->do("CREATE TABLE $tableNameZero (ZeroIds INTEGER PRIMARY KEY)");
@@ -38,8 +39,7 @@ sub applyStaticRestriction{
     #print "looped";
   }
 
-
-  return;
+  #say 'Path-Exit applyStaticRestriction:' . __FILE__ . ', line: ' . __LINE__;
 }
 
 1;

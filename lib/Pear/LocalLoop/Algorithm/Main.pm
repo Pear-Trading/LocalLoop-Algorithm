@@ -57,6 +57,8 @@ sub dbi {
 }
 
 sub process {
+  #say 'Path-Enter process:' . __FILE__ . ', line: ' . __LINE__;
+  
   my ($self, $settings) = @_;
   
   #TODO add more checks for settings.
@@ -72,20 +74,35 @@ sub process {
   $self->_initialSetup($settings);  
 
   $self->_applyStaticRestrictions($settings);
+  
+  my $transactionOrder = $settings->transactionOrder;
+  $transactionOrder->initAfterStaticRestrictions();
 
+  for (my $nextTransactionId = $transactionOrder->nextTransactionId; 
+    defined $nextTransactionId; 
+    $nextTransactionId = $transactionOrder->nextTransactionId)
+  {
+    say "$nextTransactionId";
+  }
+  
+  #say 'Path-Exit process:' . __FILE__ . ', line: ' . __LINE__;
 }
 
 #This is executed once per analysis.
 sub _initialSetup {
+  #say 'Path-Enter _initialSetup:' . __FILE__ . ', line: ' . __LINE__;
+  
   my ($self, $settings) = @_;
   my $dbh = $self->dbh;
   
   $dbh->do("DELETE FROM ProcessedTransactions");
-  $dbh->do("INSERT INTO ProcessedTransactions (TransactionId , FromUserId, ToUserId, Value) SELECT * FROM OriginalTransactions"); 
+  $dbh->do("INSERT INTO ProcessedTransactions (TransactionId, FromUserId, ToUserId, Value) SELECT * FROM OriginalTransactions"); 
   
   foreach my $staticRestriction (@{$settings->staticRestrictionsArray}) {
     $staticRestriction->init();
   }
+  
+  $settings->transactionOrder->init();
   
   foreach my $dynamicRestriction (@{$settings->dynamicRestrictionsArray}) {
     $dynamicRestriction->init();
@@ -95,9 +112,12 @@ sub _initialSetup {
     $heuristic->init();
   }
   
+  #say 'Path-Exit _initialSetup:' . __FILE__ . ', line: ' . __LINE__;
 }
 
 sub _applyStaticRestrictions {
+  #say 'Path-Enter _applyStaticRestrictions:' . __FILE__ . ', line: ' . __LINE__;
+  
   #This assumes settings is present and is valid.
   my ($self, $settings) = @_;
   
@@ -110,6 +130,7 @@ sub _applyStaticRestrictions {
   }
 
 
+  #say 'Path-Exit _applyStaticRestrictions:' . __FILE__ . ', line: ' . __LINE__;
 }
 
 sub _applyDynamicRestrictions {
