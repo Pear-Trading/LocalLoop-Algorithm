@@ -4,6 +4,7 @@ use Test::Fatal;
 use Pear::LocalLoop::Algorithm::Main;
 use Pear::LocalLoop::Algorithm::ProcessingTypeContainer;
 use Pear::LocalLoop::Algorithm::StaticRestriction::RemoveTransactionsThatCannotFormALoop;
+use Pear::LocalLoop::Algorithm::TransactionOrder::EarliestFirst;
 use Path::Class::File;
 use v5.10;
 
@@ -37,7 +38,14 @@ sub delete_table_data {
 my $rst = Pear::LocalLoop::Algorithm::StaticRestriction::RemoveTransactionsThatCannotFormALoop->new();
 
 my $staticRestrictions = [$rst];
-my $proc = Pear::LocalLoop::Algorithm::ProcessingTypeContainer->new(staticRestrictionsArray => $staticRestrictions);
+my $dynamicRestrictions = [];
+my $heuristics = [];
+my $hash = {
+  staticRestrictionsArray => $staticRestrictions,
+  transactionOrder => Pear::LocalLoop::Algorithm::TransactionOrder::EarliestFirst->new(),
+};
+
+my $proc = Pear::LocalLoop::Algorithm::ProcessingTypeContainer->new($hash);
 
 my $insertStatement = $dbh->prepare("INSERT INTO OriginalTransactions (TransactionId, FromUserId, ToUserId, Value) VALUES (?, ?, ?, ?)");
 
