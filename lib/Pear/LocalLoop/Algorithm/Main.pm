@@ -49,10 +49,10 @@ sub clearTestingMode {
 sub dbi {
   my $mode = $ENV{'MODE'};
   if (defined $mode && $mode eq "testing") {
-    return _dbi();
+    return _dbi_test();
   }
   else {
-    return _dbi_test();
+    return _dbi();
   }
 }
 
