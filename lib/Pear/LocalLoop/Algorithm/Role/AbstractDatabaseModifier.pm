@@ -1,4 +1,4 @@
-package Pear::LocalLoop::Algorithm::AbstractDatabaseModifier;
+package Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier;
 
 use Moo;
 use Pear::LocalLoop::Algorithm::Main;

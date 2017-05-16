@@ -1,4 +1,4 @@
-package Pear::LocalLoop::Algorithm::IDynamicRestriction;
+package Pear::LocalLoop::Algorithm::Role::IDynamicRestriction;
 
 use Moo::Role;
 

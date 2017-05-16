@@ -1,4 +1,4 @@
-package Pear::LocalLoop::Algorithm::IHeuristic;
+package Pear::LocalLoop::Algorithm::Role::IHeuristic;
 
 use Moo::Role;
 

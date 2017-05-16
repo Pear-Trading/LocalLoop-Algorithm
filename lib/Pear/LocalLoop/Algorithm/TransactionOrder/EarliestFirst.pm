@@ -5,8 +5,8 @@ use v5.10;
 use Data::Dumper;
 use DBI;
 
-extends 'Pear::LocalLoop::Algorithm::AbstractDatabaseModifier';
-with ('Pear::LocalLoop::Algorithm::ITransactionOrder');
+extends 'Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier';
+with ('Pear::LocalLoop::Algorithm::Role::ITransactionOrder');
 
 #TODO this should be rwp
 has dbQuery => (

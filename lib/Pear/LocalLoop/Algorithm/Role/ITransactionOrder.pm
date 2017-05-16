@@ -1,4 +1,4 @@
-package Pear::LocalLoop::Algorithm::ITransactionOrder;
+package Pear::LocalLoop::Algorithm::Role::ITransactionOrder;
 
 use Moo::Role;
 

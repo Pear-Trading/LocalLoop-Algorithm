@@ -3,8 +3,8 @@ package Pear::LocalLoop::Algorithm::StaticRestriction::RemoveTransactionsThatCan
 use Moo;
 use v5.10;
 use Data::Dumper;
-extends 'Pear::LocalLoop::Algorithm::AbstractDatabaseModifier';
-with ('Pear::LocalLoop::Algorithm::IStaticRestriction');
+extends 'Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier';
+with ('Pear::LocalLoop::Algorithm::Role::IStaticRestriction');
 
 
 sub applyStaticRestriction{
