@@ -18,17 +18,17 @@ my $main = Pear::LocalLoop::Algorithm::Main->new();
 my $dbh = $main->dbh;
 
 #Dump all pf the test tables and start again.
-my $sqlDropSchema = Path::Class::File->new("$FindBin::Bin/../dropschema.sql")->slurp;
+my $sqlDropSchema = Path::Class::File->new("$FindBin::Bin/../../dropschema.sql")->slurp;
 for (split ';', $sqlDropSchema){
   $dbh->do($_) or die $dbh->errstr;
 }
 
-my $sqlCreateDatabase = Path::Class::File->new("$FindBin::Bin/../schema.sql")->slurp;
+my $sqlCreateDatabase = Path::Class::File->new("$FindBin::Bin/../../schema.sql")->slurp;
 for (split ';', $sqlCreateDatabase){
   $dbh->do($_) or die $dbh->errstr;
 }
 
-my $sqlDeleteDataFromTables = Path::Class::File->new("$FindBin::Bin/../emptytables.sql")->slurp;
+my $sqlDeleteDataFromTables = Path::Class::File->new("$FindBin::Bin/../../emptytables.sql")->slurp;
 sub delete_table_data {
   for (split ';', $sqlDeleteDataFromTables){
     $dbh->do($_) or die $dbh->errstr;
