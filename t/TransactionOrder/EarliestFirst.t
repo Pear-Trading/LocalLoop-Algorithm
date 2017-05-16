@@ -84,4 +84,9 @@ is ($earliestFirstTest->nextTransactionId(),3,"Expected transaction id 3.");
 is ($earliestFirstTest->nextTransactionId(),4,"Expected transaction id 4."); 
 is ($earliestFirstTest->nextTransactionId(),undef,"Expected transaction id undef.");   
 
+say "Test 4 - Empty table";
+delete_table_data();
+$earliestFirstTest->initAfterStaticRestrictions();
+is ($earliestFirstTest->nextTransactionId(),undef,"Expected transaction id undef.");
+
 done_testing();
