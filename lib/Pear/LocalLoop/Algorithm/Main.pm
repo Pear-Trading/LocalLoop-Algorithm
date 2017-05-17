@@ -5,6 +5,7 @@ use Data::Dumper;
 use DBI;
 use Pear::LocalLoop::Algorithm::StaticRestriction::RemoveTransactionsThatCannotFormALoop;
 use v5.10;
+use Pear::LocalLoop::Algorithm::Debug;
 
 #FIXME move into a config file and dynamically read it in.
 my $dbConfig = {
@@ -57,7 +58,7 @@ sub dbi {
 }
 
 sub process {
-  #say 'Path-Enter process:' . __FILE__ . ', line: ' . __LINE__;
+  debugMethodStart(__PACKAGE__, "process", __LINE__);
   
   my ($self, $settings) = @_;
   
@@ -79,7 +80,6 @@ sub process {
   
   my $transactionOrder = $settings->transactionOrder;
 
-  
   for (my $nextTransactionId = $transactionOrder->nextTransactionId; 
     defined $nextTransactionId; 
     $nextTransactionId = $transactionOrder->nextTransactionId)
@@ -94,12 +94,12 @@ sub process {
 
   }
   
-  #say 'Path-Exit process:' . __FILE__ . ', line: ' . __LINE__;
+  debugMethodEnd(__PACKAGE__, "process", __LINE__);
 }
 
 #This is executed once per analysis.
 sub _initialSetup {
-  #say 'Path-Enter _initialSetup:' . __FILE__ . ', line: ' . __LINE__;
+  debugMethodStart(__PACKAGE__, "_initialSetup", __LINE__);
   
   my ($self, $settings) = @_;
   my $dbh = $self->dbh;
@@ -121,11 +121,11 @@ sub _initialSetup {
     $heuristic->init();
   }
   
-  #say 'Path-Exit _initialSetup:' . __FILE__ . ', line: ' . __LINE__;
+  debugMethodEnd(__PACKAGE__, "_initialSetup", __LINE__);
 }
 
 sub _applyStaticRestrictions {
-  #say 'Path-Enter _applyStaticRestrictions:' . __FILE__ . ', line: ' . __LINE__;
+  debugMethodStart(__PACKAGE__, "_applyStaticRestrictions", __LINE__);
   
   #This assumes settings is present and is valid.
   my ($self, $settings) = @_;
@@ -138,10 +138,12 @@ sub _applyStaticRestrictions {
     $staticRestriction->applyStaticRestriction();
   }
 
-  #say 'Path-Exit _applyStaticRestrictions:' . __FILE__ . ', line: ' . __LINE__;
+  debugMethodEnd(__PACKAGE__, "_applyStaticRestrictions", __LINE__);
 }
 
 sub _initialSetupPostApplyStaticRestrictions {
+  debugMethodStart(__PACKAGE__, "_initialSetupPostApplyStaticRestrictions", __LINE__);
+
   my ($self, $settings) = @_;
   
   $settings->transactionOrder->initAfterStaticRestrictions();
@@ -153,6 +155,8 @@ sub _initialSetupPostApplyStaticRestrictions {
   foreach my $heuristic (@{$settings->heuristicArray}) {
     $heuristic->initAfterStaticRestrictions();
   }
+  
+  debugMethodEnd(__PACKAGE__, "_initialSetupPostApplyStaticRestrictions", __LINE__);
 }
 
 sub _applyDynamicRestrictions {
@@ -166,13 +170,6 @@ sub _applyHeuristics {
 sub _selectBestLoops {
 
 }
-
-
-
-
-
-
-
 
 
 
