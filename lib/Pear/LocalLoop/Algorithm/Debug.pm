@@ -4,7 +4,7 @@ use v5.10;
 
 require Exporter;
 @ISA = qw(Exporter);
-@EXPORT = qw(&setDebugMode &clearTestingMode &isDebug &debugMethodStart &debugMethodEnd &debugMethodMiddle &debugError);
+@EXPORT = qw(&setDebugMode &clearDebugMode &isDebug &debugMethodStart &debugMethodEnd &debugMethodMiddle &debugError);
 
 sub setDebugMode {
   $ENV{'DEBUG'} = "true";
