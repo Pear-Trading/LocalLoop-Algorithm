@@ -75,14 +75,23 @@ sub process {
 
   $self->_applyStaticRestrictions($settings);
   
+  $self->_initialSetupPostApplyStaticRestrictions($settings);
+  
   my $transactionOrder = $settings->transactionOrder;
-  $transactionOrder->initAfterStaticRestrictions();
 
+  
   for (my $nextTransactionId = $transactionOrder->nextTransactionId; 
     defined $nextTransactionId; 
     $nextTransactionId = $transactionOrder->nextTransactionId)
   {
     say "$nextTransactionId";
+    
+    #Apply dynamic restrictions
+    #TODO PARAMS
+    foreach my $dynamicRestriction (@{$settings->dynamicRestrictionsArray}) {
+      $dynamicRestriction->applyDynamicRestriction();
+    }    
+
   }
   
   #say 'Path-Exit process:' . __FILE__ . ', line: ' . __LINE__;
@@ -129,8 +138,21 @@ sub _applyStaticRestrictions {
     $staticRestriction->applyStaticRestriction();
   }
 
-
   #say 'Path-Exit _applyStaticRestrictions:' . __FILE__ . ', line: ' . __LINE__;
+}
+
+sub _initialSetupPostApplyStaticRestrictions {
+  my ($self, $settings) = @_;
+  
+  $settings->transactionOrder->initAfterStaticRestrictions();
+  
+  foreach my $dynamicRestriction (@{$settings->dynamicRestrictionsArray}) {
+    $dynamicRestriction->initAfterStaticRestrictions();
+  }
+  
+  foreach my $heuristic (@{$settings->heuristicArray}) {
+    $heuristic->initAfterStaticRestrictions();
+  }
 }
 
 sub _applyDynamicRestrictions {
