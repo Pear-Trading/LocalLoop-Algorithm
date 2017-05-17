@@ -1,9 +1,13 @@
 package Pear::LocalLoop::Algorithm::Role::IDynamicRestriction;
 
 use Moo::Role;
+use v5.10;
+use Pear::LocalLoop::Algorithm::Debug;
 
 sub initAfterStaticRestrictions {
-
+  debugMethodStart(__PACKAGE__, "initAfterStaticRestrictions", __LINE__);
+  
+  debugMethodEnd(__PACKAGE__, "initAfterStaticRestrictions", __LINE__);
 }
 
 #Similar to "IStaticRestriction" but the restriction is dependent on the transaction

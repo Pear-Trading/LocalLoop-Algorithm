@@ -3,12 +3,14 @@ package Pear::LocalLoop::Algorithm::StaticRestriction::RemoveTransactionsThatCan
 use Moo;
 use v5.10;
 use Data::Dumper;
+use Pear::LocalLoop::Algorithm::Debug;
 extends 'Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier';
 with ('Pear::LocalLoop::Algorithm::Role::IStaticRestriction');
 
 
 sub applyStaticRestriction{
-  #say 'Path-Enter applyStaticRestriction:' . __FILE__ . ', line: ' . __LINE__;
+  debugMethodStart(__PACKAGE__, "applyStaticRestriction", __LINE__);
+  
   my $self = shift;
   my $dbh = $self->dbh;
 
@@ -39,7 +41,7 @@ sub applyStaticRestriction{
     #print "looped";
   }
 
-  #say 'Path-Exit applyStaticRestriction:' . __FILE__ . ', line: ' . __LINE__;
+  debugMethodEnd(__PACKAGE__, "applyStaticRestriction", __LINE__);
 }
 
 1;

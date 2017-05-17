@@ -1,6 +1,7 @@
 package Pear::LocalLoop::Algorithm::Role::IStaticRestriction;
 
 use Moo::Role;
+use v5.10;
 
 #This removes transactions from the "ProcessedTransactions" table before processing begins.
 #They are removed as the context which these restrictions are applied in is static (no-context)
