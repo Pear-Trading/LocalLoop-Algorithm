@@ -3,7 +3,7 @@ package Pear::LocalLoop::Algorithm::Role::IDynamicRestriction;
 use Moo::Role;
 
 sub initAfterStaticRestrictions {
-  die "initAfterStaticRestrictions has not been implemented.";
+
 }
 
 #Similar to "IStaticRestriction" but the restriction is dependent on the transaction
