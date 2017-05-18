@@ -9,20 +9,33 @@ use Pear::LocalLoop::Algorithm::Debug;
 extends 'Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier';
 with ('Pear::LocalLoop::Algorithm::Role::ITransactionOrder');
 
-#TODO this should be rwp
-has dbQuery => (
-  is => 'rw',
-);
+my $TABLE_NAME_ORDER = Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier->uniqueTableName(__PACKAGE__, "Order");
 
 sub initAfterStaticRestrictions {
   debugMethodStart(__PACKAGE__, "initAfterStaticRestrictions", __LINE__);
-  
+
   my $self = shift;
   
-  my $query = $self->dbh->prepare("SELECT TransactionId FROM ProcessedTransactions ORDER BY Value DESC, TransactionId ASC");
-  $query->execute();
+  $self->dbh->prepare("DROP TABLE IF EXISTS $TABLE_NAME_ORDER")->execute();
   
-  $self->dbQuery($query);
+  $self->dbh->prepare(
+    "CREATE TABLE $TABLE_NAME_ORDER (" . 
+    "OrderId INTEGER PRIMARY KEY NOT NULL, " . 
+    "TransactionId INTEGER UNIQUE NOT NULL, " . 
+    "Used INTEGER NOT NULL DEFAULT 0" . 
+    ")"
+  )->execute();
+  
+  my $statementInsert = $self->dbh->prepare("INSERT INTO $TABLE_NAME_ORDER (OrderId, TransactionId) VALUES (?, ?)");
+  
+  my $statementSelect = $self->dbh->prepare("SELECT ProcessedTransactions.TransactionId FROM ProcessedTransactions ORDER BY ProcessedTransactions.Value DESC, ProcessedTransactions.TransactionId ASC");
+  $statementSelect->execute();
+  
+  my $counter = 1;
+  while (my ($id) = $statementSelect->fetchrow_array()) {
+    $statementInsert->execute($counter, $id);
+    $counter++;
+  } 
   
   debugMethodEnd(__PACKAGE__, "initAfterStaticRestrictions", __LINE__);
 }
@@ -30,15 +43,22 @@ sub initAfterStaticRestrictions {
 
 sub nextTransactionId {
   debugMethodStart(__PACKAGE__, "nextTransactionId", __LINE__);
+
+  my ($self) = @_;
+  my $dbh = $self->dbh;
   
-  my $self = shift;
+  my $statement = $dbh->prepare("SELECT TransactionId FROM $TABLE_NAME_ORDER WHERE Used = 0 LIMIT 1");
+  $statement->execute();
   
-  #Has an integer or undef.
-  my ($transactionId) = $self->dbQuery->fetchrow_array();
-  #say $transactionId . ' ' . $value;
+  my ($nextTransactionId) = $statement->fetchrow_array();
+
+  #If we have not passed the last value.  
+  if (defined $nextTransactionId) {
+    $dbh->prepare("UPDATE $TABLE_NAME_ORDER SET Used = 1 WHERE TransactionId = ?")->execute($nextTransactionId);
+  }
   
   debugMethodEnd(__PACKAGE__, "nextTransactionId", __LINE__);
-  return $transactionId;
+  return $nextTransactionId;
 }
 
 1;
