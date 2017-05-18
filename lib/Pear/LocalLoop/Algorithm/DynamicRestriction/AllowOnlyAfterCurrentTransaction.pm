@@ -29,7 +29,7 @@ sub applyDynamicRestriction {
     $statement->execute($transactionId);
   }
   
-  say "Path-Exit: Pack:" . __PACKAGE__ . " Meth:applyDynamicRestriction Line:" . __LINE__;
+  debugMethodEnd(__PACKAGE__, "applyDynamicRestriction", __LINE__);
 }
 
 1;
