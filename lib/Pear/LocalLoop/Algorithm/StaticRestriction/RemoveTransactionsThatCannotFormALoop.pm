@@ -14,10 +14,7 @@ sub applyStaticRestriction{
   my $self = shift;
   my $dbh = $self->dbh;
 
-  my $tableName = "Tmp_StaticRestrictionRemoveTransactions";
-  my $tableNameZero = $tableName ."_0";
-
-  #print "$tableNameZero\n";  
+  my $tableNameZero = $self->uniqueTableName(__PACKAGE__,"0") ;  
   
   $dbh->do("DROP TABLE IF EXISTS $tableNameZero");
   $dbh->do("CREATE TABLE $tableNameZero (ZeroIds INTEGER PRIMARY KEY)");

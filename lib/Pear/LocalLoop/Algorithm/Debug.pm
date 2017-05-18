@@ -4,7 +4,7 @@ use v5.10;
 
 require Exporter;
 @ISA = qw(Exporter);
-@EXPORT = qw(&setDebugMode &clearDebugMode &isDebug &debugMethodStart &debugMethodEnd &debugMethodMiddle &debugError);
+@EXPORT = qw(&removeStartOfPackageName &setDebugMode &clearDebugMode &isDebug &debugMethodStart &debugMethodEnd &debugMethodMiddle &debugError);
 
 my $stackLevel = 0;
 
@@ -26,7 +26,7 @@ sub isDebug {
   }
 }
 
-sub _removeStartOfPackageName {
+sub removeStartOfPackageName {
   my ($package) = @_;
   
   #Use tilde to indicate the default root. It reduces the amount of text on screen, so makes it quicker to 
@@ -48,7 +48,7 @@ sub debugMethodStart {
   my ($package, $method, $line) = @_;
   
   if (isDebug()) {
-    $package = _removeStartOfPackageName($package);
+    $package = removeStartOfPackageName($package);
     say "Path-Method-Start: " . _line($package, $method, $line);
   }
   
@@ -60,7 +60,7 @@ sub debugMethodEnd {
   $stackLevel--;
   
   if (isDebug()) {
-    $package = _removeStartOfPackageName($package);
+    $package = removeStartOfPackageName($package);
     say "Path-Method-End:   " . _line($package, $method, $line);
   }
 }
@@ -69,7 +69,7 @@ sub debugMethodMiddle {
   my ($package, $method, $line) = @_;
   
   if (isDebug()) {
-    $package = _removeStartOfPackageName($package);
+    $package = removeStartOfPackageName($package);
     say "Path-Method:       " . _line($package, $method, $line);
   }
 }
@@ -77,7 +77,7 @@ sub debugMethodMiddle {
 sub debugError {
   my ($package, $method, $line) = @_;
   
-  $package = _removeStartOfPackageName($package);
+  $package = removeStartOfPackageName($package);
   
   say "Path-Error: " . _line($package, $method, $line);
 }
