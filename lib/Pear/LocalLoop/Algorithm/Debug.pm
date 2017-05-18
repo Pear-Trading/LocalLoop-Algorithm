@@ -24,11 +24,28 @@ sub isDebug {
   }
 }
 
+sub _removeStartOfPackageName {
+  my ($package) = @_;
+  
+  #Use tilde to indicate the default root. It reduces the amount of text on screen, so makes it quicker to 
+  #find out what's going on.
+  $package =~ s/^Pear::LocalLoop::Algorithm::/~::/;
+  
+  return $package;
+}
+
+sub _line {
+  my ($package, $method, $line) = @_;
+  
+  return "Pack:'" . $package . "'\tMeth:'" . $method . "'\tLine:" . $line; 
+}
+
 sub debugMethodStart {
   my ($package, $method, $line) = @_;
   
   if (isDebug()) {
-    say "Path-Method-Start: Pack:" . $package . " Meth:" . $method . " Line:" . $line; 
+    $package = _removeStartOfPackageName($package);
+    say "Path-Method-Start: " . _line($package, $method, $line);
   }
 
 }
@@ -37,7 +54,8 @@ sub debugMethodEnd {
   my ($package, $method, $line) = @_;
   
   if (isDebug()) {
-    say "Path-Method-End: Pack:" . $package . " Meth:" . $method . " Line:" . $line; 
+    $package = _removeStartOfPackageName($package);
+    say "Path-Method-End:   " . _line($package, $method, $line);
   }
 }
 
@@ -45,14 +63,17 @@ sub debugMethodMiddle {
   my ($package, $method, $line) = @_;
   
   if (isDebug()) {
-    say "Path-Method: Pack:" . $package . " Meth:" . $method . " Line:" . $line; 
+    $package = _removeStartOfPackageName($package);
+    say "Path-Method:       " . _line($package, $method, $line);
   }
 }
 
 sub debugError {
   my ($package, $method, $line) = @_;
   
-  say "Path-Error: Pack:" . $package . " Meth:" . $method . " Line:" . $line; 
+  $package = _removeStartOfPackageName($package);
+  
+  say "Path-Error: " . _line($package, $method, $line);
 }
 
 1;
