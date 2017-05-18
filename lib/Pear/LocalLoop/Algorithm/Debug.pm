@@ -6,6 +6,8 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(&setDebugMode &clearDebugMode &isDebug &debugMethodStart &debugMethodEnd &debugMethodMiddle &debugError);
 
+my $stackLevel = 0;
+
 sub setDebugMode {
   $ENV{'DEBUG'} = "true";
 }
@@ -37,7 +39,9 @@ sub _removeStartOfPackageName {
 sub _line {
   my ($package, $method, $line) = @_;
   
-  return "Pack:'" . $package . "'\tMeth:'" . $method . "'\tLine:" . $line; 
+  my $stackLevelSpaces = "| "x$stackLevel;
+  
+  return $stackLevelSpaces .  "Pack:'" . $package . "'\tMeth:'" . $method . "'\tLine:" . $line; 
 }
 
 sub debugMethodStart {
@@ -47,11 +51,13 @@ sub debugMethodStart {
     $package = _removeStartOfPackageName($package);
     say "Path-Method-Start: " . _line($package, $method, $line);
   }
-
+  
+  $stackLevel++;
 }
 
 sub debugMethodEnd {
   my ($package, $method, $line) = @_;
+  $stackLevel--;
   
   if (isDebug()) {
     $package = _removeStartOfPackageName($package);
