@@ -9,7 +9,7 @@ use v5.10;
 
 use FindBin;
 
-#This is a test for "Pear::LocalLoop::Algorithm::TransactionOrder::EarliestFirst"
+#This is a test for "Pear::LocalLoop::Algorithm::TransactionOrder::LargestTransactionValueFirst"
 
 Pear::LocalLoop::Algorithm::Main->setTestingMode();
 
