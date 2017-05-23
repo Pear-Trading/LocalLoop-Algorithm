@@ -10,8 +10,7 @@ with ('Pear::LocalLoop::Algorithm::Role::IStaticRestriction');
 
 sub applyStaticRestriction{
   debugMethodStart(__PACKAGE__, "applyStaticRestriction", __LINE__);
-  
-  my $self = shift;
+  my ($self) = @_;
   my $dbh = $self->dbh;
 
   my $tableNameZero = $self->uniqueTableName(__PACKAGE__,"0") ;  
