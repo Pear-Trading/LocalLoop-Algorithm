@@ -11,8 +11,16 @@ with ('Pear::LocalLoop::Algorithm::Role::IHeuristic');
 sub applyHeuristic {
   debugMethodStart(__PACKAGE__, "applyHeuristic", __LINE__);
   
-  my ($self, $transactionId, $isFirst) = @_;
+  my ($self, $transactionId, $chainId, $isFirst) = @_;
   my $dbh = $self->dbh();
+  
+  #Chain id is not used so it does not matter if it's undefined.
+  if ( ! defined $transactionId) {
+    die "transactionId cannot be undefined.";
+  }
+  elsif ( ! defined $isFirstRestriction) {
+    die "isFirstRestriction cannot be undefined.";
+  }
 
   my $nextTransactionId = undef;
   
