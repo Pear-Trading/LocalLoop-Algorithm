@@ -106,7 +106,7 @@ sub applyDynamicRestrictionsAndHeuristics {
   }
   
   foreach my $heuristic (@{$self->heuristicArray()}) {
-    $heuristic->applyHeuristic($transactionId, $isFirst);
+    $heuristic->applyHeuristic($transactionId, $chainId, $isFirst);
     $isFirst = 0;
   }    
   debugMethodEnd(__PACKAGE__, "applyDynamicRestrictionsAndHeuristics", __LINE__);
