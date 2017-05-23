@@ -18,7 +18,7 @@ sub applyHeuristic {
   if ( ! defined $transactionId) {
     die "transactionId cannot be undefined.";
   }
-  elsif ( ! defined $isFirstRestriction) {
+  elsif ( ! defined $isFirst) {
     die "isFirstRestriction cannot be undefined.";
   }
 
