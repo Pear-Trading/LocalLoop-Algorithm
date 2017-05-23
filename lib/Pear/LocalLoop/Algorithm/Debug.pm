@@ -44,6 +44,14 @@ sub _line {
   return $stackLevelSpaces .  "Pack:'" . $package . "'\tMeth:'" . $method . "'\tLine:" . $line; 
 }
 
+sub _line2 {
+  my ($line, $comment) = @_;
+  
+  my $stackLevelSpaces = "| "x$stackLevel;
+  
+  return $stackLevelSpaces .  "Line:" . $line . " Comment:" . $comment; 
+}
+
 sub debugMethodStart {
   my ($package, $method, $line) = @_;
   
@@ -66,11 +74,10 @@ sub debugMethodEnd {
 }
 
 sub debugMethodMiddle {
-  my ($package, $method, $line) = @_;
+  my ($line, $comment) = @_;
   
   if (isDebug()) {
-    $package = removeStartOfPackageName($package);
-    say "Path-Method:       " . _line($package, $method, $line);
+    say "Path-Method:       " . _line2($line, $comment);
   }
 }
 
