@@ -6,9 +6,16 @@ DROP VIEW IF EXISTS AllLoopsStats_ViewActive;
 DROP INDEX IF EXISTS AllLoopsStats_IndexActive;
 DROP TABLE IF EXISTS AllLoopsStats;
 
-DROP TABLE IF EXISTS CandinateTransaction;
+DROP TABLE IF EXISTS CandinateTransactions;
 
+DROP TABLE IF EXISTS BranchedTransactions;
+
+DROP VIEW IF EXISTS CandinateTransactions_ViewIncludedHerusticDesc;
+DROP VIEW IF EXISTS CandinateTransactions_ViewIncludedHerusticAsc;
+DROP VIEW IF EXISTS CandinateTransactions_ViewIncluded;
 DROP TABLE IF EXISTS CurrentChains;
+
+DROP TABLE IF EXISTS CurrentChainsStats;
 
 DROP TABLE IF EXISTS LastUserTransaction;
 
