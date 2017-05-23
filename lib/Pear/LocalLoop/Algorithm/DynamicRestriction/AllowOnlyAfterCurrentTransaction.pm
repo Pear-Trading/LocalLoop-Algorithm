@@ -17,8 +17,16 @@ with ('Pear::LocalLoop::Algorithm::Role::IDynamicRestriction');
 sub applyDynamicRestriction {
   debugMethodStart(__PACKAGE__, "applyDynamicRestriction", __LINE__);
 
-  my ($self, $transactionId, $isFirstRestriction) = @_;
+  my ($self, $transactionId, $chainId, $isFirstRestriction) = @_;
   my $dbh = $self->dbh();
+  
+  #We don't care if chainId is undefined as we don't use it.
+  if ( ! defined $transactionId ) {
+    die "transactionId cannot be undefined";
+  }
+  elsif ( ! defined $isFirstRestriction ) {
+    die "isFirstRestriction cannot be undefined";
+  }
   
   #FIXME move prepare statements outside this method so it does not waste resources every time.
   my $statement = $dbh->prepare("UPDATE ProcessedTransactions SET Included = 0 WHERE Included != 0 AND TransactionId <= ?");
