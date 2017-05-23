@@ -1,6 +1,6 @@
 use Test::More;
 use Test::Exception;
-use Test::Fatal;
+use Test::Fatal qw(dies_ok lives_ok);
 use Pear::LocalLoop::Algorithm::Main;
 use Pear::LocalLoop::Algorithm::StaticRestriction::RemoveTransactionsThatCannotFormALoop;
 use Path::Class::File;
@@ -8,12 +8,13 @@ use v5.10;
 
 use FindBin;
 
-#This is a test for "Pear::LocalLoop::Algorithm::StaticRestrictionRemoveTransactionsThatCannotFormALoop"
+#This is a test for "Pear::LocalLoop::Algorithm::StaticRestriction::RemoveTransactionsThatCannotFormALoop"
 
 Pear::LocalLoop::Algorithm::Main->setTestingMode();
 
 my $main = Pear::LocalLoop::Algorithm::Main->new();
 my $dbh = $main->dbh;
+
 
 #Dump all pf the test tables and start again.
 my $sqlDropSchema = Path::Class::File->new("$FindBin::Bin/../../dropschema.sql")->slurp;
@@ -44,7 +45,7 @@ $insertStatement->execute(2, 2, 3, 10);
 $insertStatement->execute(3, 3, 1, 10); 
 is (@{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions", undef, ())}[0],3,"3 initial transactions."); 
 
-$rst->applyStaticRestriction();
+lives_ok { $rst->applyStaticRestriction(); } 'No exception was thrown.';
 
 is (@{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions", undef, ())}[0],3,"3 transactions left."); 
 
@@ -57,7 +58,7 @@ $insertStatement->execute(3, 3, 1, 10);
 $insertStatement->execute(4, 1, 4, 10); #Dangling
 is (@{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions", undef, ())}[0],4,"4 initial transactions."); 
 
-$rst->applyStaticRestriction();
+lives_ok { $rst->applyStaticRestriction(); } 'No exception was thrown.';
 
 is (@{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions", undef, ())}[0],3,"3 transactions left.");
 is (@{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions WHERE TransactionId = 4", undef, ())}[0],0,"Dangling transaction removed.");
@@ -72,7 +73,7 @@ $insertStatement->execute(4, 2, 4, 10); #Dangling
 $insertStatement->execute(5, 4, 5, 10); #Dangling
 is (@{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions", undef, ())}[0],5,"5 initial transactions."); 
 
-$rst->applyStaticRestriction();
+lives_ok { $rst->applyStaticRestriction(); } 'No exception was thrown.';
 
 is (@{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions", undef, ())}[0],3,"3 transactions left."); 
 is (@{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions WHERE TransactionId = 4", undef, ())}[0],0,"1st Dangling transaction removed.");
@@ -87,7 +88,7 @@ $insertStatement->execute(3, 2, 3, 10);
 $insertStatement->execute(4, 3, 1, 10);
 is (@{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions", undef, ())}[0],4,"4 initial transactions."); 
 
-$rst->applyStaticRestriction();
+lives_ok { $rst->applyStaticRestriction(); } 'No exception was thrown.';
 
 is (@{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions", undef, ())}[0],3,"3 transactions left.");  
 is (@{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions WHERE TransactionId = 2", undef, ())}[0],0,"Dangling transaction removed.");
@@ -102,7 +103,7 @@ $insertStatement->execute(4, 2, 3, 10);
 $insertStatement->execute(5, 3, 1, 10);
 is (@{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions", undef, ())}[0],5,"5 initial transactions."); 
 
-$rst->applyStaticRestriction();
+lives_ok { $rst->applyStaticRestriction(); } 'No exception was thrown.';
 
 is (@{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions", undef, ())}[0],3,"3 transactions left.");  
 is (@{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions WHERE TransactionId = 2", undef, ())}[0],0,"1st Dangling transaction removed.");
@@ -122,7 +123,7 @@ $insertStatement->execute(6, 6, 7, 10); #Dangling
 $insertStatement->execute(7, 3, 1, 10);
 is (@{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions", undef, ())}[0],7,"7 initial transactions."); 
 
-$rst->applyStaticRestriction();
+lives_ok { $rst->applyStaticRestriction(); } 'No exception was thrown.';
 
 is (@{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions", undef, ())}[0],3,"3 transactions left.");  
 is (@{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions WHERE TransactionId = 2", undef, ())}[0],0,"1st Dangling transaction removed.");
