@@ -50,4 +50,37 @@ sub applyHeuristic {
   debugMethodEnd(__PACKAGE__, "applyHeuristic", __LINE__);
 };
 
+sub applyHeuristicCandinates {
+  debugMethodStart(__PACKAGE__, "applyHeuristicCandinates", __LINE__);
+  
+  my ($self, $isFirst) = @_;
+  my $dbh = $self->dbh();
+
+  my $nextTransactionId = undef;
+  my $candinateTransactionsId = undef;
+  
+  if ($isFirst) {
+    ($candinateTransactionsId, $nextTransactionId) = $dbh->selectrow_array("SELECT CandinateTransactionsId, MIN(TransactionTo_FK) FROM CandinateTransactions", undef, ());
+  }
+  else {
+    ($candinateTransactionsId, $nextTransactionId) = $dbh->selectrow_array("SELECT CandinateTransactionsId, MIN(TransactionTo_FK) FROM CandinateTransactions_ViewIncluded", undef, ());    
+  }
+  
+  
+  #If this is undef all are not included anyway.
+  
+  #There is at least one next transaction id. We only need the candinate transaction id as that identifies one row.
+  if (defined $candinateTransactionsId)
+  {
+    $dbh->prepare("UPDATE CandinateTransactions SET Included = 0 WHERE Included != 0 AND CandinateTransactionsId != ?")->execute($candinateTransactionsId);
+    
+    if ($isFirst) {
+      $dbh->prepare("UPDATE CandinateTransactions SET Included = 1 WHERE Included = 0 AND CandinateTransactionsId = ?")->execute($candinateTransactionsId);
+    }
+  }
+  
+  debugMethodEnd(__PACKAGE__, "applyHeuristicCandinates", __LINE__);
+};
+
+
 1;
