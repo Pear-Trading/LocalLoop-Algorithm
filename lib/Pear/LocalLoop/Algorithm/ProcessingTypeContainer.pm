@@ -29,7 +29,7 @@ has heuristicArray => (
 );
 
 sub init {
-  debugMethodStart(__PACKAGE__, "init", __LINE__);
+  debugMethodStart();
   my ($self) = @_;
   
   foreach my $staticRestriction (@{$self->staticRestrictionsArray()}) {
@@ -46,22 +46,22 @@ sub init {
     $heuristic->init();
   }
   
-  debugMethodEnd(__PACKAGE__, "init", __LINE__);
+  debugMethodEnd();
 }
 
 sub applyStaticRestrictions {
-  debugMethodStart(__PACKAGE__, "applyStaticRestrictions", __LINE__);
+  debugMethodStart();
   my ($self) = @_;
   
   foreach my $staticRestriction (@{$self->staticRestrictionsArray()}) {
     $staticRestriction->applyStaticRestriction();
   }
   
-  debugMethodEnd(__PACKAGE__, "applyStaticRestrictions", __LINE__);
+  debugMethodEnd();
 }
 
 sub initAfterStaticRestrictions {
-  debugMethodStart(__PACKAGE__, "initAfterStaticRestrictions", __LINE__);
+  debugMethodStart();
   my ($self) = @_;
 
   $self->transactionOrder()->initAfterStaticRestrictions();
@@ -74,23 +74,23 @@ sub initAfterStaticRestrictions {
     $heuristic->initAfterStaticRestrictions();
   }
   
-  debugMethodEnd(__PACKAGE__, "initAfterStaticRestrictions", __LINE__);
+  debugMethodEnd();
 }
 
 
 sub nextTransactionId {
-  debugMethodStart(__PACKAGE__, "nextTransactionId", __LINE__);
+  debugMethodStart();
   my ($self) = @_;
   
   my $nextId = $self->transactionOrder()->nextTransactionId();
   
-  debugMethodEnd(__PACKAGE__, "nextTransactionId", __LINE__);
+  debugMethodEnd();
   return $nextId;
 }
   
 
 sub applyDynamicRestrictionsAndHeuristics {
-  debugMethodStart(__PACKAGE__, "applyDynamicRestrictionsAndHeuristics", __LINE__);
+  debugMethodStart();
   my ($self, $transactionId, $chainId) = @_;
   
   debugMethodMiddle(__LINE__, "InputParams: TransactionId:$transactionId ChainId:$chainId");
@@ -114,11 +114,11 @@ sub applyDynamicRestrictionsAndHeuristics {
     $self->_dumpTransactionsIncluded();
     $isFirst = 0;
   }    
-  debugMethodEnd(__PACKAGE__, "applyDynamicRestrictionsAndHeuristics", __LINE__);
+  debugMethodEnd();
 }
 
 sub applyHeuristicsCandinates {
-  debugMethodStart(__PACKAGE__, "applyHeuristicsCandinates", __LINE__);
+  debugMethodStart();
   my ($self) = @_;
 
   my $isFirst = 1;
@@ -128,11 +128,11 @@ sub applyHeuristicsCandinates {
     $isFirst = 0;
   }    
   
-  debugMethodEnd(__PACKAGE__, "applyHeuristicsCandinates", __LINE__);
+  debugMethodEnd();
 }
 
 sub _dumpTransactionsIncluded {
-  #debugMethodStart(__PACKAGE__, "_dumpTransactionsIncluded", __LINE__);
+  #debugMethodStart();
   my ($self) = @_;
   my $dbh = Pear::LocalLoop::Algorithm::Main->dbi();
   
@@ -149,11 +149,11 @@ sub _dumpTransactionsIncluded {
   
   debugMethodMiddle(__LINE__, "TransactionsIncludedDump: ".$string);
   
-  #debugMethodEnd(__PACKAGE__, "_dumpTransactionsIncluded", __LINE__);
+  #debugMethodEnd();
 }
 
 sub _dumpCandinateTransactionsIncluded {
-  #debugMethodStart(__PACKAGE__, "_dumpCandinateTransactionsIncluded", __LINE__);
+  #debugMethodStart();
   my ($self) = @_;
   my $dbh = Pear::LocalLoop::Algorithm::Main->dbi();
   
@@ -170,7 +170,7 @@ sub _dumpCandinateTransactionsIncluded {
   
   debugMethodMiddle(__LINE__, "CandinateTransactionsIncludedDump: ".$string);
   
-  #debugMethodEnd(__PACKAGE__, "_dumpCandinateTransactionsIncluded", __LINE__);
+  #debugMethodEnd();
 }
 
 

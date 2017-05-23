@@ -9,7 +9,7 @@ with ('Pear::LocalLoop::Algorithm::Role::IStaticRestriction');
 
 
 sub applyStaticRestriction{
-  debugMethodStart(__PACKAGE__, "applyStaticRestriction", __LINE__);
+  debugMethodStart();
   my ($self) = @_;
   my $dbh = $self->dbh;
 
@@ -37,7 +37,7 @@ sub applyStaticRestriction{
     #print "looped";
   }
 
-  debugMethodEnd(__PACKAGE__, "applyStaticRestriction", __LINE__);
+  debugMethodEnd();
 }
 
 1;

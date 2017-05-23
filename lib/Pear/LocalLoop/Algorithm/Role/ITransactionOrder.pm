@@ -5,9 +5,9 @@ use v5.10;
 use Pear::LocalLoop::Algorithm::Debug;
 
 sub initAfterStaticRestrictions {
-  debugMethodStart(__PACKAGE__, "initAfterStaticRestrictions", __LINE__);
+  debugMethodStart();
   
-  debugMethodEnd(__PACKAGE__, "initAfterStaticRestrictions", __LINE__);
+  debugMethodEnd();
 }
 
 #Returns the next transaction id to be analysed.

@@ -12,7 +12,7 @@ with ('Pear::LocalLoop::Algorithm::Role::ITransactionOrder');
 my $TABLE_NAME_ORDER = Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier->uniqueTableName(__PACKAGE__, "Order");
 
 sub initAfterStaticRestrictions {
-  debugMethodStart(__PACKAGE__, "initAfterStaticRestrictions", __LINE__);
+  debugMethodStart();
 
   my $self = shift;
   
@@ -37,12 +37,12 @@ sub initAfterStaticRestrictions {
     $counter++;
   } 
   
-  debugMethodEnd(__PACKAGE__, "initAfterStaticRestrictions", __LINE__);
+  debugMethodEnd();
 }
 
 
 sub nextTransactionId {
-  debugMethodStart(__PACKAGE__, "nextTransactionId", __LINE__);
+  debugMethodStart();
 
   my ($self) = @_;
   my $dbh = $self->dbh;
@@ -57,7 +57,7 @@ sub nextTransactionId {
     $dbh->prepare("UPDATE $TABLE_NAME_ORDER SET Used = 1 WHERE TransactionId = ?")->execute($nextTransactionId);
   }
   
-  debugMethodEnd(__PACKAGE__, "nextTransactionId", __LINE__);
+  debugMethodEnd();
   return $nextTransactionId;
 }
 

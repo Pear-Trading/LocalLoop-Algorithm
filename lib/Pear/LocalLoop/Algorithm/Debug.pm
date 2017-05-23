@@ -4,7 +4,7 @@ use v5.10;
 
 require Exporter;
 @ISA = qw(Exporter);
-@EXPORT = qw(&removeStartOfPackageName &setDebugMode &clearDebugMode &isDebug &debugMethodStart &debugMethodEnd &debugMethodMiddle &debugError);
+@EXPORT = qw(&removeStartOfPackageName &debugBraceStart &debugBraceEnd &setDebugMode &clearDebugMode &isDebug &debugMethodStart &debugMethodEnd &debugMethodMiddle &debugError);
 
 my $stackLevel = 0;
 
@@ -36,57 +36,97 @@ sub removeStartOfPackageName {
   return $package;
 }
 
-sub _line {
-  my ($package, $method, $line) = @_;
+sub _removePackageNameMethod {
+  my ($functionName) = @_;
+  
+  my @arr = split('::', $functionName);
+  $functionName = @arr[-1];
+  
+  return $functionName;
+}
+
+sub _printPackageMethodLine {
+  my ($package, $filename, $line, $method) = caller(2);
+  $package = removeStartOfPackageName($package);
+  $method = _removePackageNameMethod($method);
   
   my $stackLevelSpaces = "| "x$stackLevel;
   
-  return $stackLevelSpaces .  "Pack:'" . $package . "'\tMeth:'" . $method . "'\tLine:" . $line; 
+  return $stackLevelSpaces .  "Pack:'" . $package . "' Meth:'" . $method . "' Line:" . $line; 
 }
 
-sub _line2 {
-  my ($line, $comment) = @_;
+sub _printLineComment {
+  my ($comment) = @_;
+  my ($package, $filename, $line, $method) = caller(2);
+  $package = removeStartOfPackageName($package);
+  $method = _removePackageNameMethod($method);
   
   my $stackLevelSpaces = "| "x$stackLevel;
   
   return $stackLevelSpaces .  "Line:" . $line . " Comment:" . $comment; 
 }
 
-sub debugMethodStart {
-  my ($package, $method, $line) = @_;
+sub _printPackageMethodLineComment {
+  my ($comment) = @_;
+  my ($package, $filename, $line, $method) = caller(2);
+  $package = removeStartOfPackageName($package);
+  $method = _removePackageNameMethod($method);
   
+  my $stackLevelSpaces = "| "x$stackLevel;
+  
+  return $stackLevelSpaces .  "Pack:'" . $package . "' Meth:'" . $method . "' Line:" . $line . " Comment:" . $comment; 
+}
+
+
+sub debugMethodStart {
+
   if (isDebug()) {
-    $package = removeStartOfPackageName($package);
-    say "Path-Method-Start: " . _line($package, $method, $line);
+    say "Path-Method-Start: { " . _printPackageMethodLine();
   }
   
   $stackLevel++;
 }
 
 sub debugMethodEnd {
-  my ($package, $method, $line) = @_;
+
   $stackLevel--;
   
   if (isDebug()) {
-    $package = removeStartOfPackageName($package);
-    say "Path-Method-End:   " . _line($package, $method, $line);
+    say "Path-Method-End:   } " . _printPackageMethodLine();
+  }
+}
+
+sub debugBraceStart {
+  my ($comment) = @_;
+  
+  if (isDebug()) {
+    say "Path-Brace-Start:  { " . _printPackageMethodLineComment($comment);
+  }
+  
+  $stackLevel++;
+}
+
+sub debugBraceEnd {
+  my ($comment) = @_;
+  $stackLevel--;
+  
+  if (isDebug()) {
+    say "Path-Brace-End:    } " . _printPackageMethodLineComment($comment);
   }
 }
 
 sub debugMethodMiddle {
-  my ($line, $comment) = @_;
+  my ($comment) = @_;
   
   if (isDebug()) {
-    say "Path-Method:       " . _line2($line, $comment);
+    say "Path-Method:         " . _printLineComment($comment);
   }
 }
 
 sub debugError {
-  my ($package, $method, $line) = @_;
+  my ($comment) = @_;
   
-  $package = removeStartOfPackageName($package);
-  
-  say "Path-Error: " . _line($package, $method, $line);
+  say "Path-Error: " . _printPackageMethodLine($comment);
 }
 
 1;

@@ -15,7 +15,7 @@ with ('Pear::LocalLoop::Algorithm::Role::IDynamicRestriction');
 #If it's the first restriction then set all of the from users to be included.
 
 sub applyDynamicRestriction {
-  debugMethodStart(__PACKAGE__, "applyDynamicRestriction", __LINE__);
+  debugMethodStart();
   
   my ($self, $transactionId, $chainId, $isFirstRestriction) = @_;
   my $dbh = $self->dbh();
@@ -41,7 +41,7 @@ sub applyDynamicRestriction {
     $statement->execute($fromUserId);
   }
   
-  debugMethodEnd(__PACKAGE__, "applyDynamicRestriction", __LINE__);
+  debugMethodEnd();
 }
 
 1;

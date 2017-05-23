@@ -15,7 +15,7 @@ with ('Pear::LocalLoop::Algorithm::Role::IDynamicRestriction');
 #before itself and itself to 0.
 
 sub applyDynamicRestriction {
-  debugMethodStart(__PACKAGE__, "applyDynamicRestriction", __LINE__);
+  debugMethodStart();
 
   my ($self, $transactionId, $chainId, $isFirstRestriction) = @_;
   my $dbh = $self->dbh();
@@ -37,7 +37,7 @@ sub applyDynamicRestriction {
     $statement->execute($transactionId);
   }
   
-  debugMethodEnd(__PACKAGE__, "applyDynamicRestriction", __LINE__);
+  debugMethodEnd();
 }
 
 1;

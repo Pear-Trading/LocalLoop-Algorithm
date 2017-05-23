@@ -9,7 +9,7 @@ with ('Pear::LocalLoop::Algorithm::Role::IHeuristic');
 
 
 sub applyHeuristic {
-  debugMethodStart(__PACKAGE__, "applyHeuristic", __LINE__);
+  debugMethodStart();
   
   my ($self, $transactionId, $chainId, $isFirst) = @_;
   my $dbh = $self->dbh();
@@ -47,11 +47,11 @@ sub applyHeuristic {
     $dbh->prepare("UPDATE ProcessedTransactions SET Included = 0 WHERE Included != 0")->execute();
   }
   
-  debugMethodEnd(__PACKAGE__, "applyHeuristic", __LINE__);
+  debugMethodEnd();
 };
 
 sub applyHeuristicCandinates {
-  debugMethodStart(__PACKAGE__, "applyHeuristicCandinates", __LINE__);
+  debugMethodStart();
   
   my ($self, $isFirst) = @_;
   my $dbh = $self->dbh();
@@ -79,7 +79,7 @@ sub applyHeuristicCandinates {
     }
   }
   
-  debugMethodEnd(__PACKAGE__, "applyHeuristicCandinates", __LINE__);
+  debugMethodEnd();
 };
 
 

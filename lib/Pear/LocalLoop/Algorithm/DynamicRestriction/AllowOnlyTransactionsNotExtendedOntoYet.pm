@@ -16,7 +16,7 @@ with ('Pear::LocalLoop::Algorithm::Role::IDynamicRestriction');
 #This allows to connect back to yourself. TODO
 
 sub applyDynamicRestriction {
-  debugMethodStart(__PACKAGE__, "applyDynamicRestriction", __LINE__);
+  debugMethodStart();
 
   #We assume transactionId and chainId are both valid.
   my ($self, $transactionId, $chainId, $isFirstRestriction) = @_;
@@ -67,7 +67,7 @@ sub applyDynamicRestriction {
   }
 
   
-  debugMethodEnd(__PACKAGE__, "applyDynamicRestriction", __LINE__);
+  debugMethodEnd();
 }
 
 1;
