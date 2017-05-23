@@ -132,45 +132,45 @@ sub applyHeuristicsCandinates {
 }
 
 sub _dumpTransactionsIncluded {
-  #debugMethodStart();
-  my ($self) = @_;
-  my $dbh = Pear::LocalLoop::Algorithm::Main->dbi();
-  
-  my $statement = $dbh->prepare("SELECT TransactionId, Included FROM ProcessedTransactions ORDER BY TransactionId");
-  $statement->execute();
-  
-  my $string = "";
-  my $isFirst = 1;
-  while (my ($transactionId, $included) = $statement->fetchrow_array) {
-    my $comma = ($isFirst ? "" : ", ");
-    $string = $string . $comma . "$transactionId=" . ($included ? "T" : "F");
-    $isFirst = 0;
+
+  if (isDebug()) {
+    my ($self) = @_;
+    my $dbh = Pear::LocalLoop::Algorithm::Main->dbi();
+    
+    my $statement = $dbh->prepare("SELECT TransactionId, Included FROM ProcessedTransactions ORDER BY TransactionId");
+    $statement->execute();
+    
+    my $string = "";
+    my $isFirst = 1;
+    while (my ($transactionId, $included) = $statement->fetchrow_array) {
+      my $comma = ($isFirst ? "" : ", ");
+      $string = $string . $comma . "$transactionId=" . ($included ? "T" : "F");
+      $isFirst = 0;
+    }
+    
+    debugMethodMiddle("TransactionsIncludedDump: ".$string);
   }
-  
-  debugMethodMiddle(__LINE__, "TransactionsIncludedDump: ".$string);
-  
-  #debugMethodEnd();
 }
 
 sub _dumpCandinateTransactionsIncluded {
-  #debugMethodStart();
-  my ($self) = @_;
-  my $dbh = Pear::LocalLoop::Algorithm::Main->dbi();
   
-  my $statement = $dbh->prepare("SELECT CandinateTransactionsId, Included FROM CandinateTransactions ORDER BY CandinateTransactionsId");
-  $statement->execute();
-  
-  my $string = "";
-  my $isFirst = 1;
-  while (my ($transactionId, $included) = $statement->fetchrow_array) {
-    my $comma = ($isFirst ? "" : ", ");
-    $string = $string . $comma . "$transactionId=" . ($included ? "T" : "F");
-    $isFirst = 0;
+  if (isDebug()) {
+    my ($self) = @_;
+    my $dbh = Pear::LocalLoop::Algorithm::Main->dbi();
+    
+    my $statement = $dbh->prepare("SELECT CandinateTransactionsId, Included FROM CandinateTransactions ORDER BY CandinateTransactionsId");
+    $statement->execute();
+    
+    my $string = "";
+    my $isFirst = 1;
+    while (my ($transactionId, $included) = $statement->fetchrow_array) {
+      my $comma = ($isFirst ? "" : ", ");
+      $string = $string . $comma . "$transactionId=" . ($included ? "T" : "F");
+      $isFirst = 0;
+    }
+    
+    debugMethodMiddle("CandinateTransactionsIncludedDump: ".$string);
   }
-  
-  debugMethodMiddle(__LINE__, "CandinateTransactionsIncludedDump: ".$string);
-  
-  #debugMethodEnd();
 }
 
 
