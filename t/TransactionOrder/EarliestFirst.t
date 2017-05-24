@@ -1,6 +1,6 @@
 use Test::More;
 use Test::Exception;
-use Test::Fatal;
+use Test::Fatal qw(dies_ok exception);
 use Pear::LocalLoop::Algorithm::Main;
 use Pear::LocalLoop::Algorithm::ProcessingTypeContainer;
 use Pear::LocalLoop::Algorithm::TransactionOrder::EarliestFirst;
@@ -48,7 +48,10 @@ $insertStatement->execute(1, 1, 2, 9);
 $insertStatement->execute(2, 2, 3, 10);
 $insertStatement->execute(3, 3, 4, 13);
 $insertStatement->execute(4, 4, 1, 11);
-$earliestFirstTest->initAfterStaticRestrictions();
+
+my $exception = exception { $earliestFirstTest->initAfterStaticRestrictions(); };
+is ($exception, undef ,"No exception thrown");
+
 is ($earliestFirstTest->nextTransactionId(),1,"Expected transaction id 1."); 
 is ($earliestFirstTest->nextTransactionId(),2,"Expected transaction id 2."); 
 is ($earliestFirstTest->nextTransactionId(),3,"Expected transaction id 3."); 
@@ -64,7 +67,10 @@ $insertStatement->execute(2, 2, 3, 5);
 $insertStatement->execute(4, 4, 1, 3);
 $insertStatement->execute(3, 3, 4, 6);
 $insertStatement->execute(1, 1, 2, 10);
-$earliestFirstTest->initAfterStaticRestrictions();
+
+my $exception = exception { $earliestFirstTest->initAfterStaticRestrictions(); };
+is ($exception, undef ,"No exception thrown");
+
 is ($earliestFirstTest->nextTransactionId(),1,"Expected transaction id 1."); 
 is ($earliestFirstTest->nextTransactionId(),2,"Expected transaction id 2."); 
 is ($earliestFirstTest->nextTransactionId(),3,"Expected transaction id 3."); 
@@ -80,7 +86,10 @@ $insertStatement->execute(2, 5, 6, 9);
 $insertStatement->execute(4, 6, 2, 2);
 $insertStatement->execute(3, 8, 4, 1);
 $insertStatement->execute(1, 2, 4, 3);
-$earliestFirstTest->initAfterStaticRestrictions();
+
+my $exception = exception { $earliestFirstTest->initAfterStaticRestrictions(); };
+is ($exception, undef ,"No exception thrown");
+
 is ($earliestFirstTest->nextTransactionId(),1,"Expected transaction id 1."); 
 is ($earliestFirstTest->nextTransactionId(),2,"Expected transaction id 2."); 
 is ($earliestFirstTest->nextTransactionId(),3,"Expected transaction id 3."); 
@@ -89,7 +98,10 @@ is ($earliestFirstTest->nextTransactionId(),undef,"Expected transaction id undef
 
 say "Test 4 - Empty table";
 delete_table_data();
-$earliestFirstTest->initAfterStaticRestrictions();
+
+my $exception = exception { $earliestFirstTest->initAfterStaticRestrictions(); };
+is ($exception, undef ,"No exception thrown");
+
 is ($earliestFirstTest->nextTransactionId(),undef,"Expected transaction id undef.");
 
 done_testing();

@@ -1,6 +1,6 @@
 use Test::More;
 use Test::Exception;
-use Test::Fatal;
+use Test::Fatal qw(dies_ok exception);
 use Pear::LocalLoop::Algorithm::Main;
 use Path::Class::File;
 use v5.10;
@@ -68,7 +68,9 @@ say "Test 1 - No candinate transactions in the table";
 delete_table_data();
 is (numRows(),0,"There is no tuples");
 
-my $integer = $main->_newChainStatsId();
+my $integer = undef;
+my $exception = exception { $integer = $main->_newChainStatsId(); };
+is ($exception, undef ,"No exception thrown");
 
 isnt ($integer, undef, "Empty table returns not undef id."); 
 ok (candinateTransactionIdDoesntExists($integer), "Returned id does not exist."); 
@@ -84,7 +86,9 @@ delete_table_data();
 $statementInsertCurrentStatsId->execute(1, 10, 1, 10, 1); 
 is (numRows(),1,"There is only 1 tuple");
 
-my $integer = $main->_newChainStatsId();
+my $integer = undef;
+my $exception = exception { $integer = $main->_newChainStatsId(); };
+is ($exception, undef ,"No exception thrown");
 
 isnt ($integer, undef, "Non-empty table returns not undef id."); 
 ok (candinateTransactionIdDoesntExists($integer), "Returned id does not exist."); 
@@ -100,7 +104,9 @@ $statementInsertCurrentStatsId->execute(2, 10,  1,  10,  1);
 $statementInsertCurrentStatsId->execute(5, 100, 11, 101, 11);  
 is (numRows(),2,"There is only 2 tuples");
 
-my $integer = $main->_newChainStatsId();
+my $integer = undef;
+my $exception = exception { $integer = $main->_newChainStatsId(); };
+is ($exception, undef ,"No exception thrown");
 
 isnt ($integer, undef, "Non-empty table returns not undef id."); 
 ok (candinateTransactionIdDoesntExists($integer), "Returned id does not exist."); 

@@ -1,6 +1,6 @@
 use Test::More;
 use Test::Exception;
-use Test::Fatal;
+use Test::Fatal qw(dies_ok exception);
 use Pear::LocalLoop::Algorithm::Main;
 use Pear::LocalLoop::Algorithm::ProcessingTypeContainer;
 use Pear::LocalLoop::Algorithm::TransactionOrder::LargestTransactionValueFirst;
@@ -48,7 +48,10 @@ $insertStatement->execute(1, 1, 2, 13);
 $insertStatement->execute(2, 2, 3, 12);
 $insertStatement->execute(3, 3, 4, 11);
 $insertStatement->execute(4, 4, 1, 10);
-$largestValueFirstTest->initAfterStaticRestrictions();
+
+my $exception = exception { $largestValueFirstTest->initAfterStaticRestrictions(); };
+is ($exception, undef ,"No exception thrown");
+
 is ($largestValueFirstTest->nextTransactionId(),1,"Expected transaction id 1."); 
 is ($largestValueFirstTest->nextTransactionId(),2,"Expected transaction id 2."); 
 is ($largestValueFirstTest->nextTransactionId(),3,"Expected transaction id 3."); 
@@ -62,7 +65,10 @@ $insertStatement->execute(2, 2, 3, 12);
 $insertStatement->execute(4, 4, 1, 10);
 $insertStatement->execute(3, 3, 4, 11);
 $insertStatement->execute(1, 1, 2, 13);
-$largestValueFirstTest->initAfterStaticRestrictions();
+
+my $exception = exception { $largestValueFirstTest->initAfterStaticRestrictions(); };
+is ($exception, undef ,"No exception thrown");
+
 is ($largestValueFirstTest->nextTransactionId(),1,"Expected transaction id 1."); 
 is ($largestValueFirstTest->nextTransactionId(),2,"Expected transaction id 2."); 
 is ($largestValueFirstTest->nextTransactionId(),3,"Expected transaction id 3."); 
@@ -76,7 +82,10 @@ $insertStatement->execute(2, 2, 3, 11);
 $insertStatement->execute(4, 4, 1, 13);
 $insertStatement->execute(3, 3, 4, 10);
 $insertStatement->execute(1, 1, 2, 12);
-$largestValueFirstTest->initAfterStaticRestrictions();
+
+my $exception = exception { $largestValueFirstTest->initAfterStaticRestrictions(); };
+is ($exception, undef ,"No exception thrown");
+
 is ($largestValueFirstTest->nextTransactionId(),4,"Expected transaction id 4."); 
 is ($largestValueFirstTest->nextTransactionId(),1,"Expected transaction id 1."); 
 is ($largestValueFirstTest->nextTransactionId(),2,"Expected transaction id 2."); 
@@ -90,7 +99,10 @@ $insertStatement->execute(1, 1, 2, 12);
 $insertStatement->execute(2, 2, 3, 11); #Tie - 2 goes first.
 $insertStatement->execute(3, 3, 4, 11); #Tie
 $insertStatement->execute(4, 4, 1, 10);
-$largestValueFirstTest->initAfterStaticRestrictions();
+
+my $exception = exception { $largestValueFirstTest->initAfterStaticRestrictions(); };
+is ($exception, undef ,"No exception thrown");
+
 is ($largestValueFirstTest->nextTransactionId(),1,"Expected transaction id 1."); 
 is ($largestValueFirstTest->nextTransactionId(),2,"Expected transaction id 2."); 
 is ($largestValueFirstTest->nextTransactionId(),3,"Expected transaction id 3."); 
@@ -104,7 +116,10 @@ $insertStatement->execute(4, 4, 1, 10);
 $insertStatement->execute(1, 1, 2, 12);
 $insertStatement->execute(3, 3, 4, 11); #Tie
 $insertStatement->execute(2, 2, 3, 11); #Tie - 2 goes first.
-$largestValueFirstTest->initAfterStaticRestrictions();
+
+my $exception = exception { $largestValueFirstTest->initAfterStaticRestrictions(); };
+is ($exception, undef ,"No exception thrown");
+
 is ($largestValueFirstTest->nextTransactionId(),1,"Expected transaction id 1."); 
 is ($largestValueFirstTest->nextTransactionId(),2,"Expected transaction id 2."); 
 is ($largestValueFirstTest->nextTransactionId(),3,"Expected transaction id 3."); 
@@ -118,7 +133,10 @@ $insertStatement->execute(2, 2, 3, 11);
 $insertStatement->execute(3, 3, 4, 12); #Tie
 $insertStatement->execute(4, 4, 1, 13);
 $insertStatement->execute(1, 1, 2, 12); #Tie - 1 goes first
-$largestValueFirstTest->initAfterStaticRestrictions();
+
+my $exception = exception { $largestValueFirstTest->initAfterStaticRestrictions(); };
+is ($exception, undef ,"No exception thrown");
+
 is ($largestValueFirstTest->nextTransactionId(),4,"Expected transaction id 4."); 
 is ($largestValueFirstTest->nextTransactionId(),1,"Expected transaction id 1."); 
 is ($largestValueFirstTest->nextTransactionId(),3,"Expected transaction id 3."); 
@@ -127,7 +145,10 @@ is ($largestValueFirstTest->nextTransactionId(),undef,"Expected transaction id u
 
 say "Test 7 - Empty table";
 delete_table_data();
-$largestValueFirstTest->initAfterStaticRestrictions();
+
+my $exception = exception { $largestValueFirstTest->initAfterStaticRestrictions(); };
+is ($exception, undef ,"No exception thrown");
+
 is ($largestValueFirstTest->nextTransactionId(),undef,"Expected transaction id undef."); 
 
 done_testing();

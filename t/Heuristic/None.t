@@ -1,6 +1,6 @@
 use Test::More;
 use Test::Exception;
-use Test::Fatal qw(dies_ok lives_ok);
+use Test::Fatal qw(dies_ok exception);
 use Pear::LocalLoop::Algorithm::Main;
 use Pear::LocalLoop::Algorithm::ProcessingTypeContainer;
 use Pear::LocalLoop::Algorithm::Heuristic::None;
@@ -77,11 +77,16 @@ $insertStatementProcessedTransactions->execute(1, 1, 2, 10, 1);
 $insertStatementProcessedTransactions->execute(2, 2, 3, 10, 1);
 $insertStatementProcessedTransactions->execute(3, 3, 4, 10, 1);
 $insertStatementProcessedTransactions->execute(4, 4, 1, 10, 1);
-lives_ok { $testModule->applyHeuristic(1, undef, 0); } "No exception was thrown"; #id 1, not first restriction
+
+my $exception = exception { $testModule->applyHeuristic(1, undef, 0); };
+is ($exception, undef ,"No exception thrown"); #id 1, not first restriction
+
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
 is (transactionIdIncluded(2),1,"Can link to id 2."); 
 is (transactionIdIncluded(3),0,"Can't link to id 3."); 
 is (transactionIdIncluded(4),0,"Can't link to id 4.");
+
+
 
 say "Test 2 - Transaction 2, not first dynamic restriction";
 delete_table_data();
@@ -90,11 +95,16 @@ $insertStatementProcessedTransactions->execute(1, 1, 2, 10, 1);
 $insertStatementProcessedTransactions->execute(2, 2, 3, 10, 1);
 $insertStatementProcessedTransactions->execute(3, 3, 4, 10, 1);
 $insertStatementProcessedTransactions->execute(4, 4, 1, 10, 1);
-lives_ok { $testModule->applyHeuristic(2, undef, 0); } "No exception was thrown"; #id 2, not first restriction
+
+my $exception = exception { $testModule->applyHeuristic(2, undef, 0); };
+is ($exception, undef ,"No exception thrown"); #id 2, not first restriction
+
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2."); 
 is (transactionIdIncluded(3),1,"Can link to id 3."); 
 is (transactionIdIncluded(4),0,"Can't link to id 4.");
+
+
 
 say "Test 3 - Transaction 2, one not included, not first dynamic restriction";
 delete_table_data();
@@ -103,11 +113,16 @@ $insertStatementProcessedTransactions->execute(1, 1, 2, 10, 1);
 $insertStatementProcessedTransactions->execute(2, 2, 3, 10, 1);
 $insertStatementProcessedTransactions->execute(3, 3, 4, 10, 0);
 $insertStatementProcessedTransactions->execute(4, 4, 1, 10, 1);
-lives_ok { $testModule->applyHeuristic(2, undef, 0); } "No exception was thrown"; #id 2, not first restriction
+
+my $exception = exception { $testModule->applyHeuristic(2, undef, 0); };
+is ($exception, undef ,"No exception thrown"); #id 2, not first restriction
+
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2."); 
 is (transactionIdIncluded(3),0,"Can't link to id 3."); 
 is (transactionIdIncluded(4),1,"Can link to id 4.");    
+
+
 
 say "Test 4 - Transaction last, can't link to any, not first dynamic restriction";
 delete_table_data();
@@ -116,11 +131,15 @@ $insertStatementProcessedTransactions->execute(1, 1, 2, 10, 0);
 $insertStatementProcessedTransactions->execute(2, 2, 3, 10, 1);
 $insertStatementProcessedTransactions->execute(3, 3, 4, 10, 1);
 $insertStatementProcessedTransactions->execute(4, 4, 1, 10, 0);
-lives_ok { $testModule->applyHeuristic(3, undef, 0); } "No exception was thrown"; #id 3, not first restriction
+
+my $exception = exception { $testModule->applyHeuristic(3, undef, 0); };
+is ($exception, undef ,"No exception thrown"); #id 3, not first restriction
+
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2."); 
 is (transactionIdIncluded(3),0,"Can't link to id 3."); 
 is (transactionIdIncluded(4),0,"Can't link to id 4.");    
+
 
 
 # When the first restriction is enabled all of the included params are reset so will be the next transaction regardless.
@@ -131,11 +150,16 @@ $insertStatementProcessedTransactions->execute(1, 1, 2, 10, 1);
 $insertStatementProcessedTransactions->execute(2, 2, 3, 10, 1);
 $insertStatementProcessedTransactions->execute(3, 3, 4, 10, 1);
 $insertStatementProcessedTransactions->execute(4, 4, 1, 10, 1);
-lives_ok { $testModule->applyHeuristic(1, undef, 1); } "No exception was thrown"; #id 1, first restriction
+
+my $exception = exception { $testModule->applyHeuristic(1, undef, 1); };
+is ($exception, undef ,"No exception thrown"); #id 1, first restriction
+
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
 is (transactionIdIncluded(2),1,"Can link to id 2."); 
 is (transactionIdIncluded(3),0,"Can't link to id 3."); 
 is (transactionIdIncluded(4),0,"Can't link to id 4.");
+
+
 
 say "Test 6 - Transaction 2, first dynamic restriction";
 delete_table_data();
@@ -144,11 +168,16 @@ $insertStatementProcessedTransactions->execute(1, 1, 2, 10, 1);
 $insertStatementProcessedTransactions->execute(2, 2, 3, 10, 1);
 $insertStatementProcessedTransactions->execute(3, 3, 4, 10, 1);
 $insertStatementProcessedTransactions->execute(4, 4, 1, 10, 1);
-lives_ok { $testModule->applyHeuristic(2, undef, 1); } "No exception was thrown"; #id 2, first restriction
+
+my $exception = exception { $testModule->applyHeuristic(2, undef, 1); };
+is ($exception, undef ,"No exception thrown"); #id 2, first restriction
+
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2."); 
 is (transactionIdIncluded(3),1,"Can link to id 3."); 
 is (transactionIdIncluded(4),0,"Can't link to id 4.");
+
+
 
 say "Test 7 - Transaction 2, one not included, first dynamic restriction";
 delete_table_data();
@@ -157,11 +186,16 @@ $insertStatementProcessedTransactions->execute(1, 1, 2, 10, 1);
 $insertStatementProcessedTransactions->execute(2, 2, 3, 10, 1);
 $insertStatementProcessedTransactions->execute(3, 3, 4, 10, 0);
 $insertStatementProcessedTransactions->execute(4, 4, 1, 10, 1);
-lives_ok { $testModule->applyHeuristic(2, undef, 1); } "No exception was thrown"; #id 2, first restriction
+
+my $exception = exception { $testModule->applyHeuristic(2, undef, 1); };
+is ($exception, undef ,"No exception thrown"); #id 2, first restriction
+
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2."); 
 is (transactionIdIncluded(3),1,"Can link to id 3."); 
 is (transactionIdIncluded(4),0,"Can't link to id 4.");    
+
+
 
 say "Test 8 - Transaction last, can't link to any, first dynamic restriction";
 delete_table_data();
@@ -170,11 +204,15 @@ $insertStatementProcessedTransactions->execute(1, 1, 2, 10, 0);
 $insertStatementProcessedTransactions->execute(2, 2, 3, 10, 1);
 $insertStatementProcessedTransactions->execute(3, 3, 4, 10, 1);
 $insertStatementProcessedTransactions->execute(4, 4, 1, 10, 0);
-lives_ok { $testModule->applyHeuristic(3, undef, 1); } "No exception was thrown"; #id 3, first restriction
+
+my $exception = exception { $testModule->applyHeuristic(3, undef, 1); };
+is ($exception, undef ,"No exception thrown"); #id 3, first restriction
+
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2."); 
 is (transactionIdIncluded(3),0,"Can't link to id 3."); 
 is (transactionIdIncluded(4),1,"Can link to id 4.");   
+
 
 
 #Test with "DynamicRestriction::AllowOnlyTransactionsWhichFromUserMatchesOurToUser" 
@@ -188,7 +226,10 @@ $insertStatementProcessedTransactions->execute(4, 3, 4, 10, 1);
 $insertStatementProcessedTransactions->execute(5, 2, 3, 10, 1);
 $insertStatementProcessedTransactions->execute(6, 4, 1, 10, 1);
 $insertStatementProcessedTransactions->execute(7, 3, 4, 10, 1);
-lives_ok { testWithMatchIds(1, 0); } "No exception was thrown"; #id 1, not first restriction
+
+my $exception = exception { testWithMatchIds(1, 0); };
+is ($exception, undef ,"No exception thrown"); #id 1, not first restriction
+
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2."); 
 is (transactionIdIncluded(3),1,"Can link to id 3."); 
@@ -196,6 +237,8 @@ is (transactionIdIncluded(4),0,"Can't link to id 4.");
 is (transactionIdIncluded(5),0,"Can't link to id 5.");
 is (transactionIdIncluded(6),0,"Can't link to id 6.");
 is (transactionIdIncluded(7),0,"Can't link to id 7.");
+
+
 
 say "Test 10 - Transaction 1, one linkable not included, not first dynamic restriction (user id match restriction applied)";
 delete_table_data();
@@ -207,7 +250,10 @@ $insertStatementProcessedTransactions->execute(4, 3, 4, 10, 1);
 $insertStatementProcessedTransactions->execute(5, 2, 3, 10, 1);
 $insertStatementProcessedTransactions->execute(6, 4, 1, 10, 1);
 $insertStatementProcessedTransactions->execute(7, 3, 4, 10, 1);
-lives_ok { testWithMatchIds(1, 0); } "No exception was thrown"; #id 1, not first restriction
+
+my $exception = exception { testWithMatchIds(1, 0); };
+is ($exception, undef ,"No exception thrown"); #id 1, not first restriction
+
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2."); 
 is (transactionIdIncluded(3),0,"Can't link to id 3."); 
@@ -215,6 +261,8 @@ is (transactionIdIncluded(4),0,"Can't link to id 4.");
 is (transactionIdIncluded(5),1,"Can link to id 5.");
 is (transactionIdIncluded(6),0,"Can't link to id 6.");
 is (transactionIdIncluded(7),0,"Can't link to id 7.");
+
+
 
 say "Test 11 - Transaction 1, all linkable not included, not first dynamic restriction (user id match restriction applied)";
 delete_table_data();
@@ -226,7 +274,10 @@ $insertStatementProcessedTransactions->execute(4, 3, 4, 10, 1);
 $insertStatementProcessedTransactions->execute(5, 2, 3, 10, 0);
 $insertStatementProcessedTransactions->execute(6, 4, 1, 10, 1);
 $insertStatementProcessedTransactions->execute(7, 3, 4, 10, 1);
-lives_ok { testWithMatchIds(1, 0); } "No exception was thrown"; #id 1, not first restriction
+
+my $exception = exception { testWithMatchIds(1, 0); };
+is ($exception, undef ,"No exception thrown"); #id 1, not first restriction
+
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2."); 
 is (transactionIdIncluded(3),0,"Can't link to id 3."); 
@@ -234,6 +285,8 @@ is (transactionIdIncluded(4),0,"Can't link to id 4.");
 is (transactionIdIncluded(5),0,"Can't link to id 5.");
 is (transactionIdIncluded(6),0,"Can't link to id 6.");
 is (transactionIdIncluded(7),0,"Can't link to id 7.");
+
+
 
 #Now with the first restriction setting, all reset so they ignore the inputted include values.
 say "Test 12 - Transaction 1, all linkable included, first dynamic restriction (user id match restriction applied)";
@@ -246,7 +299,10 @@ $insertStatementProcessedTransactions->execute(4, 3, 4, 10, 1);
 $insertStatementProcessedTransactions->execute(5, 2, 3, 10, 1);
 $insertStatementProcessedTransactions->execute(6, 4, 1, 10, 1);
 $insertStatementProcessedTransactions->execute(7, 3, 4, 10, 1);
-lives_ok { testWithMatchIds(1, 1); } "No exception was thrown"; #id 1, first restriction
+
+my $exception = exception { testWithMatchIds(1, 1); };
+is ($exception, undef ,"No exception thrown"); #id 1, first restriction
+
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2."); 
 is (transactionIdIncluded(3),1,"Can link to id 3."); 
@@ -254,6 +310,8 @@ is (transactionIdIncluded(4),0,"Can't link to id 4.");
 is (transactionIdIncluded(5),0,"Can't link to id 5.");
 is (transactionIdIncluded(6),0,"Can't link to id 6.");
 is (transactionIdIncluded(7),0,"Can't link to id 7.");
+
+
 
 say "Test 13 - Transaction 1, one linkable not included, first dynamic restriction (user id match restriction applied)";
 delete_table_data();
@@ -265,7 +323,10 @@ $insertStatementProcessedTransactions->execute(4, 3, 4, 10, 1);
 $insertStatementProcessedTransactions->execute(5, 2, 3, 10, 1);
 $insertStatementProcessedTransactions->execute(6, 4, 1, 10, 1);
 $insertStatementProcessedTransactions->execute(7, 3, 4, 10, 1);
-lives_ok { testWithMatchIds(1, 1); } "No exception was thrown"; #id 1, first restriction
+
+my $exception = exception { testWithMatchIds(1, 1); };
+is ($exception, undef ,"No exception thrown"); #id 1, first restriction
+
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2."); 
 is (transactionIdIncluded(3),1,"Can link to id 3."); 
@@ -273,6 +334,8 @@ is (transactionIdIncluded(4),0,"Can't link to id 4.");
 is (transactionIdIncluded(5),0,"Can't link to id 5.");
 is (transactionIdIncluded(6),0,"Can't link to id 6.");
 is (transactionIdIncluded(7),0,"Can't link to id 7.");
+
+
 
 say "Test 14 - Transaction 1, all linkable not included, first dynamic restriction (user id match restriction applied)";
 delete_table_data();
@@ -284,7 +347,10 @@ $insertStatementProcessedTransactions->execute(4, 3, 4, 10, 1);
 $insertStatementProcessedTransactions->execute(5, 2, 3, 10, 0);
 $insertStatementProcessedTransactions->execute(6, 4, 1, 10, 1);
 $insertStatementProcessedTransactions->execute(7, 3, 4, 10, 1);
-lives_ok { testWithMatchIds(1, 1); } "No exception was thrown"; #id 1, first restriction
+
+my $exception = exception { testWithMatchIds(1, 1); };
+is ($exception, undef ,"No exception thrown"); #id 1, first restriction
+
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2."); 
 is (transactionIdIncluded(3),1,"Can link to id 3."); 
@@ -344,7 +410,8 @@ $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
-lives_ok { $testModule->applyHeuristicCandinates(0); } "No exception was thrown"; #not first restriction
+my $exception = exception { $testModule->applyHeuristicCandinates(0); };
+is ($exception, undef ,"No exception thrown"); #not first restriction
 is (candinateTransactionIdIncluded(1),1,"id 1 is included."); 
 is (candinateTransactionIdIncluded(2),0,"id 2 is discounted."); 
 is (candinateTransactionIdIncluded(3),0,"id 3 is discounted."); 
@@ -361,7 +428,8 @@ $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
-lives_ok { $testModule->applyHeuristicCandinates(0); } "No exception was thrown"; #not first restriction
+my $exception = exception { $testModule->applyHeuristicCandinates(0); };
+is ($exception, undef ,"No exception thrown"); #not first restriction
 is (candinateTransactionIdIncluded(1),1,"id 1 is included."); 
 is (candinateTransactionIdIncluded(2),0,"id 2 is discounted."); 
 is (candinateTransactionIdIncluded(3),0,"id 3 is discounted."); 
@@ -378,7 +446,8 @@ $insertStatementCandinateTransactions->execute(4, 1, 1, 12, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 7,  1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(1, 1, 1, 88, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(3, 1, 1, 4,  1, 1, 1, 1, 1);
-lives_ok { $testModule->applyHeuristicCandinates(0); } "No exception was thrown"; #not first restriction
+my $exception = exception { $testModule->applyHeuristicCandinates(0); };
+is ($exception, undef ,"No exception thrown"); #not first restriction
 is (candinateTransactionIdIncluded(1),0,"id 88 is discounted."); 
 is (candinateTransactionIdIncluded(2),0,"id 7 is discounted."); 
 is (candinateTransactionIdIncluded(3),1,"id 4 is included."); 
@@ -395,7 +464,8 @@ $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
-lives_ok { $testModule->applyHeuristicCandinates(0); } "No exception was thrown"; #not first restriction
+my $exception = exception { $testModule->applyHeuristicCandinates(0); };
+is ($exception, undef ,"No exception thrown"); #not first restriction
 is (candinateTransactionIdIncluded(1),0,"id 1 is not included anyway."); 
 is (candinateTransactionIdIncluded(2),1,"id 2 is included."); 
 is (candinateTransactionIdIncluded(3),0,"id 3 is discounted."); 
@@ -411,7 +481,8 @@ $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);
 $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 0);
-lives_ok { $testModule->applyHeuristicCandinates(0); } "No exception was thrown"; #not first restriction
+my $exception = exception { $testModule->applyHeuristicCandinates(0); };
+is ($exception, undef ,"No exception thrown"); #not first restriction
 is (candinateTransactionIdIncluded(1),1,"id 1 is included."); 
 is (candinateTransactionIdIncluded(2),0,"id 2 is not included anyway."); 
 is (candinateTransactionIdIncluded(3),0,"id 3 is discounted."); 
@@ -427,7 +498,8 @@ $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);
 $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 0);
 $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 0);
-lives_ok { $testModule->applyHeuristicCandinates(0); } "No exception was thrown"; #not first restriction
+my $exception = exception { $testModule->applyHeuristicCandinates(0); };
+is ($exception, undef ,"No exception thrown"); #not first restriction
 is (candinateTransactionIdIncluded(1),0,"id 1 is not included anyway."); 
 is (candinateTransactionIdIncluded(2),0,"id 2 is not included anyway."); 
 is (candinateTransactionIdIncluded(3),0,"id 3 is not included anyway."); 
@@ -446,7 +518,8 @@ $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
-lives_ok { $testModule->applyHeuristicCandinates(1); } "No exception was thrown"; #not first restriction
+my $exception = exception { $testModule->applyHeuristicCandinates(1); };
+is ($exception, undef ,"No exception thrown"); #not first restriction
 is (candinateTransactionIdIncluded(1),1,"id 1 is included."); 
 is (candinateTransactionIdIncluded(2),0,"id 2 is discounted."); 
 is (candinateTransactionIdIncluded(3),0,"id 3 is discounted."); 
@@ -463,7 +536,8 @@ $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
-lives_ok { $testModule->applyHeuristicCandinates(1); } "No exception was thrown"; #not first restriction
+my $exception = exception { $testModule->applyHeuristicCandinates(1); };
+is ($exception, undef ,"No exception thrown"); #not first restriction
 is (candinateTransactionIdIncluded(1),1,"id 1 is included."); 
 is (candinateTransactionIdIncluded(2),0,"id 2 is discounted."); 
 is (candinateTransactionIdIncluded(3),0,"id 3 is discounted."); 
@@ -480,7 +554,8 @@ $insertStatementCandinateTransactions->execute(4, 1, 1, 12, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 7,  1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(1, 1, 1, 88, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(3, 1, 1, 4,  1, 1, 1, 1, 1);
-lives_ok { $testModule->applyHeuristicCandinates(1); } "No exception was thrown"; #not first restriction
+my $exception = exception { $testModule->applyHeuristicCandinates(1); };
+is ($exception, undef ,"No exception thrown"); #not first restriction
 is (candinateTransactionIdIncluded(1),0,"id 88 is discounted."); 
 is (candinateTransactionIdIncluded(2),0,"id 7 is discounted."); 
 is (candinateTransactionIdIncluded(3),1,"id 4 is included."); 
@@ -497,7 +572,8 @@ $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
-lives_ok { $testModule->applyHeuristicCandinates(1); } "No exception was thrown"; #not first restriction
+my $exception = exception { $testModule->applyHeuristicCandinates(1); };
+is ($exception, undef ,"No exception thrown"); #not first restriction
 is (candinateTransactionIdIncluded(1),1,"id 1 is included (resetted)."); 
 is (candinateTransactionIdIncluded(2),0,"id 2 is discounted."); 
 is (candinateTransactionIdIncluded(3),0,"id 3 is discounted."); 
@@ -513,7 +589,8 @@ $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);
 $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 0);
-lives_ok { $testModule->applyHeuristicCandinates(1); } "No exception was thrown"; #not first restriction
+my $exception = exception { $testModule->applyHeuristicCandinates(1); };
+is ($exception, undef ,"No exception thrown"); #not first restriction
 is (candinateTransactionIdIncluded(1),1,"id 1 is included."); 
 is (candinateTransactionIdIncluded(2),0,"id 2 is not included, but is reset and discounted anyway."); 
 is (candinateTransactionIdIncluded(3),0,"id 3 is discounted."); 
@@ -529,7 +606,8 @@ $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);
 $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 0);
 $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 0);
-lives_ok { $testModule->applyHeuristicCandinates(1); } "No exception was thrown"; #not first restriction
+my $exception = exception { $testModule->applyHeuristicCandinates(1); };
+is ($exception, undef ,"No exception thrown"); #not first restriction
 is (candinateTransactionIdIncluded(1),1,"id 1 is included (resetted)."); 
 is (candinateTransactionIdIncluded(2),0,"id 2 is not included, but is reset and discounted anyway."); 
 is (candinateTransactionIdIncluded(3),0,"id 3 is not included, but is reset and discounted anyway."); 

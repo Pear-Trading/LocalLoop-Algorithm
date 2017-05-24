@@ -1,6 +1,6 @@
 use Test::More;
 use Test::Exception;
-use Test::Fatal qw(dies_ok lives_ok);
+use Test::Fatal qw(dies_ok exception);
 use Pear::LocalLoop::Algorithm::Main;
 use Pear::LocalLoop::Algorithm::ProcessingTypeContainer;
 use Pear::LocalLoop::Algorithm::DynamicRestriction::AllowOnlyTransactionsWhichFromUserMatchesOurToUser;
@@ -62,13 +62,17 @@ $insertStatement->execute(3, 3, 4, 10, 1);
 $insertStatement->execute(4, 3, 5, 10, 1);
 $insertStatement->execute(5, 4, 5, 10, 1);
 $insertStatement->execute(6, 5, 1, 10, 1);
-lives_ok { $testModule->applyDynamicRestriction(1, undef, 0); } "No exception was thrown"; #id 1, not first restriction
+
+my $exception = exception { $testModule->applyDynamicRestriction(1, undef, 0); };
+is ($exception, undef ,"No exception thrown"); #id 1, not first restriction
+
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
 is (transactionIdIncluded(2),1,"Can link to id 2."); 
 is (transactionIdIncluded(3),0,"Can't link to id 3."); 
 is (transactionIdIncluded(4),0,"Can't link to id 4.");
 is (transactionIdIncluded(5),0,"Can't link to id 5.");
 is (transactionIdIncluded(6),0,"Can't link to id 6.");
+
 
 
 say "Test 2 - Transaction 1, some not included, but none to link to, first dynamic restriction";
@@ -81,13 +85,18 @@ $insertStatement->execute(3, 3, 4, 10, 1);
 $insertStatement->execute(4, 3, 5, 10, 0);
 $insertStatement->execute(5, 4, 5, 10, 0);
 $insertStatement->execute(6, 5, 1, 10, 1);
-lives_ok { $testModule->applyDynamicRestriction(1, undef, 1); } "No exception was thrown"; #id 1, first restriction
+
+my $exception = exception { $testModule->applyDynamicRestriction(1, undef, 1); };
+is ($exception, undef ,"No exception thrown"); #id 1, first restriction
+
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
 is (transactionIdIncluded(2),1,"Can link to id 2."); 
 is (transactionIdIncluded(3),0,"Can't link to id 3."); 
 is (transactionIdIncluded(4),0,"Can't link to id 4.");
 is (transactionIdIncluded(5),0,"Can't link to id 5.");
 is (transactionIdIncluded(6),0,"Can't link to id 6.");
+
+
 
 say "Test 3 - Transaction 1, some not included, but none to link to, not first dynamic restriction";
 delete_table_data();
@@ -99,7 +108,10 @@ $insertStatement->execute(3, 3, 4, 10, 1);
 $insertStatement->execute(4, 3, 5, 10, 0);
 $insertStatement->execute(5, 4, 5, 10, 0);
 $insertStatement->execute(6, 5, 1, 10, 1);
-lives_ok { $testModule->applyDynamicRestriction(1, undef, 0); } "No exception was thrown"; #id 1, not first restriction
+
+my $exception = exception { $testModule->applyDynamicRestriction(1, undef, 0); };
+is ($exception, undef ,"No exception thrown"); #id 1, not first restriction
+
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2."); 
 is (transactionIdIncluded(3),0,"Can't link to id 3."); 
@@ -119,13 +131,18 @@ $insertStatement->execute(3, 3, 4, 10, 1);
 $insertStatement->execute(4, 3, 5, 10, 1);
 $insertStatement->execute(5, 4, 5, 10, 1);
 $insertStatement->execute(6, 5, 1, 10, 1);
-lives_ok { $testModule->applyDynamicRestriction(2, undef, 0); } "No exception was thrown"; #id 2, not first restriction
+
+my $exception = exception { $testModule->applyDynamicRestriction(2, undef, 0); };
+is ($exception, undef ,"No exception thrown"); #id 2, not first restriction
+
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2."); 
 is (transactionIdIncluded(3),1,"Can link to id 3."); 
 is (transactionIdIncluded(4),1,"Can link to id 4.");
 is (transactionIdIncluded(5),0,"Can't link to id 5.");
 is (transactionIdIncluded(6),0,"Can't link to id 6.");
+
+
 
 say "Test 4 - Transaction 2, some not included, but none to link to 1/2, first dynamic restriction";
 delete_table_data();
@@ -137,13 +154,18 @@ $insertStatement->execute(3, 3, 4, 10, 1);
 $insertStatement->execute(4, 3, 5, 10, 0);
 $insertStatement->execute(5, 4, 5, 10, 1);
 $insertStatement->execute(6, 5, 1, 10, 0);
-lives_ok { $testModule->applyDynamicRestriction(2, undef, 1); } "No exception was thrown"; #id 2, first restriction
+
+my $exception = exception { $testModule->applyDynamicRestriction(2, undef, 1); };
+is ($exception, undef ,"No exception thrown"); #id 2, first restriction
+
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2."); 
 is (transactionIdIncluded(3),1,"Can link to id 3."); 
 is (transactionIdIncluded(4),1,"Can link to id 4.");
 is (transactionIdIncluded(5),0,"Can't link to id 5.");
 is (transactionIdIncluded(6),0,"Can't link to id 6.");
+
+
 
 say "Test 5 - Transaction 2, some not included, but none to link to 2/2, first dynamic restriction";
 delete_table_data();
@@ -155,13 +177,18 @@ $insertStatement->execute(3, 3, 4, 10, 0);
 $insertStatement->execute(4, 3, 5, 10, 0);
 $insertStatement->execute(5, 4, 5, 10, 0);
 $insertStatement->execute(6, 5, 1, 10, 1);
-lives_ok { $testModule->applyDynamicRestriction(2, undef, 1); } "No exception was thrown"; #id 2, first restriction
+
+my $exception = exception { $testModule->applyDynamicRestriction(2, undef, 1); };
+is ($exception, undef ,"No exception thrown"); #id 2, first restriction
+
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2."); 
 is (transactionIdIncluded(3),1,"Can link to id 3."); 
 is (transactionIdIncluded(4),1,"Can link to id 4.");
 is (transactionIdIncluded(5),0,"Can't link to id 5.");
 is (transactionIdIncluded(6),0,"Can't link to id 6.");
+
+
 
 say "Test 6 - Transaction 2, some not included, but one to link to 1/2, not first dynamic restriction";
 delete_table_data();
@@ -173,13 +200,18 @@ $insertStatement->execute(3, 3, 4, 10, 1);
 $insertStatement->execute(4, 3, 5, 10, 0);
 $insertStatement->execute(5, 4, 5, 10, 1);
 $insertStatement->execute(6, 5, 1, 10, 0);
-lives_ok { $testModule->applyDynamicRestriction(2, undef, 0); } "No exception was thrown"; #id 2, not first restriction
+
+my $exception = exception { $testModule->applyDynamicRestriction(2, undef, 0); };
+is ($exception, undef ,"No exception thrown"); #id 2, not first restriction
+
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2."); 
 is (transactionIdIncluded(3),1,"Can link to id 3."); 
 is (transactionIdIncluded(4),0,"Can't link to id 4.");
 is (transactionIdIncluded(5),0,"Can't link to id 5.");
 is (transactionIdIncluded(6),0,"Can't link to id 6.");
+
+
 
 say "Test 7 - Transaction 2, some not included, but none to link to 2/2, not first dynamic restriction";
 delete_table_data();
@@ -191,7 +223,10 @@ $insertStatement->execute(3, 3, 4, 10, 0);
 $insertStatement->execute(4, 3, 5, 10, 0);
 $insertStatement->execute(5, 4, 5, 10, 0);
 $insertStatement->execute(6, 5, 1, 10, 1);
-lives_ok { $testModule->applyDynamicRestriction(2, undef, 0); } "No exception was thrown"; #id 2, not first restriction
+
+my $exception = exception { $testModule->applyDynamicRestriction(2, undef, 0); };
+is ($exception, undef ,"No exception thrown"); #id 2, not first restriction
+
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2."); 
 is (transactionIdIncluded(3),0,"Can't link to id 3."); 
@@ -211,13 +246,18 @@ $insertStatement->execute(3, 3, 4, 10, 1);
 $insertStatement->execute(4, 3, 5, 10, 1);
 $insertStatement->execute(5, 4, 5, 10, 1);
 $insertStatement->execute(6, 5, 1, 10, 1);
-lives_ok { $testModule->applyDynamicRestriction(2, undef, 0); } "No exception was thrown"; #id 2, non first restriction
+
+my $exception = exception { $testModule->applyDynamicRestriction(2, undef, 0); };
+is ($exception, undef ,"No exception thrown"); #id 2, non first restriction
+
 is (transactionIdIncluded(1),1,"Can link to id 1."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2."); 
 is (transactionIdIncluded(3),1,"Can link to id 3."); 
 is (transactionIdIncluded(4),1,"Can link to id 4.");
 is (transactionIdIncluded(5),0,"Can't link to id 5.");
 is (transactionIdIncluded(6),0,"Can't link to id 6.");
+
+
 
 say "Test 9 - Transaction 2, backwards in time is valid, first restriction";
 delete_table_data();
@@ -230,7 +270,10 @@ $insertStatement->execute(3, 3, 4, 10, 0);
 $insertStatement->execute(4, 3, 5, 10, 1);
 $insertStatement->execute(5, 4, 5, 10, 1);
 $insertStatement->execute(6, 5, 1, 10, 1);
-lives_ok { $testModule->applyDynamicRestriction(2, undef, 1); } "No exception was thrown"; #id 2, first restriction
+
+my $exception = exception { $testModule->applyDynamicRestriction(2, undef, 1); };
+is ($exception, undef ,"No exception thrown"); #id 2, first restriction
+
 is (transactionIdIncluded(1),1,"Can link to id 1."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2."); 
 is (transactionIdIncluded(3),1,"Can link to id 3."); 

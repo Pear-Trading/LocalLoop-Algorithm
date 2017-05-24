@@ -1,6 +1,6 @@
 use Test::More;
 use Test::Exception;
-use Test::Fatal qw(dies_ok lives_ok);
+use Test::Fatal qw(dies_ok exception);
 use Pear::LocalLoop::Algorithm::Main;
 use Pear::LocalLoop::Algorithm::ProcessingTypeContainer;
 use Pear::LocalLoop::Algorithm::Heuristic::None;
@@ -102,10 +102,12 @@ say "Test 1 - Empty table";
 
   # return [$hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues];
   my ($hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numOfMinValues);
-  lives_ok { 
+  my $exception = exception { 
     ($hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numOfMinValues) = 
         @{$main->_getNextBestCandinateTransaction($settings)};
-  } "No exception thrown";
+  };
+  is ($exception, undef ,"No exception thrown");
+
 
   is (numCandinateTransactionRows(),0,"There is still no rows after invocation.");
   is ($hasRow, 0, "It has returned no row."); 
@@ -139,10 +141,11 @@ say "Test 2 - 1 Null candinate transaction";
 
   # return [$hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues];
   my ($hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numOfMinValues);
-  lives_ok { 
+  my $exception = exception { 
     ($hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numOfMinValues) = 
         @{$main->_getNextBestCandinateTransaction($settings)};
-  } "No exception thrown";
+  };
+  is ($exception, undef ,"No exception thrown");
 
   is (numCandinateTransactionRows(),0,"There are zero rows after invocation.");
   is (candinateTransactionIdExists(1), 0,"Candinate transaction id 1 has been removed.");
@@ -179,10 +182,11 @@ say "Test 3 - 2 Null candinate transactions";
 
   # return [$hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues];
   my ($hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numOfMinValues);
-  lives_ok { 
+  my $exception = exception { 
     ($hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numOfMinValues) = 
         @{$main->_getNextBestCandinateTransaction($settings)};
-  } "No exception thrown";
+  };
+  is ($exception, undef ,"No exception thrown");
 
   is (numCandinateTransactionRows(),1,"There is one row after invocation.");
   #It does not matter which one returns.
@@ -247,10 +251,11 @@ say "Test 4- 1 Null and one not null candinate transaction, null returns first."
 
   # return [$hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues];
   my ($hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numOfMinValues);
-  lives_ok { 
+  my $exception = exception { 
     ($hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numOfMinValues) = 
         @{$main->_getNextBestCandinateTransaction($settings)};
-  } "No exception thrown";
+  };
+  is ($exception, undef ,"No exception thrown");
 
   is (numCandinateTransactionRows(),1,"There is one row after invocation.");
   is (candinateTransactionIdExists(2), 1,"Candinate transaction id 2 still exists.");
@@ -293,10 +298,11 @@ say "Test 5 - 1 not null candinate transaction.";
 
   # return [$hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues];
   my ($hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numOfMinValues);
-  lives_ok { 
+  my $exception = exception { 
     ($hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numOfMinValues) = 
         @{$main->_getNextBestCandinateTransaction($settings)};
-  } "No exception thrown";
+  };
+  is ($exception, undef ,"No exception thrown");
 
   is (numCandinateTransactionRows(),0,"There is zero rows after invocation.");
   is (candinateTransactionIdExists(2), 0,"Candinate transaction id 2 has been removed.");
@@ -342,10 +348,11 @@ say "Test 6 - 2 not null candinate transactions, selection be by heuristic.";
 
   # return [$hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues];
   my ($hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numOfMinValues);
-  lives_ok { 
+  my $exception = exception { 
     ($hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numOfMinValues) = 
         @{$main->_getNextBestCandinateTransaction($settings)};
-  } "No exception thrown";
+  };
+  is ($exception, undef ,"No exception thrown");
 
   is (numCandinateTransactionRows(),1,"There is one row after invocation.");
   is (candinateTransactionIdExists(1), 1,"Candinate transaction id 1 still exists.");

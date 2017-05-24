@@ -1,6 +1,6 @@
 use Test::More;
 use Test::Exception;
-use Test::Fatal;
+use Test::Fatal qw(dies_ok exception);
 use Pear::LocalLoop::Algorithm::Main;
 use Path::Class::File;
 use v5.10;
@@ -93,7 +93,9 @@ say "Test 1 - No chains in the table";
 initialise();
 is (numRows(),0,"There is no rows");
 
-my $integer = $main->_newChainId();
+my $integer = undef;
+my $exception = exception { $integer = $main->_newChainId(); };
+is ($exception, undef ,"No exception thrown");
 
 isnt ($integer, undef, "Empty table returns not undef id."); 
 ok (chainIdDoesntExists($integer), "Returned id does not exist."); 
@@ -111,7 +113,9 @@ $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 is (numRows(),3,"There is only 3 rows");
 
-my $integer = $main->_newChainId();
+my $integer = undef;
+my $exception = exception { $integer = $main->_newChainId(); };
+is ($exception, undef ,"No exception thrown");
 
 isnt ($integer, undef, "Non-empty table returns not undef id."); 
 ok (chainIdDoesntExists($integer), "Returned id does not exist."); 
@@ -134,7 +138,9 @@ $statementInsertCurrentChains->execute(2, 5, 1);
 $statementInsertCurrentChains->execute(2, 6, 1);
 is (numRows(),9,"There is only 9 rows");
 
-my $integer = $main->_newChainId();
+my $integer = undef;
+my $exception = exception { $integer = $main->_newChainId(); };
+is ($exception, undef ,"No exception thrown");
 
 isnt ($integer, undef, "Non-empty table returns not undef id."); 
 ok (chainIdDoesntExists($integer), "Returned id does not exist."); 

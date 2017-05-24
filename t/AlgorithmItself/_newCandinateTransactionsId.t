@@ -1,6 +1,6 @@
 use Test::More;
 use Test::Exception;
-use Test::Fatal;
+use Test::Fatal qw(dies_ok exception);
 use Pear::LocalLoop::Algorithm::Main;
 use Pear::LocalLoop::Algorithm::ProcessingTypeContainer;
 use Pear::LocalLoop::Algorithm::DynamicRestriction::AllowOnlyTransactionsWhichFromUserMatchesOurToUser;
@@ -100,7 +100,9 @@ say "Test 1 - No candinate transactions in the table";
 initialise();
 is (numRows(),0,"There is no rows");
 
-my $integer = $main->_newCandinateTransactionsId();
+my $integer = undef;
+my $exception = exception { $integer = $main->_newCandinateTransactionsId(); };
+is ($exception, undef ,"No exception thrown");
 
 isnt ($integer, undef, "Empty table returns not undef id."); 
 ok (candinateTransactionIdDoesntExists($integer), "Returned id does not exist."); 
@@ -116,7 +118,9 @@ initialise();
 $statementInsertCandinateTransactions->execute(1, 1, 2, 3, 10, 10, 10, 10);
 is (numRows(),1,"There is only 1 row");
 
-my $integer = $main->_newCandinateTransactionsId();
+my $integer = undef;
+my $exception = exception { $integer = $main->_newCandinateTransactionsId(); };
+is ($exception, undef ,"No exception thrown");
 
 isnt ($integer, undef, "Non-empty table returns not undef id."); 
 ok (candinateTransactionIdDoesntExists($integer), "Returned id does not exist."); 
@@ -132,7 +136,9 @@ $statementInsertCandinateTransactions->execute(3, 1, 2, 3, 10, 10, 10, 10);
 $statementInsertCandinateTransactions->execute(6, 2, 3, 3, 10, 10, 10, 10);
 is (numRows(),2,"There is only 2 rows");
 
-my $integer = $main->_newCandinateTransactionsId();
+my $integer = undef;
+my $exception = exception { $integer = $main->_newCandinateTransactionsId(); };
+is ($exception, undef ,"No exception thrown");
 
 isnt ($integer, undef, "Non-empty table returns not undef id."); 
 ok (candinateTransactionIdDoesntExists($integer), "Returned id does not exist."); 

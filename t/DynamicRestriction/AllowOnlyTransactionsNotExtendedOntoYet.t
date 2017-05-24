@@ -1,6 +1,6 @@
 use Test::More;
 use Test::Exception;
-use Test::Fatal qw(dies_ok lives_ok);
+use Test::Fatal qw(dies_ok exception);
 use Pear::LocalLoop::Algorithm::Main;
 use Pear::LocalLoop::Algorithm::ProcessingTypeContainer;
 use Pear::LocalLoop::Algorithm::DynamicRestriction::AllowOnlyTransactionsNotExtendedOntoYet;
@@ -75,7 +75,8 @@ $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 1);
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 1);
 
 #transactionId, chainId, use first restriction?
-lives_ok { $testModule->applyDynamicRestriction(1, 1, 0); } "No exception thrown.";
+my $exception = exception { $testModule->applyDynamicRestriction(1, 1, 0); };
+is ($exception, undef ,"No exception thrown");
 
 is (transactionIdIncluded(1),1,"Can link to id 1 (can link to yourself)."); 
 is (transactionIdIncluded(2),1,"Can link to id 2."); 
@@ -84,10 +85,13 @@ is (transactionIdIncluded(4),1,"Can link to id 4.");
 is (transactionIdIncluded(5),1,"Can link to id 5."); 
 is (transactionIdIncluded(6),1,"Can link to id 6."); 
 
+
+
 say "Test 2 - No chains present (no restrictions), transaction id undef";
 initialise();
 #transactionId, chainId, use first restriction?
 dies_ok { $testModule->applyDynamicRestriction(undef, 1, 0); } "Exception thrown, transaction id missing.";
+
 
 
 say "Test 3 - No chains present (no restrictions), chain id undef";
@@ -96,10 +100,12 @@ initialise();
 dies_ok { $testModule->applyDynamicRestriction(1, undef, 0); } "Exception thrown, transaction id missing.";
 
 
+
 say "Test 4 - No chains present (no restrictions), use first restriction id undef";
 initialise();
 #transactionId, chainId, use first restriction?
 dies_ok { $testModule->applyDynamicRestriction(1, 1, undef); } "Exception thrown, transaction id missing.";
+
 
 
 say "Test 5 - 1 chain present, selection start/middle, not first restriction";
@@ -119,7 +125,8 @@ $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
 #transactionId, chainId, use first restriction?
-lives_ok { $testModule->applyDynamicRestriction(1, 1, 0); } "No exception thrown.";
+my $exception = exception { $testModule->applyDynamicRestriction(1, 1, 0); };
+is ($exception, undef ,"No exception thrown");
 
 is (transactionIdIncluded(1),1,"Can link to id 1 (can link to yourself)."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2 (disabled from the next link in chain)."); 
@@ -127,6 +134,7 @@ is (transactionIdIncluded(3),1,"Can link to id 3.");
 is (transactionIdIncluded(4),1,"Can link to id 4.");
 is (transactionIdIncluded(5),1,"Can link to id 5."); 
 is (transactionIdIncluded(6),1,"Can link to id 6."); 
+
 
 
 say "Test 6 - 1 chain present, selection start/middle, pre-disable two, not first restriction";
@@ -146,7 +154,8 @@ $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
 #transactionId, chainId, use first restriction?
-lives_ok { $testModule->applyDynamicRestriction(1, 1, 0); } "No exception thrown.";
+my $exception = exception { $testModule->applyDynamicRestriction(1, 1, 0); };
+is ($exception, undef ,"No exception thrown");
 
 is (transactionIdIncluded(1),1,"Can link to id 1 (can link to yourself)."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2 (not included and disabled anyway)."); 
@@ -154,6 +163,7 @@ is (transactionIdIncluded(3),1,"Can link to id 3.");
 is (transactionIdIncluded(4),1,"Can link to id 4.");
 is (transactionIdIncluded(5),0,"Can't link to id 5 (not included).");
 is (transactionIdIncluded(6),1,"Can link to id 6."); 
+
 
 
 say "Test 7 - 1 chain present, selection start/middle, pre-disable all, not first restriction";
@@ -173,7 +183,8 @@ $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
 #transactionId, chainId, use first restriction?
-lives_ok { $testModule->applyDynamicRestriction(1, 1, 0); } "No exception thrown.";
+my $exception = exception { $testModule->applyDynamicRestriction(1, 1, 0); };
+is ($exception, undef ,"No exception thrown");
 
 is (transactionIdIncluded(1),0,"Can't link to id 1 (not included)."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2 (not included)."); 
@@ -181,6 +192,7 @@ is (transactionIdIncluded(3),0,"Can't link to id 3 (not included).");
 is (transactionIdIncluded(4),0,"Can't link to id 4 (not included).");
 is (transactionIdIncluded(5),0,"Can't link to id 5 (not included).");
 is (transactionIdIncluded(6),0,"Can't link to id 6 (not included)."); 
+
 
 
 say "Test 8 - 1 chain present, selection last transaction, not first restriction";
@@ -200,7 +212,8 @@ $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
 #transactionId, chainId, use first restriction?
-lives_ok { $testModule->applyDynamicRestriction(3, 1, 0); } "No exception thrown.";
+my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 0); };
+is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.
 is (transactionIdIncluded(1),1,"Can link to id 1."); 
@@ -209,6 +222,7 @@ is (transactionIdIncluded(3),1,"Can link to id 3 (can link to yourself).");
 is (transactionIdIncluded(4),1,"Can link to id 4.");
 is (transactionIdIncluded(5),1,"Can link to id 5.");
 is (transactionIdIncluded(6),1,"Can link to id 6."); 
+
 
 
 say "Test 9 - 1 chain present, selection last transaction two disabled, not first restriction";
@@ -228,7 +242,8 @@ $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
 #transactionId, chainId, use first restriction?
-lives_ok { $testModule->applyDynamicRestriction(3, 1, 0); } "No exception thrown.";
+my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 0); };
+is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.
 is (transactionIdIncluded(1),1,"Can link to id 1."); 
@@ -237,6 +252,7 @@ is (transactionIdIncluded(3),0,"Can't link to id 3 (not included).");
 is (transactionIdIncluded(4),1,"Can link to id 4.");
 is (transactionIdIncluded(5),1,"Can link to id 5.");
 is (transactionIdIncluded(6),0,"Can't link to id 6 (not included)."); 
+
 
 
 say "Test 10 - 1 chain present, selection last transaction, all disabled, not first restriction";
@@ -256,7 +272,8 @@ $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
 #transactionId, chainId, use first restriction?
-lives_ok { $testModule->applyDynamicRestriction(3, 1, 0); } "No exception thrown.";
+my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 0); };
+is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.
 is (transactionIdIncluded(1),0,"Can't link to id 1 (not included)."); 
@@ -265,6 +282,7 @@ is (transactionIdIncluded(3),0,"Can't link to id 3 (not included).");
 is (transactionIdIncluded(4),0,"Can't link to id 4 (not included).");
 is (transactionIdIncluded(5),0,"Can't link to id 5 (not included).");
 is (transactionIdIncluded(6),0,"Can't link to id 6 (not included)."); 
+  
   
   
 say "Test 11 - 2 chains, selection start/middle transaction, not first restriction";
@@ -291,7 +309,8 @@ $statementInsertCurrentChains->execute(2, 6, 1);
 $statementInsertBranchedTransactions->execute(1, 3, 6);
 
 #transactionId, chainId, use first restriction?
-lives_ok { $testModule->applyDynamicRestriction(3, 1, 0); } "No exception thrown.";
+my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 0); };
+is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.
 is (transactionIdIncluded(1),1,"Can link to id 1."); 
@@ -300,6 +319,7 @@ is (transactionIdIncluded(3),1,"Can link to id 3 (can link to yourself).");
 is (transactionIdIncluded(4),0,"Can't link to id 4 (next transaction on chain 1).");
 is (transactionIdIncluded(5),1,"Can link to id 5.");
 is (transactionIdIncluded(6),0,"Can't link to id 6 (it branched to this previously)."); 
+
 
 
 say "Test 12 - 2 chains, selection start/middle transaction, some disabled, not first restriction";
@@ -326,7 +346,8 @@ $statementInsertCurrentChains->execute(2, 6, 1);
 $statementInsertBranchedTransactions->execute(1, 3, 6);
 
 #transactionId, chainId, use first restriction?
-lives_ok { $testModule->applyDynamicRestriction(3, 1, 0); } "No exception thrown.";
+my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 0); };
+is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.
 is (transactionIdIncluded(1),0,"Can't link to id 1 (it was not included)."); 
@@ -335,6 +356,7 @@ is (transactionIdIncluded(3),1,"Can link to id 3 (can link to yourself).");
 is (transactionIdIncluded(4),0,"Can't link to id 4 (next transaction on chain 1).");
 is (transactionIdIncluded(5),0,"Can't link to id 5 (it was not included).");
 is (transactionIdIncluded(6),0,"Can't link to id 6 (it branched to this previously and was not included)."); 
+
 
 
 say "Test 13 - 2 chains, selection start/middle transaction, all disabled, not first restriction";
@@ -361,7 +383,8 @@ $statementInsertCurrentChains->execute(2, 6, 1);
 $statementInsertBranchedTransactions->execute(1, 3, 6);
 
 #transactionId, chainId, use first restriction?
-lives_ok { $testModule->applyDynamicRestriction(3, 1, 0); } "No exception thrown.";
+my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 0); };
+is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.
 is (transactionIdIncluded(1),0,"Can't link to id 1 (it was not included)."); 
@@ -370,6 +393,7 @@ is (transactionIdIncluded(3),0,"Can't link to id 3 (it was not included).");
 is (transactionIdIncluded(4),0,"Can't link to id 4 (next transaction on chain 1 and was not included).");
 is (transactionIdIncluded(5),0,"Can't link to id 5 (it was not included).");
 is (transactionIdIncluded(6),0,"Can't link to id 6 (it branched to this previously and was not included)."); 
+
 
 
 # All now with first restriction.
@@ -390,7 +414,8 @@ $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
 #transactionId, chainId, use first restriction?
-lives_ok { $testModule->applyDynamicRestriction(1, 1, 1); } "No exception thrown.";
+my $exception = exception { $testModule->applyDynamicRestriction(1, 1, 1); };
+is ($exception, undef ,"No exception thrown");
 
 is (transactionIdIncluded(1),1,"Can link to id 1 (can link to yourself)."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2 (disabled from the next link in chain)."); 
@@ -398,6 +423,7 @@ is (transactionIdIncluded(3),1,"Can link to id 3.");
 is (transactionIdIncluded(4),1,"Can link to id 4.");
 is (transactionIdIncluded(5),1,"Can link to id 5."); 
 is (transactionIdIncluded(6),1,"Can link to id 6."); 
+
 
 
 say "Test 15 - 1 chain present, selection start/middle, pre-disable two, first restriction";
@@ -417,7 +443,8 @@ $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
 #transactionId, chainId, use first restriction?
-lives_ok { $testModule->applyDynamicRestriction(1, 1, 1); } "No exception thrown.";
+my $exception = exception { $testModule->applyDynamicRestriction(1, 1, 1); };
+is ($exception, undef ,"No exception thrown");
 
 is (transactionIdIncluded(1),1,"Can link to id 1 (can link to yourself)."); 
 is (transactionIdIncluded(2),0,"Can't still link to id 2 (not included, but was reset, then was excluded)."); 
@@ -425,6 +452,7 @@ is (transactionIdIncluded(3),1,"Can link to id 3.");
 is (transactionIdIncluded(4),1,"Can link to id 4.");
 is (transactionIdIncluded(5),1,"Can link to id 5.");
 is (transactionIdIncluded(6),1,"Can link to id 6 (was disabled but was reset)."); 
+
 
 
 say "Test 16 - 1 chain present, selection start/middle, pre-disable all, first restriction";
@@ -444,7 +472,8 @@ $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
 #transactionId, chainId, use first restriction?
-lives_ok { $testModule->applyDynamicRestriction(1, 1, 1); } "No exception thrown.";
+my $exception = exception { $testModule->applyDynamicRestriction(1, 1, 1); };
+is ($exception, undef ,"No exception thrown");
 
 is (transactionIdIncluded(1),1,"Can link to id 1 (not included, but was reset, can link to self)."); 
 is (transactionIdIncluded(2),0,"Can't link to id 2 (not included, but was reset, then was disabled again)."); 
@@ -452,6 +481,7 @@ is (transactionIdIncluded(3),1,"Can link to id 3 (not included, but was reset)."
 is (transactionIdIncluded(4),1,"Can link to id 4 (not included, but was reset).");
 is (transactionIdIncluded(5),1,"Can link to id 5 (not included, but was reset).");
 is (transactionIdIncluded(6),1,"Can link to id 6 (not included, but was reset)."); 
+
 
 
 say "Test 17 - 1 chain present, selection last transaction, first restriction";
@@ -471,7 +501,8 @@ $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
 #transactionId, chainId, use first restriction?
-lives_ok { $testModule->applyDynamicRestriction(3, 1, 1); } "No exception thrown.";
+my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 1); };
+is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.
 is (transactionIdIncluded(1),1,"Can link to id 1."); 
@@ -480,6 +511,7 @@ is (transactionIdIncluded(3),1,"Can link to id 3 (can link to yourself).");
 is (transactionIdIncluded(4),1,"Can link to id 4.");
 is (transactionIdIncluded(5),1,"Can link to id 5.");
 is (transactionIdIncluded(6),1,"Can link to id 6."); 
+
 
 
 say "Test 18 - 1 chain present, selection last transaction two disabled, first restriction";
@@ -499,7 +531,8 @@ $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
 #transactionId, chainId, use first restriction?
-lives_ok { $testModule->applyDynamicRestriction(3, 1, 1); } "No exception thrown.";
+my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 1); };
+is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.
 is (transactionIdIncluded(1),1,"Can link to id 1."); 
@@ -508,6 +541,7 @@ is (transactionIdIncluded(3),1,"Can link to id 3 (not included, but reset, can l
 is (transactionIdIncluded(4),1,"Can link to id 4.");
 is (transactionIdIncluded(5),1,"Can link to id 5.");
 is (transactionIdIncluded(6),1,"Can link to id 6 (not included, but reset)."); 
+
 
 
 say "Test 19 - 1 chain present, selection last transaction, all disabled, first restriction";
@@ -527,7 +561,8 @@ $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
 #transactionId, chainId, use first restriction?
-lives_ok { $testModule->applyDynamicRestriction(3, 1, 1); } "No exception thrown.";
+my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 1); };
+is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.
 is (transactionIdIncluded(1),1,"Can link to id 1 (not included, but was reset, can link to self)."); 
@@ -536,6 +571,7 @@ is (transactionIdIncluded(3),1,"Can link to id 3 (not included, but was reset)."
 is (transactionIdIncluded(4),1,"Can link to id 4 (not included, but was reset).");
 is (transactionIdIncluded(5),1,"Can link to id 5 (not included, but was reset).");
 is (transactionIdIncluded(6),1,"Can link to id 6 (not included, but was reset)."); 
+  
   
   
 say "Test 20 - 2 chains, selection start/middle transaction, not first restriction";
@@ -562,7 +598,8 @@ $statementInsertCurrentChains->execute(2, 6, 1);
 $statementInsertBranchedTransactions->execute(1, 3, 6);
 
 #transactionId, chainId, use first restriction?
-lives_ok { $testModule->applyDynamicRestriction(3, 1, 1); } "No exception thrown.";
+my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 1); };
+is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.
 is (transactionIdIncluded(1),1,"Can link to id 1."); 
@@ -571,6 +608,7 @@ is (transactionIdIncluded(3),1,"Can link to id 3 (can link to yourself).");
 is (transactionIdIncluded(4),0,"Can't link to id 4 (next transaction on chain 1).");
 is (transactionIdIncluded(5),1,"Can link to id 5.");
 is (transactionIdIncluded(6),0,"Can't link to id 6 (it branched to this previously)."); 
+
 
 
 say "Test 21 - 2 chains, selection start/middle transaction, some disabled, not first restriction";
@@ -597,7 +635,8 @@ $statementInsertCurrentChains->execute(2, 6, 1);
 $statementInsertBranchedTransactions->execute(1, 3, 6);
 
 #transactionId, chainId, use first restriction?
-lives_ok { $testModule->applyDynamicRestriction(3, 1, 1); } "No exception thrown.";
+my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 1); };
+is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.
 is (transactionIdIncluded(1),1,"Can link to id 1 (it was not included, but was reset)."); 
@@ -606,6 +645,7 @@ is (transactionIdIncluded(3),1,"Can link to id 3 (can link to self).");
 is (transactionIdIncluded(4),0,"Can't link to id 4 (not included, but was reset, but is the next transaction on chain 1 so was disabled).");
 is (transactionIdIncluded(5),1,"Can link to id 5 (it was not included, but was reset).");
 is (transactionIdIncluded(6),0,"Can't link to id 6 (not included, but was reset, but branched to this previously so was disabled )."); 
+
 
 
 say "Test 22 - 2 chains, selection start/middle transaction, all disabled, not first restriction";
@@ -632,7 +672,8 @@ $statementInsertCurrentChains->execute(2, 6, 1);
 $statementInsertBranchedTransactions->execute(1, 3, 6);
 
 #transactionId, chainId, use first restriction?
-lives_ok { $testModule->applyDynamicRestriction(3, 1, 1); } "No exception thrown.";
+my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 1); };
+is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.
 is (transactionIdIncluded(1),1,"Can link to id 1 (it was not included, but was reset)."); 
