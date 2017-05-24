@@ -1,6 +1,10 @@
 package Pear::LocalLoop::Algorithm::ExtendedTransaction;
 
 use Moo;
+use v5.10;
+use Data::Dumper;
+use Pear::LocalLoop::Algorithm::ExtendedTransaction;
+use Pear::LocalLoop::Algorithm::Debug;
 
 extends('Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier');
 
@@ -64,6 +68,38 @@ sub isStillFormingLoops {
   return (! $self->noCandinateTransactionsLeft() && $self->hasLoopFormed());
 }
 
+#TODO we assume $compare is the correct class.
+sub equals {
+  my ($self, $compare1, $compare2) = @_;
+ 
+  if ( ! defined $compare1 && ! defined $compare2 ) {
+    return 1;
+  }
+  elsif ( defined $compare1 != defined $compare2 ) {
+    return 0;
+  }
+  #Done from a static context to prevent deferencing a null ref.
+  elsif ( ! Pear::LocalLoop::Algorithm::ChainTransaction->equals($compare1->extendedTransaction(), $compare2->extendedTransaction()) ) {
+    return 0;
+  }
+  elsif ( ! Pear::LocalLoop::Algorithm::ChainTransaction->equals($compare1->fromTransaction(), $compare2->fromTransaction()) ) {
+    return 0;
+  }
+  elsif ($compare1->loopStartEndUserId() != $compare2->loopStartEndUserId()) {
+    return 0;
+  }
+  elsif ($compare1->firstTransaction() != $compare2->firstTransaction()) {
+    return 0;
+  }
+  elsif ($compare1->noCandinateTransactionsLeft() != $compare2->noCandinateTransactionsLeft()) {
+    return 0;
+  }
+  else {
+    return 1;
+  }
+}
+
 
 1;
+
 
