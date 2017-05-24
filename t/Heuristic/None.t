@@ -72,6 +72,7 @@ sub testWithMatchIds {
 #Test "Heuristic::None" alone without "DynamicRestriction::AllowOnlyTransactionsWhichFromUserMatchesOurToUser" 
 say "Test 1 - Transaction 1, not first dynamic restriction";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatementProcessedTransactions->execute(1, 1, 2, 10, 1);
 $insertStatementProcessedTransactions->execute(2, 2, 3, 10, 1);
 $insertStatementProcessedTransactions->execute(3, 3, 4, 10, 1);
@@ -84,6 +85,7 @@ is (transactionIdIncluded(4),0,"Can't link to id 4.");
 
 say "Test 2 - Transaction 2, not first dynamic restriction";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatementProcessedTransactions->execute(1, 1, 2, 10, 1);
 $insertStatementProcessedTransactions->execute(2, 2, 3, 10, 1);
 $insertStatementProcessedTransactions->execute(3, 3, 4, 10, 1);
@@ -96,6 +98,7 @@ is (transactionIdIncluded(4),0,"Can't link to id 4.");
 
 say "Test 3 - Transaction 2, one not included, not first dynamic restriction";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatementProcessedTransactions->execute(1, 1, 2, 10, 1);
 $insertStatementProcessedTransactions->execute(2, 2, 3, 10, 1);
 $insertStatementProcessedTransactions->execute(3, 3, 4, 10, 0);
@@ -108,6 +111,7 @@ is (transactionIdIncluded(4),1,"Can link to id 4.");
 
 say "Test 4 - Transaction last, can't link to any, not first dynamic restriction";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatementProcessedTransactions->execute(1, 1, 2, 10, 0);
 $insertStatementProcessedTransactions->execute(2, 2, 3, 10, 1);
 $insertStatementProcessedTransactions->execute(3, 3, 4, 10, 1);
@@ -122,6 +126,7 @@ is (transactionIdIncluded(4),0,"Can't link to id 4.");
 # When the first restriction is enabled all of the included params are reset so will be the next transaction regardless.
 say "Test 5 - Transaction 1, first dynamic restriction";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatementProcessedTransactions->execute(1, 1, 2, 10, 1);
 $insertStatementProcessedTransactions->execute(2, 2, 3, 10, 1);
 $insertStatementProcessedTransactions->execute(3, 3, 4, 10, 1);
@@ -134,6 +139,7 @@ is (transactionIdIncluded(4),0,"Can't link to id 4.");
 
 say "Test 6 - Transaction 2, first dynamic restriction";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatementProcessedTransactions->execute(1, 1, 2, 10, 1);
 $insertStatementProcessedTransactions->execute(2, 2, 3, 10, 1);
 $insertStatementProcessedTransactions->execute(3, 3, 4, 10, 1);
@@ -146,6 +152,7 @@ is (transactionIdIncluded(4),0,"Can't link to id 4.");
 
 say "Test 7 - Transaction 2, one not included, first dynamic restriction";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatementProcessedTransactions->execute(1, 1, 2, 10, 1);
 $insertStatementProcessedTransactions->execute(2, 2, 3, 10, 1);
 $insertStatementProcessedTransactions->execute(3, 3, 4, 10, 0);
@@ -158,6 +165,7 @@ is (transactionIdIncluded(4),0,"Can't link to id 4.");
 
 say "Test 8 - Transaction last, can't link to any, first dynamic restriction";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatementProcessedTransactions->execute(1, 1, 2, 10, 0);
 $insertStatementProcessedTransactions->execute(2, 2, 3, 10, 1);
 $insertStatementProcessedTransactions->execute(3, 3, 4, 10, 1);
@@ -172,6 +180,7 @@ is (transactionIdIncluded(4),1,"Can link to id 4.");
 #Test with "DynamicRestriction::AllowOnlyTransactionsWhichFromUserMatchesOurToUser" 
 say "Test 9 - Transaction 1, all linkable included, not first dynamic restriction (user id match restriction applied)";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatementProcessedTransactions->execute(1, 1, 2, 10, 1);
 $insertStatementProcessedTransactions->execute(2, 1, 2, 10, 1); #This is here so we know it skips over it.
 $insertStatementProcessedTransactions->execute(3, 2, 3, 10, 1);
@@ -190,6 +199,7 @@ is (transactionIdIncluded(7),0,"Can't link to id 7.");
 
 say "Test 10 - Transaction 1, one linkable not included, not first dynamic restriction (user id match restriction applied)";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatementProcessedTransactions->execute(1, 1, 2, 10, 1);
 $insertStatementProcessedTransactions->execute(2, 1, 2, 10, 1); #This is here so we know it skips over it.
 $insertStatementProcessedTransactions->execute(3, 2, 3, 10, 0);
@@ -208,6 +218,7 @@ is (transactionIdIncluded(7),0,"Can't link to id 7.");
 
 say "Test 11 - Transaction 1, all linkable not included, not first dynamic restriction (user id match restriction applied)";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatementProcessedTransactions->execute(1, 1, 2, 10, 1);
 $insertStatementProcessedTransactions->execute(2, 1, 2, 10, 1); #This is here so we know it skips over it.
 $insertStatementProcessedTransactions->execute(3, 2, 3, 10, 0);
@@ -227,6 +238,7 @@ is (transactionIdIncluded(7),0,"Can't link to id 7.");
 #Now with the first restriction setting, all reset so they ignore the inputted include values.
 say "Test 12 - Transaction 1, all linkable included, first dynamic restriction (user id match restriction applied)";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatementProcessedTransactions->execute(1, 1, 2, 10, 1);
 $insertStatementProcessedTransactions->execute(2, 1, 2, 10, 1); #This is here so we know it skips over it.
 $insertStatementProcessedTransactions->execute(3, 2, 3, 10, 1);
@@ -245,6 +257,7 @@ is (transactionIdIncluded(7),0,"Can't link to id 7.");
 
 say "Test 13 - Transaction 1, one linkable not included, first dynamic restriction (user id match restriction applied)";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatementProcessedTransactions->execute(1, 1, 2, 10, 1);
 $insertStatementProcessedTransactions->execute(2, 1, 2, 10, 1); #This is here so we know it skips over it.
 $insertStatementProcessedTransactions->execute(3, 2, 3, 10, 0);
@@ -263,6 +276,7 @@ is (transactionIdIncluded(7),0,"Can't link to id 7.");
 
 say "Test 14 - Transaction 1, all linkable not included, first dynamic restriction (user id match restriction applied)";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatementProcessedTransactions->execute(1, 1, 2, 10, 1);
 $insertStatementProcessedTransactions->execute(2, 1, 2, 10, 1); #This is here so we know it skips over it.
 $insertStatementProcessedTransactions->execute(3, 2, 3, 10, 0);
@@ -289,6 +303,7 @@ my $insertStatementCandinateTransactions = $dbh->prepare("INSERT INTO CandinateT
 
 sub initialise { 
   delete_table_data();
+  #TransactionId, FromUserId, ToUserId, Value
   $statementInsertProcessedTransactions->execute(1, 1, 2, 10);
   $statementInsertProcessedTransactions->execute(2, 2, 3, 10);
   $statementInsertProcessedTransactions->execute(3, 3, 4, 10);
@@ -297,8 +312,10 @@ sub initialise {
   $statementInsertProcessedTransactions->execute(6, 6, 1, 10);
   
   #It does not matter what these values are.
+  #ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCurrentStatsId->execute(1, 10, 1, 10, 1);
   
+  #ChainId, TransactionId_FK, ChainStatsId_FK
   $statementInsertCurrentChains->execute(1, 1, 1);
   $statementInsertCurrentChains->execute(1, 2, 1);
   $statementInsertCurrentChains->execute(1, 3, 1);
@@ -321,6 +338,7 @@ say "Test 15 - not first dynamic restriction";
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
+#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #              #
 $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
@@ -337,6 +355,7 @@ say "Test 16 - test 15 insertion order shuffled, not first dynamic restriction";
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
+#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #              #
 $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
@@ -353,6 +372,7 @@ say "Test 17 - to transaction ids randomised, not first dynamic restriction";
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
+#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #               #
 $insertStatementCandinateTransactions->execute(4, 1, 1, 12, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 7,  1, 1, 1, 1, 1);
@@ -369,6 +389,7 @@ say "Test 18 - best candinate not included, not first dynamic restriction";
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
+#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #              #
 $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
@@ -384,6 +405,7 @@ say "Test 19 - other non best candinates not included, not first dynamic restric
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
+#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #              #
 $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);
@@ -399,6 +421,7 @@ say "Test 20 - none included, not first dynamic restriction";
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
+#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #              #
 $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);
@@ -417,6 +440,7 @@ say "Test 21 - first dynamic restriction";
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
+#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #              #
 $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
@@ -433,6 +457,7 @@ say "Test 22 - test 15 insertion order shuffled, first dynamic restriction";
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
+#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #              #
 $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
@@ -449,6 +474,7 @@ say "Test 23 - to transaction ids randomised, first dynamic restriction";
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
+#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #               #
 $insertStatementCandinateTransactions->execute(4, 1, 1, 12, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 7,  1, 1, 1, 1, 1);
@@ -465,6 +491,7 @@ say "Test 24 - best candinate not included, first dynamic restriction";
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
+#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #              #
 $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
@@ -480,6 +507,7 @@ say "Test 25 - other non best candinates included, not first dynamic restriction
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
+#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #              #
 $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);
@@ -495,6 +523,7 @@ say "Test 26 - none included, first dynamic restriction";
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
+#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #              #
 $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
 $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);

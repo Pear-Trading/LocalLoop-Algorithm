@@ -40,6 +40,7 @@ my $insertStatement = $dbh->prepare("INSERT INTO ProcessedTransactions (Transact
 
 say "Test 1 - No transactions that can be removed (all can be in a loop).";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value
 $insertStatement->execute(1, 1, 2, 10);
 $insertStatement->execute(2, 2, 3, 10); 
 $insertStatement->execute(3, 3, 1, 10); 
@@ -52,6 +53,7 @@ is (@{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions", und
 
 say "Test 2 - One transaction to remove, 1 dangling to.";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value
 $insertStatement->execute(1, 1, 2, 10);
 $insertStatement->execute(2, 2, 3, 10); 
 $insertStatement->execute(3, 3, 1, 10);
@@ -66,6 +68,7 @@ is (@{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions WHERE
 
 say "Test 3 - Two transactions to remove, 2 dangling to.";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value
 $insertStatement->execute(1, 1, 2, 10);
 $insertStatement->execute(2, 2, 3, 10); 
 $insertStatement->execute(3, 3, 1, 10);
@@ -82,6 +85,7 @@ is (@{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions WHERE
 
 say "Test 4 - One transaction to remove, 1 dangling from.";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value
 $insertStatement->execute(1, 1, 2, 10);
 $insertStatement->execute(2, 4, 2, 10); #Dangling
 $insertStatement->execute(3, 2, 3, 10); 
@@ -96,6 +100,7 @@ is (@{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions WHERE
  
 say "Test 5 - Two transactions to remove, 2 dangling from.";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value
 $insertStatement->execute(1, 1, 2, 10);
 $insertStatement->execute(2, 5, 4, 10); #Dangling 
 $insertStatement->execute(3, 4, 2, 10); #Dangling
@@ -113,6 +118,7 @@ is (@{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions WHERE
 
 say "Test 6 - Four transactions to remove, 2 dangling from and two dangling to.";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value
 #Create another chain that uses an id in another loop.
 $insertStatement->execute(1, 1, 2, 10);
 $insertStatement->execute(2, 5, 4, 10); #Dangling 

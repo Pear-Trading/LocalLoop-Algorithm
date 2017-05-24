@@ -55,6 +55,7 @@ sub transactionIdIncluded {
 #Tests with no modification to the included (all are included by default)
 say "Test 1 - Transaction 1, all included, not first dynamic restriction";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatement->execute(1, 1, 2, 10, 1);
 $insertStatement->execute(2, 2, 3, 10, 1);
 $insertStatement->execute(3, 3, 4, 10, 1);
@@ -73,6 +74,7 @@ is (transactionIdIncluded(6),0,"Can't link to id 6.");
 say "Test 2 - Transaction 1, some not included, but none to link to, first dynamic restriction";
 delete_table_data();
 #Scattering of 0's and 0 on the only one 1 can link to. This gets reset and can now link to it.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatement->execute(1, 1, 2, 10, 1);
 $insertStatement->execute(2, 2, 3, 10, 0);
 $insertStatement->execute(3, 3, 4, 10, 1);
@@ -90,6 +92,7 @@ is (transactionIdIncluded(6),0,"Can't link to id 6.");
 say "Test 3 - Transaction 1, some not included, but none to link to, not first dynamic restriction";
 delete_table_data();
 #Scattering of 0's and 0 on the only one 1 can link to.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatement->execute(1, 1, 2, 10, 1);
 $insertStatement->execute(2, 2, 3, 10, 0);
 $insertStatement->execute(3, 3, 4, 10, 1);
@@ -109,6 +112,7 @@ is (transactionIdIncluded(6),0,"Can't link to id 6.");
 say "Test 4 - Transaction 2, all included, not first dynamic restriction";
 delete_table_data();
 #More than one transaction can be linked to. All included by default.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatement->execute(1, 1, 2, 10, 1);
 $insertStatement->execute(2, 2, 3, 10, 1);
 $insertStatement->execute(3, 3, 4, 10, 1);
@@ -126,6 +130,7 @@ is (transactionIdIncluded(6),0,"Can't link to id 6.");
 say "Test 4 - Transaction 2, some not included, but none to link to 1/2, first dynamic restriction";
 delete_table_data();
 #More than one transaction can be linked to. One of them disabled by default, but it will reset.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatement->execute(1, 1, 2, 10, 1);
 $insertStatement->execute(2, 2, 3, 10, 0);
 $insertStatement->execute(3, 3, 4, 10, 1);
@@ -143,6 +148,7 @@ is (transactionIdIncluded(6),0,"Can't link to id 6.");
 say "Test 5 - Transaction 2, some not included, but none to link to 2/2, first dynamic restriction";
 delete_table_data();
 #More than one transaction can be linked to. Both disabled by default, but it will reset
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatement->execute(1, 1, 2, 10, 0);
 $insertStatement->execute(2, 2, 3, 10, 1);
 $insertStatement->execute(3, 3, 4, 10, 0);
@@ -160,6 +166,7 @@ is (transactionIdIncluded(6),0,"Can't link to id 6.");
 say "Test 6 - Transaction 2, some not included, but one to link to 1/2, not first dynamic restriction";
 delete_table_data();
 #More than one transaction can be linked to. One of them disabled by default.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatement->execute(1, 1, 2, 10, 1);
 $insertStatement->execute(2, 2, 3, 10, 0);
 $insertStatement->execute(3, 3, 4, 10, 1);
@@ -177,6 +184,7 @@ is (transactionIdIncluded(6),0,"Can't link to id 6.");
 say "Test 7 - Transaction 2, some not included, but none to link to 2/2, not first dynamic restriction";
 delete_table_data();
 #More than one transaction can be linked to. Both disabled by default, but it will reset
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatement->execute(1, 1, 2, 10, 0);
 $insertStatement->execute(2, 2, 3, 10, 1);
 $insertStatement->execute(3, 3, 4, 10, 0);
@@ -196,6 +204,7 @@ is (transactionIdIncluded(6),0,"Can't link to id 6.");
 say "Test 8 - Transaction 2, backwards in time is valid, not first restriction";
 delete_table_data();
 #transactions back in time are valid as they will be discounted using another module.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatement->execute(1, 3, 5, 10, 1);
 $insertStatement->execute(2, 2, 3, 10, 1);
 $insertStatement->execute(3, 3, 4, 10, 1);
@@ -214,6 +223,7 @@ say "Test 9 - Transaction 2, backwards in time is valid, first restriction";
 delete_table_data();
 #transactions back in time are valid as they will be discounted using another module. They all will be reset
 #and will show the text above,
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatement->execute(1, 3, 5, 10, 0);
 $insertStatement->execute(2, 2, 3, 10, 1);
 $insertStatement->execute(3, 3, 4, 10, 0);

@@ -56,6 +56,7 @@ sub initialise {
   
   #It does not matter what values are in here as they are ignored, this is only needed for referential integrity
   #in CurrentChains.
+  #ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCurrentChainStats->execute(1, 10, 1, 10, 1);
 }
 
@@ -65,6 +66,7 @@ sub initialise {
 say "Test 1 - No chains present (no restrictions), not first restriction";
 initialise();
 #Only the 1st (transaction id) and 5th (included) matter in this, the rest can be ignored.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $statementInsertProcessedTransactions->execute(1, 1, 2, 10, 1);
 $statementInsertProcessedTransactions->execute(2, 2, 3, 10, 1);
 $statementInsertProcessedTransactions->execute(3, 3, 4, 10, 1);
@@ -103,6 +105,7 @@ dies_ok { $testModule->applyDynamicRestriction(1, 1, undef); } "Exception thrown
 say "Test 5 - 1 chain present, selection start/middle, not first restriction";
 initialise();
 #Only the 1st (transaction id) and 5th (included) matter in this, the rest can be ignored.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $statementInsertProcessedTransactions->execute(1, 1, 2, 10, 1);
 $statementInsertProcessedTransactions->execute(2, 2, 3, 10, 1);
 $statementInsertProcessedTransactions->execute(3, 3, 4, 10, 1);
@@ -110,6 +113,7 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 1);
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 1);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
+#ChainId, TransactionId_FK, ChainStatsId_FK
 $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
@@ -128,6 +132,7 @@ is (transactionIdIncluded(6),1,"Can link to id 6.");
 say "Test 6 - 1 chain present, selection start/middle, pre-disable two, not first restriction";
 initialise();
 #Only the 1st (transaction id) and 5th (included) matter in this, the rest can be ignored.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $statementInsertProcessedTransactions->execute(1, 1, 2, 10, 1);
 $statementInsertProcessedTransactions->execute(2, 2, 3, 10, 0); # Disable this to see if it gets re-enabled (in chain)
 $statementInsertProcessedTransactions->execute(3, 3, 4, 10, 1);
@@ -135,6 +140,7 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 0); # Disable this to see if it gets re-enabled (not in chain)
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 1);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
+#ChainId, TransactionId_FK, ChainStatsId_FK
 $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
@@ -153,6 +159,7 @@ is (transactionIdIncluded(6),1,"Can link to id 6.");
 say "Test 7 - 1 chain present, selection start/middle, pre-disable all, not first restriction";
 initialise();
 #Only the 1st (transaction id) and 5th (included) matter in this, the rest can be ignored.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $statementInsertProcessedTransactions->execute(1, 1, 2, 10, 0);
 $statementInsertProcessedTransactions->execute(2, 2, 3, 10, 0);
 $statementInsertProcessedTransactions->execute(3, 3, 4, 10, 0);
@@ -160,6 +167,7 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 0);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 0);
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 0);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
+#ChainId, TransactionId_FK, ChainStatsId_FK
 $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
@@ -178,6 +186,7 @@ is (transactionIdIncluded(6),0,"Can't link to id 6 (not included).");
 say "Test 8 - 1 chain present, selection last transaction, not first restriction";
 initialise();
 #Only the 1st (transaction id) and 5th (included) matter in this, the rest can be ignored.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $statementInsertProcessedTransactions->execute(1, 1, 2, 10, 1);
 $statementInsertProcessedTransactions->execute(2, 2, 3, 10, 1); 
 $statementInsertProcessedTransactions->execute(3, 3, 4, 10, 1);
@@ -185,6 +194,7 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 1); 
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 1);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
+#ChainId, TransactionId_FK, ChainStatsId_FK
 $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
@@ -204,6 +214,7 @@ is (transactionIdIncluded(6),1,"Can link to id 6.");
 say "Test 9 - 1 chain present, selection last transaction two disabled, not first restriction";
 initialise();
 #Only the 1st (transaction id) and 5th (included) matter in this, the rest can be ignored.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $statementInsertProcessedTransactions->execute(1, 1, 2, 10, 1);
 $statementInsertProcessedTransactions->execute(2, 2, 3, 10, 1); 
 $statementInsertProcessedTransactions->execute(3, 3, 4, 10, 0);
@@ -211,6 +222,7 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 1); 
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 0);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
+#ChainId, TransactionId_FK, ChainStatsId_FK
 $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
@@ -230,6 +242,7 @@ is (transactionIdIncluded(6),0,"Can't link to id 6 (not included).");
 say "Test 10 - 1 chain present, selection last transaction, all disabled, not first restriction";
 initialise();
 #Only the 1st (transaction id) and 5th (included) matter in this, the rest can be ignored.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $statementInsertProcessedTransactions->execute(1, 1, 2, 10, 0);
 $statementInsertProcessedTransactions->execute(2, 2, 3, 10, 0); 
 $statementInsertProcessedTransactions->execute(3, 3, 4, 10, 0);
@@ -237,6 +250,7 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 0);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 0); 
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 0);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
+#ChainId, TransactionId_FK, ChainStatsId_FK
 $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
@@ -256,6 +270,7 @@ is (transactionIdIncluded(6),0,"Can't link to id 6 (not included).");
 say "Test 11 - 2 chains, selection start/middle transaction, not first restriction";
 initialise();
 #Only the 1st (transaction id) and 5th (included) matter in this, the rest can be ignored.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $statementInsertProcessedTransactions->execute(1, 1, 2, 10, 1);
 $statementInsertProcessedTransactions->execute(2, 2, 3, 10, 1); 
 $statementInsertProcessedTransactions->execute(3, 3, 4, 10, 1);
@@ -263,6 +278,7 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 1); 
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 1);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
+#ChainId, TransactionId_FK, ChainStatsId_FK
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1); #Branch at 3 
 $statementInsertCurrentChains->execute(1, 4, 1);
@@ -271,6 +287,7 @@ $statementInsertCurrentChains->execute(2, 2, 1);
 $statementInsertCurrentChains->execute(2, 3, 1); #Branch at 3 
 $statementInsertCurrentChains->execute(2, 6, 1);
 #It started off as chain 1 but branched at transaction id 3 to transaction id 6.
+#ChainId_FK, FromTransactionId_FK, ToTransactionId_FK
 $statementInsertBranchedTransactions->execute(1, 3, 6);
 
 #transactionId, chainId, use first restriction?
@@ -288,6 +305,7 @@ is (transactionIdIncluded(6),0,"Can't link to id 6 (it branched to this previous
 say "Test 12 - 2 chains, selection start/middle transaction, some disabled, not first restriction";
 initialise();
 #Only the 1st (transaction id) and 5th (included) matter in this, the rest can be ignored.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $statementInsertProcessedTransactions->execute(1, 1, 2, 10, 0); # Disabled for testing, should remain disabled
 $statementInsertProcessedTransactions->execute(2, 2, 3, 10, 1); 
 $statementInsertProcessedTransactions->execute(3, 3, 4, 10, 1);
@@ -295,6 +313,7 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 0); # Disabled for testing, should remain disabled
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 0);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
+#ChainId, TransactionId_FK, ChainStatsId_FK
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1); #Branch at 3 
 $statementInsertCurrentChains->execute(1, 4, 1);
@@ -303,6 +322,7 @@ $statementInsertCurrentChains->execute(2, 2, 1);
 $statementInsertCurrentChains->execute(2, 3, 1); #Branch at 3 
 $statementInsertCurrentChains->execute(2, 6, 1);
 #It started off as chain 1 but branched at transaction id 3 to transaction id 6.
+#ChainId_FK, FromTransactionId_FK, ToTransactionId_FK
 $statementInsertBranchedTransactions->execute(1, 3, 6);
 
 #transactionId, chainId, use first restriction?
@@ -320,6 +340,7 @@ is (transactionIdIncluded(6),0,"Can't link to id 6 (it branched to this previous
 say "Test 13 - 2 chains, selection start/middle transaction, all disabled, not first restriction";
 initialise();
 #Only the 1st (transaction id) and 5th (included) matter in this, the rest can be ignored.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $statementInsertProcessedTransactions->execute(1, 1, 2, 10, 0);
 $statementInsertProcessedTransactions->execute(2, 2, 3, 10, 0); 
 $statementInsertProcessedTransactions->execute(3, 3, 4, 10, 0);
@@ -327,6 +348,7 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 0);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 0); 
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 0);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
+#ChainId, TransactionId_FK, ChainStatsId_FK
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1); #Branch at 3 
 $statementInsertCurrentChains->execute(1, 4, 1);
@@ -335,6 +357,7 @@ $statementInsertCurrentChains->execute(2, 2, 1);
 $statementInsertCurrentChains->execute(2, 3, 1); #Branch at 3 
 $statementInsertCurrentChains->execute(2, 6, 1);
 #It started off as chain 1 but branched at transaction id 3 to transaction id 6.
+#ChainId_FK, FromTransactionId_FK, ToTransactionId_FK
 $statementInsertBranchedTransactions->execute(1, 3, 6);
 
 #transactionId, chainId, use first restriction?
@@ -353,6 +376,7 @@ is (transactionIdIncluded(6),0,"Can't link to id 6 (it branched to this previous
 say "Test 14 - 1 chain present, selection start/middle, first restriction";
 initialise();
 #Only the 1st (transaction id) and 5th (included) matter in this, the rest can be ignored.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $statementInsertProcessedTransactions->execute(1, 1, 2, 10, 1);
 $statementInsertProcessedTransactions->execute(2, 2, 3, 10, 1);
 $statementInsertProcessedTransactions->execute(3, 3, 4, 10, 1);
@@ -360,6 +384,7 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 1);
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 1);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
+#ChainId, TransactionId_FK, ChainStatsId_FK
 $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
@@ -378,6 +403,7 @@ is (transactionIdIncluded(6),1,"Can link to id 6.");
 say "Test 15 - 1 chain present, selection start/middle, pre-disable two, first restriction";
 initialise();
 #Only the 1st (transaction id) and 5th (included) matter in this, the rest can be ignored.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $statementInsertProcessedTransactions->execute(1, 1, 2, 10, 1);
 $statementInsertProcessedTransactions->execute(2, 2, 3, 10, 0); # Disable this to see if it gets re-enabled (in chain)
 $statementInsertProcessedTransactions->execute(3, 3, 4, 10, 1);
@@ -385,6 +411,7 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 1); 
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 0);# Disable this to see if it gets re-enabled (not in chain)
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
+#ChainId, TransactionId_FK, ChainStatsId_FK
 $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
@@ -403,6 +430,7 @@ is (transactionIdIncluded(6),1,"Can link to id 6 (was disabled but was reset).")
 say "Test 16 - 1 chain present, selection start/middle, pre-disable all, first restriction";
 initialise();
 #Only the 1st (transaction id) and 5th (included) matter in this, the rest can be ignored.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $statementInsertProcessedTransactions->execute(1, 1, 2, 10, 0);
 $statementInsertProcessedTransactions->execute(2, 2, 3, 10, 0);
 $statementInsertProcessedTransactions->execute(3, 3, 4, 10, 0);
@@ -410,6 +438,7 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 0);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 0);
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 0);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
+#ChainId, TransactionId_FK, ChainStatsId_FK
 $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
@@ -428,6 +457,7 @@ is (transactionIdIncluded(6),1,"Can link to id 6 (not included, but was reset)."
 say "Test 17 - 1 chain present, selection last transaction, first restriction";
 initialise();
 #Only the 1st (transaction id) and 5th (included) matter in this, the rest can be ignored.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $statementInsertProcessedTransactions->execute(1, 1, 2, 10, 1);
 $statementInsertProcessedTransactions->execute(2, 2, 3, 10, 1); 
 $statementInsertProcessedTransactions->execute(3, 3, 4, 10, 1);
@@ -435,6 +465,7 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 1); 
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 1);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
+#ChainId, TransactionId_FK, ChainStatsId_FK
 $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
@@ -454,6 +485,7 @@ is (transactionIdIncluded(6),1,"Can link to id 6.");
 say "Test 18 - 1 chain present, selection last transaction two disabled, first restriction";
 initialise();
 #Only the 1st (transaction id) and 5th (included) matter in this, the rest can be ignored.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $statementInsertProcessedTransactions->execute(1, 1, 2, 10, 1);
 $statementInsertProcessedTransactions->execute(2, 2, 3, 10, 1); 
 $statementInsertProcessedTransactions->execute(3, 3, 4, 10, 0);
@@ -461,6 +493,7 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 1); 
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 0);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
+#ChainId, TransactionId_FK, ChainStatsId_FK
 $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
@@ -480,6 +513,7 @@ is (transactionIdIncluded(6),1,"Can link to id 6 (not included, but reset).");
 say "Test 19 - 1 chain present, selection last transaction, all disabled, first restriction";
 initialise();
 #Only the 1st (transaction id) and 5th (included) matter in this, the rest can be ignored.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $statementInsertProcessedTransactions->execute(1, 1, 2, 10, 0);
 $statementInsertProcessedTransactions->execute(2, 2, 3, 10, 0); 
 $statementInsertProcessedTransactions->execute(3, 3, 4, 10, 0);
@@ -487,6 +521,7 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 0);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 0); 
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 0);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
+#ChainId, TransactionId_FK, ChainStatsId_FK
 $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
@@ -506,6 +541,7 @@ is (transactionIdIncluded(6),1,"Can link to id 6 (not included, but was reset)."
 say "Test 20 - 2 chains, selection start/middle transaction, not first restriction";
 initialise();
 #Only the 1st (transaction id) and 5th (included) matter in this, the rest can be ignored.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $statementInsertProcessedTransactions->execute(1, 1, 2, 10, 1);
 $statementInsertProcessedTransactions->execute(2, 2, 3, 10, 1); 
 $statementInsertProcessedTransactions->execute(3, 3, 4, 10, 1);
@@ -513,6 +549,7 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 1); 
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 1);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
+#ChainId, TransactionId_FK, ChainStatsId_FK
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1); #Branch at 3 
 $statementInsertCurrentChains->execute(1, 4, 1);
@@ -521,6 +558,7 @@ $statementInsertCurrentChains->execute(2, 2, 1);
 $statementInsertCurrentChains->execute(2, 3, 1); #Branch at 3 
 $statementInsertCurrentChains->execute(2, 6, 1);
 #It started off as chain 1 but branched at transaction id 3 to transaction id 6.
+#ChainId_FK, FromTransactionId_FK, ToTransactionId_FK
 $statementInsertBranchedTransactions->execute(1, 3, 6);
 
 #transactionId, chainId, use first restriction?
@@ -538,6 +576,7 @@ is (transactionIdIncluded(6),0,"Can't link to id 6 (it branched to this previous
 say "Test 21 - 2 chains, selection start/middle transaction, some disabled, not first restriction";
 initialise();
 #Only the 1st (transaction id) and 5th (included) matter in this, the rest can be ignored.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $statementInsertProcessedTransactions->execute(1, 1, 2, 10, 0); # Disabled for testing, should remain disabled
 $statementInsertProcessedTransactions->execute(2, 2, 3, 10, 1); 
 $statementInsertProcessedTransactions->execute(3, 3, 4, 10, 1);
@@ -545,6 +584,7 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 0); # Disabled for testing, should remain disabled
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 0);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
+#ChainId, TransactionId_FK, ChainStatsId_FK
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1); #Branch at 3 
 $statementInsertCurrentChains->execute(1, 4, 1);
@@ -553,6 +593,7 @@ $statementInsertCurrentChains->execute(2, 2, 1);
 $statementInsertCurrentChains->execute(2, 3, 1); #Branch at 3 
 $statementInsertCurrentChains->execute(2, 6, 1);
 #It started off as chain 1 but branched at transaction id 3 to transaction id 6.
+#ChainId_FK, FromTransactionId_FK, ToTransactionId_FK
 $statementInsertBranchedTransactions->execute(1, 3, 6);
 
 #transactionId, chainId, use first restriction?
@@ -570,6 +611,7 @@ is (transactionIdIncluded(6),0,"Can't link to id 6 (not included, but was reset,
 say "Test 22 - 2 chains, selection start/middle transaction, all disabled, not first restriction";
 initialise();
 #Only the 1st (transaction id) and 5th (included) matter in this, the rest can be ignored.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $statementInsertProcessedTransactions->execute(1, 1, 2, 10, 0);
 $statementInsertProcessedTransactions->execute(2, 2, 3, 10, 0); 
 $statementInsertProcessedTransactions->execute(3, 3, 4, 10, 0);
@@ -577,6 +619,7 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 0);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 0); 
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 0);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
+#ChainId, TransactionId_FK, ChainStatsId_FK
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1); #Branch at 3 
 $statementInsertCurrentChains->execute(1, 4, 1);
@@ -585,6 +628,7 @@ $statementInsertCurrentChains->execute(2, 2, 1);
 $statementInsertCurrentChains->execute(2, 3, 1); #Branch at 3 
 $statementInsertCurrentChains->execute(2, 6, 1);
 #It started off as chain 1 but branched at transaction id 3 to transaction id 6.
+#ChainId_FK, FromTransactionId_FK, ToTransactionId_FK
 $statementInsertBranchedTransactions->execute(1, 3, 6);
 
 #transactionId, chainId, use first restriction?

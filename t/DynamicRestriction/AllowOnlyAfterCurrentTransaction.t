@@ -57,6 +57,7 @@ sub transactionIdIncluded {
 #Tests with no modification to the included (all are included by default)
 say "Test 1 - Transaction 1, not first dynamic restriction";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatement->execute(1, 1, 2, 10, 1);
 $insertStatement->execute(2, 2, 3, 10, 1);
 $insertStatement->execute(3, 3, 4, 10, 1);
@@ -71,6 +72,7 @@ is (transactionIdIncluded(4),1,"Can link to id 4.");
 
 say "Test 2 - Transaction 2, not first dynamic restriction";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatement->execute(1, 1, 2, 10, 1);
 $insertStatement->execute(2, 2, 3, 10, 1);
 $insertStatement->execute(3, 3, 4, 10, 1);
@@ -83,6 +85,7 @@ is (transactionIdIncluded(4),1,"Can link to id 4.");
 
 say "Test 3 - Transaction 2nd last, not first dynamic restriction";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatement->execute(1, 1, 2, 10, 1);
 $insertStatement->execute(2, 2, 3, 10, 1);
 $insertStatement->execute(3, 3, 4, 10, 1);
@@ -95,6 +98,7 @@ is (transactionIdIncluded(4),1,"Can link to id 4.");
 
 say "Test 4 - Transaction last, not first dynamic restriction";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatement->execute(1, 1, 2, 10, 1);
 $insertStatement->execute(2, 2, 3, 10, 1);
 $insertStatement->execute(3, 3, 4, 10, 1);
@@ -110,6 +114,7 @@ is (transactionIdIncluded(4),0,"Can't link to id 4.");
 say "Test 5 - Transaction 1, not first dynamic restriction with some not included";
 delete_table_data();
 #Similar to test one but some values are already not included
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatement->execute(1, 1, 2, 10, 1);
 $insertStatement->execute(2, 2, 3, 10, 0);
 $insertStatement->execute(3, 3, 4, 10, 1);
@@ -123,6 +128,7 @@ is (transactionIdIncluded(4),0,"Can't link to id 4.");
 say "Test 6 - Transaction 1, not first dynamic restriction with some not included";
 delete_table_data();
 #Similar to test one but some values are already not included
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatement->execute(1, 1, 2, 10, 1);
 $insertStatement->execute(2, 2, 3, 10, 0);
 $insertStatement->execute(3, 3, 4, 10, 0);
@@ -138,6 +144,7 @@ is (transactionIdIncluded(4),0,"Can't link to id 4.");
 say "Test 7 - Transaction 1, first dynamic restriction";
 delete_table_data();
 #Set all included to zero they will reset
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatement->execute(1, 1, 2, 10, 0); 
 $insertStatement->execute(2, 2, 3, 10, 0);
 $insertStatement->execute(3, 3, 4, 10, 0);
@@ -151,6 +158,7 @@ is (transactionIdIncluded(4),1,"Can link to id 4.");
 say "Test 8 - Transaction 2, first dynamic restriction";
 delete_table_data();
 #Transaction id 4 will reset.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatement->execute(1, 1, 2, 10, 1);
 $insertStatement->execute(2, 2, 3, 10, 1);
 $insertStatement->execute(3, 3, 4, 10, 1);
@@ -164,6 +172,7 @@ is (transactionIdIncluded(4),1,"Can link to id 4.");
 say "Test 9 - Transaction 2nd last, first dynamic restriction";
 delete_table_data();
 #Transaction id 4 will reset again.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatement->execute(1, 1, 2, 10, 1);
 $insertStatement->execute(2, 2, 3, 10, 0);
 $insertStatement->execute(3, 3, 4, 10, 1);
@@ -177,6 +186,7 @@ is (transactionIdIncluded(4),1,"Can link to id 4.");
 say "Test 10 - Transaction last, first dynamic restriction";
 delete_table_data();
 #All will be reset but they will be set to 0.
+#TransactionId, FromUserId, ToUserId, Value, Included
 $insertStatement->execute(1, 1, 2, 10, 0);
 $insertStatement->execute(2, 2, 3, 10, 0);
 $insertStatement->execute(3, 3, 4, 10, 0);

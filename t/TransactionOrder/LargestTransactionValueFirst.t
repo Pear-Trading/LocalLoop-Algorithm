@@ -43,6 +43,7 @@ my $insertStatement = $dbh->prepare("INSERT INTO ProcessedTransactions (Transact
 
 say "Test 1 - Basic ordering";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value
 $insertStatement->execute(1, 1, 2, 13);
 $insertStatement->execute(2, 2, 3, 12);
 $insertStatement->execute(3, 3, 4, 11);
@@ -56,6 +57,7 @@ is ($largestValueFirstTest->nextTransactionId(),undef,"Expected transaction id u
 
 say "Test 2 - Mixed insertion ordering 1";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value
 $insertStatement->execute(2, 2, 3, 12);
 $insertStatement->execute(4, 4, 1, 10);
 $insertStatement->execute(3, 3, 4, 11);
@@ -69,6 +71,7 @@ is ($largestValueFirstTest->nextTransactionId(),undef,"Expected transaction id u
 
 say "Test 3 - Mixed insertion ordering 2";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value
 $insertStatement->execute(2, 2, 3, 11);
 $insertStatement->execute(4, 4, 1, 13);
 $insertStatement->execute(3, 3, 4, 10);
@@ -82,6 +85,7 @@ is ($largestValueFirstTest->nextTransactionId(),undef,"Expected transaction id u
 
 say "Test 4 - Ties";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value
 $insertStatement->execute(1, 1, 2, 12);
 $insertStatement->execute(2, 2, 3, 11); #Tie - 2 goes first.
 $insertStatement->execute(3, 3, 4, 11); #Tie
@@ -95,6 +99,7 @@ is ($largestValueFirstTest->nextTransactionId(),undef,"Expected transaction id u
 
 say "Test 5 - Ties - randomly inserted";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value
 $insertStatement->execute(4, 4, 1, 10);
 $insertStatement->execute(1, 1, 2, 12);
 $insertStatement->execute(3, 3, 4, 11); #Tie
@@ -108,6 +113,7 @@ is ($largestValueFirstTest->nextTransactionId(),undef,"Expected transaction id u
 
 say "Test 6 - Ties - randomly inserted - Different id order";
 delete_table_data();
+#TransactionId, FromUserId, ToUserId, Value
 $insertStatement->execute(2, 2, 3, 11);
 $insertStatement->execute(3, 3, 4, 12); #Tie
 $insertStatement->execute(4, 4, 1, 13);
