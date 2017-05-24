@@ -15,7 +15,7 @@ use v5.10;
 
 use FindBin;
 
-#This is a test for "Pear::LocalLoop::Algorithm::AlgorithmItself::_getNextBestCandinateTransaction"
+#This is a test for "Pear::LocalLoop::Algorithm::AlgorithmItself::_selectNextBestCandinateTransactions"
 
 Pear::LocalLoop::Algorithm::Main->setTestingMode();
 
