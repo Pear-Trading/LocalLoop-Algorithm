@@ -114,6 +114,16 @@ sub applyDynamicRestrictionsAndHeuristics {
     $self->_dumpTransactionsIncluded();
     $isFirst = 0;
   }    
+  
+  #Nothing applied? Reset all of the included values
+  if ($isFirst) {
+    debugMethodMiddle("No dynamic restrictions or heuristics executed. All transactions reset.");
+    
+    my $dbh = Pear::LocalLoop::Algorithm::Main->dbi();
+    my $statement = $dbh->prepare("UPDATE ProcessedTransactions SET Included = 1 WHERE Included = 0");
+    $statement->execute();
+  }
+  
   debugMethodEnd();
 }
 
@@ -127,6 +137,15 @@ sub applyHeuristicsCandinates {
     $self->_dumpCandinateTransactionsIncluded();
     $isFirst = 0;
   }    
+  
+  #Nothing applied? Reset all of the included values.
+  if ($isFirst) {
+    debugMethodMiddle("No heuristics executed. All candinate transactions reset.");
+    
+    my $dbh = Pear::LocalLoop::Algorithm::Main->dbi();
+    my $statement = $dbh->prepare("UPDATE CandinateTransactions SET Included = 1 WHERE Included = 0");
+    $statement->execute();
+  }
   
   debugMethodEnd();
 }
