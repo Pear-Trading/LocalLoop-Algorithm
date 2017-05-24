@@ -46,7 +46,8 @@ sub _removePackageNameMethod {
 }
 
 sub _printPackageMethodLine {
-  my ($package, $filename, $line, $method) = caller(2);
+  my ($package, $ignore, $line, $ignore) = caller(1);
+  my ($ignore, $ignore, $ignore, $method) = caller(2);
   $package = removeStartOfPackageName($package);
   $method = _removePackageNameMethod($method);
   
@@ -57,7 +58,8 @@ sub _printPackageMethodLine {
 
 sub _printLineComment {
   my ($comment) = @_;
-  my ($package, $filename, $line, $method) = caller(2);
+  my ($package, $ignore, $line, $ignore) = caller(1);
+  my ($ignore, $ignore, $ignore, $method) = caller(2);
   $package = removeStartOfPackageName($package);
   $method = _removePackageNameMethod($method);
   
@@ -68,7 +70,8 @@ sub _printLineComment {
 
 sub _printPackageMethodLineComment {
   my ($comment) = @_;
-  my ($package, $filename, $line, $method) = caller(2);
+  my ($package, $ignore, $line, $ignore) = caller(1);
+  my ($ignore, $ignore, $ignore, $method) = caller(2);
   $package = removeStartOfPackageName($package);
   $method = _removePackageNameMethod($method);
   
