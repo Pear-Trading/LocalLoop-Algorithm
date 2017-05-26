@@ -82,5 +82,33 @@ sub applyHeuristicCandinates {
   debugMethodEnd();
 };
 
+sub applyHeuristicLoops {
+  debugMethodStart();
+  
+  my ($self, $isFirst) = @_;
+  my $dbh = $self->dbh();
+
+  my $earliestLoop = undef;
+  if ($isFirst) {
+    my $statementEarliestLoop = $dbh->prepare("SELECT LoopId FROM LoopInfo_ViewInactive ORDER BY FirstTransactionId_FK ASC, LastTransactionId_FK ASC");
+    $statementEarliestLoop->execute();
+    ($earliestLoop) = $statementEarliestLoop->fetchrow_array();
+  }
+  else {
+    my $statementEarliestLoop = $dbh->prepare("SELECT LoopId FROM LoopInfo_ViewIncludedInactive ORDER BY FirstTransactionId_FK ASC, LastTransactionId_FK ASC");
+    $statementEarliestLoop->execute();
+    ($earliestLoop) = $statementEarliestLoop->fetchrow_array();
+  }
+  
+  if (defined $earliestLoop) {
+    $dbh->prepare("UPDATE LoopInfo SET Included = 0 WHERE Included != 0 AND LoopId != ?")->execute($earliestLoop);
+  
+    if ($isFirst) {
+      $dbh->prepare("UPDATE LoopInfo SET Included = 1 WHERE Included = 0 AND LoopId = ?")->execute($earliestLoop);
+    }
+  }
+
+  debugMethodEnd();
+};
 
 1;
