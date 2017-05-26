@@ -5,5 +5,5 @@ DELETE FROM CurrentChainsStats;
 DELETE FROM CurrentChains;
 DELETE FROM BranchedTransactions;
 DELETE FROM CandinateTransactions;
-DELETE FROM AllLoopsStats;
-DELETE FROM AllLoops;
+DELETE FROM LoopInfo;
+DELETE FROM Loops;

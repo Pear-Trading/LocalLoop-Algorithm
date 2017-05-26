@@ -1,10 +1,14 @@
-DROP VIEW IF EXISTS AllLoops_ViewActive;
-DROP INDEX IF EXISTS AllLoops_IndexTransactionId;
-DROP TABLE IF EXISTS AllLoops;
+DROP VIEW IF EXISTS Loops_ViewActive;
+DROP INDEX IF EXISTS Loops_IndexTransactionId;
+DROP TABLE IF EXISTS Loops;
 
-DROP VIEW IF EXISTS AllLoopsStats_ViewActive;
-DROP INDEX IF EXISTS AllLoopsStats_IndexActive;
-DROP TABLE IF EXISTS AllLoopsStats;
+DROP VIEW IF EXISTS LoopInfo_ViewIncludedInactiveHerusticDesc;
+DROP VIEW IF EXISTS LoopInfo_ViewIncludedInactiveHerusticAsc;
+DROP VIEW IF EXISTS LoopInfo_ViewIncludedInactive;
+DROP VIEW IF EXISTS LoopInfo_ViewInactive;
+DROP VIEW IF EXISTS LoopInfo_ViewActive;
+DROP INDEX IF EXISTS LoopInfo_IndexActive;
+DROP TABLE IF EXISTS LoopInfo;
 
 DROP TABLE IF EXISTS CandinateTransactions;
 
@@ -28,3 +32,4 @@ DROP INDEX IF EXISTS ProcessedTransactions_IndexFromUserId;
 
 DROP TABLE IF EXISTS ProcessedTransactions;
 DROP TABLE IF EXISTS OriginalTransactions;
+
