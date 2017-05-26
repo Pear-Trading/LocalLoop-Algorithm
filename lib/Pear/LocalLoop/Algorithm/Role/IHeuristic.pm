@@ -15,7 +15,7 @@ sub applyHeuristic {
 };
 
 sub applyHeuristicCandinates {
-  die "applyHeuristic has not been implemented.";
+  die "applyHeuristicCandinates has not been implemented.";
 };
 
 1;
