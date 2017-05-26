@@ -22,6 +22,12 @@ has dynamicRestrictionsArray => (
 #  lazy => 1,
 );
 
+has loopDynamicRestrictionsArray => (
+  is => 'ro',
+  default => sub { return []; },
+#  lazy => 1,
+);
+
 has heuristicArray => (
   is => 'ro',
   default => sub { return []; },
@@ -45,6 +51,10 @@ sub init {
   foreach my $heuristic (@{$self->heuristicArray()}) {
     $heuristic->init();
   }
+  
+  foreach my $loopDynamicRestriction (@{$self->loopDynamicRestrictionsArray()}) {
+    $loopDynamicRestriction->init();
+  }    
   
   debugMethodEnd();
 }
@@ -73,6 +83,10 @@ sub initAfterStaticRestrictions {
   foreach my $heuristic (@{$self->heuristicArray()}) {
     $heuristic->initAfterStaticRestrictions();
   }
+  
+  foreach my $loopDynamicRestriction (@{$self->loopDynamicRestrictionsArray()}) {
+    $loopDynamicRestriction->initAfterStaticRestrictions();
+  }    
   
   debugMethodEnd();
 }
@@ -144,6 +158,33 @@ sub applyHeuristicsCandinates {
     
     my $dbh = Pear::LocalLoop::Algorithm::Main->dbi();
     my $statement = $dbh->prepare("UPDATE CandinateTransactions SET Included = 1 WHERE Included = 0");
+    $statement->execute();
+  }
+  
+  debugMethodEnd();
+}
+
+sub applyLoopDynamicRestrictionsAndHeuristics {
+  debugMethodStart();
+  my ($self) = @_;
+
+  my $isFirst = 1;
+  foreach my $loopDynamicRestriction (@{$self->loopDynamicRestrictionsArray()}) {
+    $loopDynamicRestriction->applyLoopDynamicRestriction($isFirst);
+    $isFirst = 0;
+  }    
+  
+  foreach my $heuristic (@{$self->heuristicArray()}) {
+    $heuristic->applyHeuristicLoops($isFirst);
+    $isFirst = 0;
+  }    
+  
+  #Nothing applied? Reset all of the included values.
+  if ($isFirst) {
+    debugMethodMiddle("No dynamic restrictions or heuristics executed. All loops reset.");
+    
+    my $dbh = Pear::LocalLoop::Algorithm::Main->dbi();
+    my $statement = $dbh->prepare("UPDATE LoopStats SET Included = 1 WHERE Included = 0");
     $statement->execute();
   }
   
