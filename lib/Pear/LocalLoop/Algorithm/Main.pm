@@ -74,15 +74,12 @@ sub process {
   
   my $dbh = $self->dbh or die "Database does not exist";  
   
-
   $self->_initialSetup($settings);  
-
   $settings->applyStaticRestrictions();
-  
   $settings->initAfterStaticRestrictions();
-
+  
   debugMethodMiddle("Before loop");
-  my $isFirstRestriction = 1;
+  
   for (my $nextTransactionId = $settings->nextTransactionId(); 
     defined $nextTransactionId; 
     $nextTransactionId = $settings->nextTransactionId())
