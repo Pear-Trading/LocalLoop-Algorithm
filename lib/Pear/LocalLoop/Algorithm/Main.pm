@@ -553,6 +553,32 @@ sub _newCandinateTransactionsId {
   return $id;
 }
 
+sub _newLoopId {
+  debugMethodStart();
+  
+  my ($self) = @_;
+  my $dbh = $self->dbh;
+
+  my $statementMaxChainStatsId = $dbh->prepare("SELECT MAX(LoopId) FROM LoopInfo");
+  $statementMaxChainStatsId->execute();
+  
+  my ($maxId) = $statementMaxChainStatsId->fetchrow_array();
+  
+  my $id = undef;
+  if (defined $maxId) {
+    $id = $maxId + 1;
+    debugMethodMiddle("LoopIdExists = $id");
+  }
+  #No chains so there is no value
+  else {
+    $id = 1;
+    debugMethodMiddle("LoopIdDoesn'tExist = $id");
+  }
+  
+  debugMethodEnd();
+  return $id;
+}
+
 
 
 
