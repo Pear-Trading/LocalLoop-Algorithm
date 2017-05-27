@@ -90,12 +90,12 @@ sub applyHeuristicLoops {
 
   my $earliestLoop = undef;
   if ($isFirst) {
-    my $statementEarliestLoop = $dbh->prepare("SELECT LoopId FROM LoopInfo_ViewInactive ORDER BY FirstTransactionId_FK ASC, LastTransactionId_FK ASC");
+    my $statementEarliestLoop = $dbh->prepare("SELECT LoopId FROM LoopInfo ORDER BY FirstTransactionId_FK ASC, LastTransactionId_FK ASC");
     $statementEarliestLoop->execute();
     ($earliestLoop) = $statementEarliestLoop->fetchrow_array();
   }
   else {
-    my $statementEarliestLoop = $dbh->prepare("SELECT LoopId FROM LoopInfo_ViewIncludedInactive ORDER BY FirstTransactionId_FK ASC, LastTransactionId_FK ASC");
+    my $statementEarliestLoop = $dbh->prepare("SELECT LoopId FROM LoopInfo_ViewIncluded ORDER BY FirstTransactionId_FK ASC, LastTransactionId_FK ASC");
     $statementEarliestLoop->execute();
     ($earliestLoop) = $statementEarliestLoop->fetchrow_array();
   }
