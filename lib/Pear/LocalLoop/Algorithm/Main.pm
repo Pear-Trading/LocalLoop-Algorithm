@@ -71,7 +71,14 @@ sub process {
   
   my $dbh = $self->dbh or die "Database does not exist";  
   
-  $self->_initialSetup($settings);  
+  debugMethodMiddle("Inputted settings:");
+  say ("\n".Dumper($settings));
+  
+  $dbh->do("DELETE FROM ProcessedTransactions");
+  $dbh->do("INSERT INTO ProcessedTransactions (TransactionId, FromUserId, ToUserId, Value) SELECT * FROM OriginalTransactions"); 
+  
+  $settings->init();
+    
   $settings->applyStaticRestrictions();
   $settings->initAfterStaticRestrictions();
   
@@ -88,20 +95,6 @@ sub process {
   
   #This may be here or the last line in the for loop, depending on when you want the loops to be selected.
   $self->_selectLoops($settings);
-  
-  debugMethodEnd();
-}
-
-#This is executed once per analysis.
-sub _initialSetup {
-  debugMethodStart();
-  my ($self, $settings) = @_;
-  my $dbh = $self->dbh;
-  
-  $dbh->do("DELETE FROM ProcessedTransactions");
-  $dbh->do("INSERT INTO ProcessedTransactions (TransactionId, FromUserId, ToUserId, Value) SELECT * FROM OriginalTransactions"); 
-  
-  $settings->init();
   
   debugMethodEnd();
 }
