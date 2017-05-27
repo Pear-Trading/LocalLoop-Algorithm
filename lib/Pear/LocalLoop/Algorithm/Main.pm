@@ -280,11 +280,10 @@ sub _getNextBestCandinateTransactionAnalysis {
 
   my ($hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues) = @{$self->_getNextBestCandinateTransaction($settings)};
   
-  debugMethodMiddle("getCandinateReturb: hasRow:$hasRow ChainId:$chainId TransactionTo:$transactionTo MinVal:$minimumValue Length:$length TotalValue:$totalValue NumMinValues:$numberOfMinimumValues");
-  
   my $transactionsToAnalyseNext = undef;
   
   if ($hasRow == 0) {
+    debugMethodMiddle("No row");
     $transactionsToAnalyseNext = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
       noCandinateTransactionsLeft => 1,
       loopStartEndUserId => $loopStartId,
@@ -296,8 +295,10 @@ sub _getNextBestCandinateTransactionAnalysis {
     return $transactionsToAnalyseNext;
   }
   
-  my $newChainStatsId = $self->_newChainStatsId();
+  debugMethodMiddle("ReturnVals(Non-null): hasRow:$hasRow chainId:".(defined $chainId ? $chainId : "")." transFrom:".(defined $transactionFrom ? $transactionFrom : "")." transTo:$transactionTo miniValue:$minimumValue Length:$length TotalValue:$totalValue numMinVals:$numberOfMinimumValues");
+
   
+  my $newChainStatsId = $self->_newChainStatsId();  
   
   if (! defined $transactionFrom) {
     $chainId = $self->_newChainId();
@@ -420,11 +421,13 @@ sub _getNextBestCandinateTransaction {
     
     my $hasRow = (defined $transactionTo ? 1 : 0);
     if ($hasRow) {
-      my $numberRowsDeleted = $statementDelete->execute($candinateTransactionId);
+      $statementDelete->execute($candinateTransactionId);
       debugMethodMiddle("Deleted CandinateTransactionId:$candinateTransactionId");
+      debugMethodMiddle("ReturnVals(Non-null): hasRow:$hasRow chainId:".(defined $chainId ? $chainId : "")." transFrom:".(defined $transactionFrom ? $transactionFrom : "")." transTo:$transactionTo miniValue:$minimumValue Length:$length TotalValue:$totalValue numMinVals:$numberOfMinimumValues");
     }
-    
-    debugMethodMiddle("ReturnVals(Non-null): hasRow:$hasRow chainId:".(defined $chainId ? $chainId : "" )." transFrom:".(defined $transactionFrom ? $transactionFrom : "" )." transTo:$transactionTo miniValue:$minimumValue Length:$length TotalValue:$totalValue numMinVals:$numberOfMinimumValues");
+    else {
+      debugMethodMiddle("ReturnVals: Empty row");
+    }
     
 
     #Don't return CandinateTransactionsId as it's not needed and is just used to identify and remove one row.
