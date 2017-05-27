@@ -113,6 +113,7 @@ sub _initialSetup {
 
 sub _loopGeneration {
   debugMethodStart();
+  #we assume the nextTransaction id is valid.
   my ($self, $settings, $nextTransactionId) = @_;
   my $dbh = $self->dbh;
   
@@ -149,26 +150,58 @@ sub _loopGeneration {
     debugMethodMiddle("1st while loop end");
   }
   
-  if ($extendedTransaction->noCandinateTransactionsLeft())
-  {
-    # FIXME
-    my $a = "FillSpace";
-    
-  }
-  elsif ($extendedTransaction->hasLoopFormed())
-  {
-    #Keep on looping while loops can be formed. (Loops that are the same value)
-    #FIXME It does not take into consideration if it reduces in quality.
-    
-    #while ( ($extendedTransaction = $self->_getNextBestCandinateTransactionAnalysis($settings, $fromUserId))->isStillFormingLoops() ) {
-    #  $self->_selectNextBestCandinateTransactions($settings, $extendedTransaction);
-    #}
+  #Insert all of the remaining candinate transactions, so equal candinates can be found.
+  #This also can mean poor candinates can be added, however in the next section the filtering should take
+  #care of this. Also as we have processed the loops we may as well store them it would a waste of resouces 
+  #not to, as some other loop may become inactive which results in these poor loops becoming active.
+  while ( ! $extendedTransaction->noCandinateTransactionsLeft() ) {
+    $extendedTransaction = $self->_getNextBestCandinateTransactionAnalysis($settings, $fromUserId);
   }
   
+
+  my $statementLoops = $dbh->prepare("SELECT Result.ChainId FROM ProcessedTransactions, (SELECT CurrentChains.ChainId AS ChainId, MAX(CurrentChains.TransactionId_FK) AS MaxTransactionId FROM CurrentChains GROUP BY CurrentChains.ChainId) AS Result WHERE Result.MaxTransactionId = ProcessedTransactions.TransactionId AND ProcessedTransactions.ToUserId = ?");
+    
+  $statementLoops->execute($fromUserId);
   
-  #TODO LOOPS!
+  #Store a list as we can't have a select and insert statement executed at the same time on a SQLite database.
+  my $chainIdsWhichAreLoops = [];
+  while (my ($chainId) = $statementLoops->fetchrow_array()) {
+    push(@$chainIdsWhichAreLoops, $chainId);
+  }
+  
+  #say Dumper($chainIdsWhichAreLoops);
+  
+  my $statementGetChainMinMax = $dbh->prepare("SELECT MIN(TransactionId_FK), MAX(TransactionId_FK) FROM CurrentChains WHERE ChainId = ? GROUP BY ChainId");
+  my $statementGetChainStatsId = $dbh->prepare("SELECT ChainStatsId_FK FROM CurrentChains WHERE ChainId = ? AND TransactionId_FK = ?");
+  my $statementGetChainStats = $dbh->prepare("SELECT MinimumValue, Length, TotalValue, NumberOfMinimumValues FROM CurrentChainsStats WHERE ChainStatsId = ?");
+
+  
+  my $statementInsertStats = $dbh->prepare("INSERT INTO LoopInfo (LoopId, FirstTransactionId_FK, LastTransactionId_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?, ?, ?)");
+  my $statementInsert = $dbh->prepare("INSERT INTO Loops (LoopId_FK, TransactionId_FK) SELECT ?, TransactionId_FK FROM CurrentChains WHERE ChainId = ?");
+  
+  
+  my $newLoopIds = [];
+  #TODO think about how to detect duplicate loops.
+  foreach my $chainId (@{$chainIdsWhichAreLoops}) {
+    my $newUniqueLoopId = $self->_newLoopId();
+    push(@$newLoopIds, $newUniqueLoopId);
+    
+    $statementGetChainMinMax->execute($chainId);
+    my ($minTransactionId, $maxTransactionId) = $statementGetChainMinMax->fetchrow_array();
+    
+    $statementGetChainStatsId->execute($chainId, $maxTransactionId);
+    my ($chainStatsId) = $statementGetChainStatsId->fetchrow_array();
+    
+    $statementGetChainStats->execute($chainStatsId);
+    my ($minimumValue, $length, $totalValue, $numberOfMinimumValues) = $statementGetChainStats->fetchrow_array();
+    
+    $statementInsertStats->execute($newUniqueLoopId, $minTransactionId, $maxTransactionId, $minimumValue, $length, $totalValue, $numberOfMinimumValues);
+    $statementInsert->execute($newUniqueLoopId, $chainId);
+  }
+  
 
   debugMethodEnd();
+  return $newLoopIds;
 }
 
 #Note: the test for this function is limited to that only the differences in the pass with 2 transactions (from and to)
