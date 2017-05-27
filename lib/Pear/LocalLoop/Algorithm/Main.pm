@@ -89,7 +89,8 @@ sub process {
     
   }
   
-  $self->_selectLoops();
+  #This may be here or the last line in the for loop, depending on when you want the loops to be selected.
+  $self->_selectLoops($settings);
   
   debugMethodEnd();
 }
