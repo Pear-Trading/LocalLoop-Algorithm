@@ -62,15 +62,12 @@ sub dbi {
 
 sub process {
   debugMethodStart();
-  
   my ($self, $settings) = @_;
   
   #TODO add more checks for settings.
   if (! defined $settings) {
     die "Settings are undefined";
   }
-  
-  say (Dumper($settings));
   
   my $dbh = $self->dbh or die "Database does not exist";  
   
