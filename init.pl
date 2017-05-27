@@ -18,6 +18,9 @@ use Pear::LocalLoop::Algorithm::DynamicRestriction::AllowOnlyTransactionsNotExte
 use Pear::LocalLoop::Algorithm::Heuristic::None;
 use Pear::LocalLoop::Algorithm::TransactionOrder::EarliestFirst;
 use Pear::LocalLoop::Algorithm::TransactionOrder::LargestTransactionValueFirst;
+use Pear::LocalLoop::Algorithm::LoopDynamicRestriction::DisallowLoopsWhichHaveTransactionsInActiveLoops;
+use Pear::LocalLoop::Algorithm::LoopDynamicRestriction::DisallowSelectionOfAlreadySelectedLoops;
+
 
 my $debug = 0;
 
@@ -33,6 +36,11 @@ if ($debug) {
 
 my $main = Pear::LocalLoop::Algorithm::Main->new();
 
+#FIXME It should not have this in the final version, but for now use this for state management.
+my $dbh = $main->dbi();
+$dbh->prepare("DELETE FROM Loops")->execute();  
+$dbh->prepare("DELETE FROM LoopInfo")->execute();
+
 my $rst = Pear::LocalLoop::Algorithm::StaticRestriction::RemoveTransactionsThatCannotFormALoop->new();
 my $staticRestrictions = [$rst];
 
@@ -44,10 +52,15 @@ my $dynamicRestrictions = [$matchId, $extendedOnto, $afterCurrent];
 my $none = Pear::LocalLoop::Algorithm::Heuristic::None->new();
 my $heuristics = [$none];
 
+my $disallowSelectedLoops = Pear::LocalLoop::Algorithm::LoopDynamicRestriction::DisallowSelectionOfAlreadySelectedLoops->new();
+my $disallowTransactionsInLoops = Pear::LocalLoop::Algorithm::LoopDynamicRestriction::DisallowLoopsWhichHaveTransactionsInActiveLoops->new();
+my $loopDynamicRestrictions = [$disallowSelectedLoops, $disallowTransactionsInLoops];
+
 my $hash = {
   staticRestrictionsArray => $staticRestrictions,
   dynamicRestrictionsArray => $dynamicRestrictions,
   heuristicArray => $heuristics,
+  loopDynamicRestrictionsArray => $loopDynamicRestrictions,
   transactionOrder => Pear::LocalLoop::Algorithm::TransactionOrder::EarliestFirst->new(),
 };
 
