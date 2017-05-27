@@ -580,13 +580,4 @@ sub _newLoopId {
 }
 
 
-
-
-
-sub _selectBestLoops {
-
-}
-
-
-
 1;
