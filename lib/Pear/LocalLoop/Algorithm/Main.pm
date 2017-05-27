@@ -87,8 +87,9 @@ sub process {
     debugMethodMiddle("TransactionLoop: $nextTransactionId");
     $self->_loopGeneration($settings, $nextTransactionId);
     
-    last; #Break. FIXME 
   }
+  
+  $self->_selectLoops();
   
   debugMethodEnd();
 }
