@@ -110,6 +110,30 @@ sub _initialSetup {
   debugMethodEnd();
 }
 
+sub _selectLoops {
+  debugMethodStart();
+  my ($self, $settings) = @_;
+  my $dbh = $self->dbh;
+  
+  my $statementSelectOneIncludedLoopId = $dbh->prepare("SELECT LoopId FROM LoopInfo WHERE Included != 0 LIMIT 1");
+  my $statementSetLoopToActive = $dbh->prepare("UPDATE LoopInfo SET Active = 1 WHERE LoopId = ?");
+  my $statementResetAllActiveLoops = $dbh->prepare("UPDATE LoopInfo SET Active = 0 WHERE Active != 0");
+  
+  $statementResetAllActiveLoops->execute();
+  #Insert one loop at a time as the activating of a loop may break the other loops (consistency of the loops).
+  my $loopId = undef; 
+  do {
+    $settings->applyLoopDynamicRestrictionsAndHeuristics();
+    $statementSelectOneIncludedLoopId->execute();
+    ($loopId) = $statementSelectOneIncludedLoopId->fetchrow_array();
+    if (defined $loopId) {
+      $statementSetLoopToActive->execute($loopId);
+    }
+  } while (defined $loopId); #Continue looping while loops can co-exist.
+  
+  debugMethodEnd();
+}
+
 
 sub _loopGeneration {
   debugMethodStart();
