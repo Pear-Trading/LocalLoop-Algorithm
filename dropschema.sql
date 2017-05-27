@@ -5,6 +5,7 @@ DROP TABLE IF EXISTS Loops;
 DROP VIEW IF EXISTS LoopInfo_ViewIncludedInactiveHerusticDesc;
 DROP VIEW IF EXISTS LoopInfo_ViewIncludedInactiveHerusticAsc;
 DROP VIEW IF EXISTS LoopInfo_ViewIncludedInactive;
+DROP VIEW IF EXISTS LoopInfo_ViewIncluded;
 DROP VIEW IF EXISTS LoopInfo_ViewInactive;
 DROP VIEW IF EXISTS LoopInfo_ViewActive;
 DROP INDEX IF EXISTS LoopInfo_IndexActive;

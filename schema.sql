@@ -137,6 +137,11 @@ SELECT LoopId, FirstTransactionId_FK, LastTransactionId_FK, MinimumValue, Length
 FROM LoopInfo
 WHERE Active = 0;
 
+CREATE VIEW LoopInfo_ViewIncluded AS
+SELECT LoopId, FirstTransactionId_FK, LastTransactionId_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included, HeuristicValue
+FROM LoopInfo
+WHERE Included = 1;
+
 CREATE VIEW LoopInfo_ViewIncludedInactive AS
 SELECT LoopId, FirstTransactionId_FK, LastTransactionId_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, HeuristicValue
 FROM LoopInfo
