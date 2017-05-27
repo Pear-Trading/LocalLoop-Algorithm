@@ -650,4 +650,396 @@ is (candinateTransactionIdIncluded(3),0,"id 3 is not included, but is reset and 
 is (candinateTransactionIdIncluded(4),0,"id 4 is not included, but is reset and discounted anyway."); 
 
 
+
+#####################################################################################
+
+# my $statementInsertProcessedTransactions;
+my $statementInsertLoopInfoId = $dbh->prepare("INSERT INTO LoopInfo (LoopId, Active, FirstTransactionId_FK, LastTransactionId_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+my $statementInsertLoops = $dbh->prepare("INSERT INTO Loops (LoopId_FK, TransactionId_FK) VALUES (?, ?)");
+
+sub loopIdIncluded {
+  my ($id) = @_;
+  
+  my ($hasIncludedId) = $dbh->selectrow_array("SELECT COUNT(*) FROM LoopInfo WHERE LoopId = ? AND Included = 1", undef, ($id));
+  
+  return $hasIncludedId;
+}
+
+#NOTE: If the start and end transaction of a loop are the same the results are undefined. 
+#(It'll return either one of them.)
+
+
+say "Test 27 - Empty table - not first transaction";
+{
+  delete_table_data();
+
+  my $exception = exception { $testModule->applyHeuristicLoops(0); };
+  is ($exception, undef ,"No exception thrown"); #not first restriction
+}
+
+
+
+say "Test 28 - Empty table - first transaction";
+{
+  delete_table_data();
+
+  my $exception = exception { $testModule->applyHeuristicLoops(1); };
+  is ($exception, undef ,"No exception thrown"); #first restriction
+}
+
+
+sub initialise1 {
+  delete_table_data();
+
+  #TransactionId, FromUserId, ToUserId, Value  
+  $statementInsertProcessedTransactions->execute( 1,  1,  2, 10);
+  $statementInsertProcessedTransactions->execute( 2,  2,  1,  8);
+  
+  $statementInsertProcessedTransactions->execute( 3,  3,  4, 10);
+  $statementInsertProcessedTransactions->execute( 4,  4,  5, 12);
+  $statementInsertProcessedTransactions->execute( 5,  5,  3, 10);
+   
+  $statementInsertProcessedTransactions->execute( 6,  6,  7, 10);
+  $statementInsertProcessedTransactions->execute( 7,  7,  6, 10);
+  
+  $statementInsertProcessedTransactions->execute( 8,  8,  9, 10);
+  $statementInsertProcessedTransactions->execute( 9,  9, 10, 10);
+  $statementInsertProcessedTransactions->execute(10, 10,  8, 15);
+  
+  #LoopId, Active, FirstTransactionId_FK, LastTransactionId_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+  $statementInsertLoopInfoId->execute(1, 0, 1,  2,  8, 2, 18, 1, 0);
+  $statementInsertLoopInfoId->execute(2, 1, 3,  5, 10, 3, 32, 2, 0);
+  $statementInsertLoopInfoId->execute(3, 1, 6,  7, 10, 2, 20, 2, 0);
+  $statementInsertLoopInfoId->execute(4, 0, 8, 10, 10, 3, 35, 2, 0);
+  
+  #LoopId_FK, TransactionId_FK
+  $statementInsertLoops->execute(1,  1);
+  $statementInsertLoops->execute(1,  2);
+  $statementInsertLoops->execute(2,  3);
+  $statementInsertLoops->execute(2,  4);
+  $statementInsertLoops->execute(2,  5);
+  $statementInsertLoops->execute(3,  6);
+  $statementInsertLoops->execute(3,  7);
+  $statementInsertLoops->execute(4,  8);
+  $statementInsertLoops->execute(4,  9);
+  $statementInsertLoops->execute(4, 10);
+}
+
+
+say "Test 29 - None included - not first";
+{
+  initialise1();
+  
+  my $exception = exception { $testModule->applyHeuristicLoops(0); };
+  is ($exception, undef ,"No exception thrown"); #not first restriction
+  
+  is (loopIdIncluded(1),0,"loop 1 is not included."); 
+  is (loopIdIncluded(2),0,"loop 2 is not included."); 
+  is (loopIdIncluded(3),0,"loop 3 is not included."); 
+  is (loopIdIncluded(4),0,"loop 4 is not included."); 
+}
+
+
+say "Test 30 - None included - first";
+{
+  initialise1();
+  
+  my $exception = exception { $testModule->applyHeuristicLoops(1); };
+  is ($exception, undef ,"No exception thrown"); #first restriction
+  
+  is (loopIdIncluded(1),1,"loop 1 is not included, but was reset."); 
+  is (loopIdIncluded(2),0,"loop 2 is not included, but was reset but then was discounted."); 
+  is (loopIdIncluded(3),0,"loop 3 is not included, but was reset but then was discounted."); 
+  is (loopIdIncluded(4),0,"loop 4 is not included, but was reset but then was discounted."); 
+}
+
+sub initialise2 {
+  delete_table_data();
+
+  #TransactionId, FromUserId, ToUserId, Value  
+  $statementInsertProcessedTransactions->execute( 1,  1,  2, 10);
+  $statementInsertProcessedTransactions->execute( 2,  2,  1,  8);
+  
+  $statementInsertProcessedTransactions->execute( 3,  3,  4, 10);
+  $statementInsertProcessedTransactions->execute( 4,  4,  5, 12);
+  $statementInsertProcessedTransactions->execute( 5,  5,  3, 10);
+   
+  $statementInsertProcessedTransactions->execute( 6,  6,  7, 10);
+  $statementInsertProcessedTransactions->execute( 7,  7,  6, 10);
+  
+  $statementInsertProcessedTransactions->execute( 8,  8,  9, 10);
+  $statementInsertProcessedTransactions->execute( 9,  9, 10, 10);
+  $statementInsertProcessedTransactions->execute(10, 10,  8, 15);
+  
+  #LoopId, Active, FirstTransactionId_FK, LastTransactionId_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+  #Shuffle the order around, so prevent the selection of earlier loops by insertion order.
+  $statementInsertLoopInfoId->execute(1, 1, 6,  7, 10, 2, 20, 2, 1); #3. We should ignore if loops are active and process it anyway.
+  $statementInsertLoopInfoId->execute(2, 0, 1,  2,  8, 2, 18, 1, 1); #1
+  $statementInsertLoopInfoId->execute(3, 0, 8, 10, 10, 3, 35, 2, 1); #4
+  $statementInsertLoopInfoId->execute(4, 1, 3,  5, 10, 3, 32, 2, 1); #2. We should ignore if loops are active and process it anyway.
+
+  #LoopId_FK, TransactionId_FK
+  $statementInsertLoops->execute(1,  6);
+  $statementInsertLoops->execute(1,  7);
+  $statementInsertLoops->execute(2,  1);
+  $statementInsertLoops->execute(2,  2);
+  $statementInsertLoops->execute(3,  8);
+  $statementInsertLoops->execute(3,  9);
+  $statementInsertLoops->execute(3, 10);
+  $statementInsertLoops->execute(4,  3);
+  $statementInsertLoops->execute(4,  4);
+  $statementInsertLoops->execute(4,  5);
+}
+
+say "Test 31 - All included - not first";
+{
+  initialise2();
+
+  my $exception = exception { $testModule->applyHeuristicLoops(0); };
+  is ($exception, undef ,"No exception thrown"); #not first restriction
+  
+  is (loopIdIncluded(1),0,"loop 1 was included but was discounted."); 
+  is (loopIdIncluded(2),1,"loop 2 still is included."); 
+  is (loopIdIncluded(3),0,"loop 3 was included but was discounted."); 
+  is (loopIdIncluded(4),0,"loop 4 was included but was discounted."); 
+}
+
+say "Test 32 - All included - first";
+{
+  initialise2();
+
+  my $exception = exception { $testModule->applyHeuristicLoops(1); };
+  is ($exception, undef ,"No exception thrown"); #first restriction
+  
+  is (loopIdIncluded(1),0,"loop 1 was included but was discounted."); 
+  is (loopIdIncluded(2),1,"loop 2 still is included."); 
+  is (loopIdIncluded(3),0,"loop 3 was included but was discounted."); 
+  is (loopIdIncluded(4),0,"loop 4 was included but was discounted."); 
+}
+
+
+sub initialise3 {
+  delete_table_data();
+
+  #TransactionId, FromUserId, ToUserId, Value  
+  $statementInsertProcessedTransactions->execute( 1,  1,  2, 10);
+  $statementInsertProcessedTransactions->execute( 2,  2,  1,  8);
+  
+  $statementInsertProcessedTransactions->execute( 3,  3,  4, 10);
+  $statementInsertProcessedTransactions->execute( 4,  4,  5, 12);
+  $statementInsertProcessedTransactions->execute( 5,  5,  3, 10);
+   
+  $statementInsertProcessedTransactions->execute( 6,  6,  7, 10);
+  $statementInsertProcessedTransactions->execute( 7,  7,  6, 10);
+  
+  $statementInsertProcessedTransactions->execute( 8,  8,  9, 10);
+  $statementInsertProcessedTransactions->execute( 9,  9, 10, 10);
+  $statementInsertProcessedTransactions->execute(10, 10,  8, 15);
+  
+  #LoopId, Active, FirstTransactionId_FK, LastTransactionId_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+  #Shuffle the order around, so prevent the selection of earlier loops by insertion order.
+  $statementInsertLoopInfoId->execute(1, 1, 6,  7, 10, 2, 20, 2, 1); #3. We should ignore if loops are active and process it anyway.
+  $statementInsertLoopInfoId->execute(2, 0, 1,  2,  8, 2, 18, 1, 0); #1
+  $statementInsertLoopInfoId->execute(3, 0, 8, 10, 10, 3, 35, 2, 1); #4
+  $statementInsertLoopInfoId->execute(4, 1, 3,  5, 10, 3, 32, 2, 1); #2. We should ignore if loops are active and process it anyway.
+
+  #LoopId_FK, TransactionId_FK
+  $statementInsertLoops->execute(1,  6);
+  $statementInsertLoops->execute(1,  7);
+  $statementInsertLoops->execute(2,  1);
+  $statementInsertLoops->execute(2,  2);
+  $statementInsertLoops->execute(3,  8);
+  $statementInsertLoops->execute(3,  9);
+  $statementInsertLoops->execute(3, 10);
+  $statementInsertLoops->execute(4,  3);
+  $statementInsertLoops->execute(4,  4);
+  $statementInsertLoops->execute(4,  5);
+}
+
+
+say "Test 33 - Best loop not included - not first";
+{
+  initialise3();
+  
+  my $exception = exception { $testModule->applyHeuristicLoops(0); };
+  is ($exception, undef ,"No exception thrown"); #not first restriction
+  
+  is (loopIdIncluded(1),0,"loop 1 was included but was discounted."); 
+  is (loopIdIncluded(2),0,"loop 2 not included and remained that way."); 
+  is (loopIdIncluded(3),0,"loop 3 was included but was discounted."); 
+  is (loopIdIncluded(4),1,"loop 4 remained included (selected)."); 
+}
+
+
+say "Test 34 - Best loop not included - first";
+{
+  initialise3();
+  
+  my $exception = exception { $testModule->applyHeuristicLoops(1); };
+  is ($exception, undef ,"No exception thrown"); # first restriction
+  
+  is (loopIdIncluded(1),0,"loop 1 was included but was discounted."); 
+  is (loopIdIncluded(2),1,"loop 2 not included but was reset and selected"); 
+  is (loopIdIncluded(3),0,"loop 3 was included but was discounted."); 
+  is (loopIdIncluded(4),0,"loop 4 was included but was discounted."); 
+}
+
+
+sub initialise4 {
+  delete_table_data();
+
+  #TransactionId, FromUserId, ToUserId, Value  
+  $statementInsertProcessedTransactions->execute( 1,  1,  2, 10);
+  $statementInsertProcessedTransactions->execute( 2,  2,  1,  8);
+  $statementInsertProcessedTransactions->execute( 3,  2,  3,  8);
+  $statementInsertProcessedTransactions->execute( 4,  3,  1, 10);
+  
+  $statementInsertProcessedTransactions->execute( 5,  5,  6, 10);
+  $statementInsertProcessedTransactions->execute( 6,  6,  5,  8);
+  $statementInsertProcessedTransactions->execute( 7,  6,  7,  8);
+  $statementInsertProcessedTransactions->execute( 8,  7,  5, 10);
+  
+  $statementInsertProcessedTransactions->execute( 9,  8,  9, 10);
+  $statementInsertProcessedTransactions->execute(10,  9, 10, 10);
+  $statementInsertProcessedTransactions->execute(11, 10,  8, 10);
+  
+  #LoopId, Active, FirstTransactionId_FK, LastTransactionId_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+  #Shuffle the order around, so prevent the selection of earlier loops by insertion order.
+  #Active values are shuffled again to add more possible senarios.
+  $statementInsertLoopInfoId->execute(1, 0, 1,  2,  8, 2, 18, 1, 0); # Duplicate of the loops below for first selection.
+  $statementInsertLoopInfoId->execute(2, 1, 1,  4,  8, 3, 28, 2, 0); # ... but is disabled.
+  $statementInsertLoopInfoId->execute(3, 0, 5,  6,  8, 2, 18, 1, 1); #1. Choice between these two.
+  $statementInsertLoopInfoId->execute(4, 1, 5,  8,  8, 3, 28, 2, 1); #2.
+  $statementInsertLoopInfoId->execute(5, 0, 9, 11, 10, 3, 30, 3, 1); 
+
+  #LoopId_FK, TransactionId_FK
+  $statementInsertLoops->execute(1,  1);
+  $statementInsertLoops->execute(1,  2);
+  
+  $statementInsertLoops->execute(2,  1);
+  $statementInsertLoops->execute(2,  3);
+  $statementInsertLoops->execute(2,  4);
+  
+  $statementInsertLoops->execute(3,  5);
+  $statementInsertLoops->execute(3,  6);
+  
+  $statementInsertLoops->execute(4,  5);
+  $statementInsertLoops->execute(4,  6);
+  $statementInsertLoops->execute(4,  8);
+  
+  $statementInsertLoops->execute(5,  9);
+  $statementInsertLoops->execute(5, 10);
+  $statementInsertLoops->execute(5, 11);
+}
+
+
+say "Test 35 - Best loops with same start transaction but different end transaction - not first";
+{
+  initialise4();
+  
+  my $exception = exception { $testModule->applyHeuristicLoops(0); };
+  is ($exception, undef ,"No exception thrown"); #not first restriction
+  
+  is (loopIdIncluded(1),0,"loop 1 not included and remained that way."); 
+  is (loopIdIncluded(2),0,"loop 2 not included and remained that way."); 
+  is (loopIdIncluded(3),1,"loop 3 was included and was selected."); 
+  is (loopIdIncluded(4),0,"loop 4 was included but was discounted."); 
+  is (loopIdIncluded(5),0,"loop 5 was included but was discounted."); 
+}
+
+say "Test 36 - Best loops with same start transaction but different end transaction - first";
+{
+  initialise4();
+  
+  my $exception = exception { $testModule->applyHeuristicLoops(1); };
+  is ($exception, undef ,"No exception thrown"); #first restriction
+  
+  is (loopIdIncluded(1),1,"loop 1 not included but was reset and selected."); 
+  is (loopIdIncluded(2),0,"loop 2 not included but was reset and discounted."); 
+  is (loopIdIncluded(3),0,"loop 3 was included and was discounted."); 
+  is (loopIdIncluded(4),0,"loop 4 was included but was discounted."); 
+  is (loopIdIncluded(5),0,"loop 5 was included but was discounted."); 
+}
+
+
+sub initialise5 {
+  delete_table_data();
+
+  #TransactionId, FromUserId, ToUserId, Value  
+  $statementInsertProcessedTransactions->execute( 1,  1,  2, 10);
+  $statementInsertProcessedTransactions->execute( 2,  2,  3,  8);
+  $statementInsertProcessedTransactions->execute( 3,  1,  3,  8);
+  $statementInsertProcessedTransactions->execute( 4,  3,  1, 10);
+  
+  $statementInsertProcessedTransactions->execute( 5,  1,  2, 10);
+  $statementInsertProcessedTransactions->execute( 6,  2,  3,  8);
+  $statementInsertProcessedTransactions->execute( 7,  1,  3,  8);
+  $statementInsertProcessedTransactions->execute( 8,  3,  1, 10);
+  
+  $statementInsertProcessedTransactions->execute( 9,  8,  9, 10);
+  $statementInsertProcessedTransactions->execute(10,  9, 10, 10);
+  $statementInsertProcessedTransactions->execute(11, 10,  8, 10);
+  
+  #LoopId, Active, FirstTransactionId_FK, LastTransactionId_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+  #Shuffle the order around, so prevent the selection of earlier loops by insertion order.
+  #Active values are shuffled again to add more possible senarios.
+  $statementInsertLoopInfoId->execute(1, 1, 1,  4,  8, 2, 18, 1, 0); # Duplicate of the loops below for first selection.
+  $statementInsertLoopInfoId->execute(2, 0, 3,  4,  8, 3, 28, 2, 0); # ... but is disabled.
+  $statementInsertLoopInfoId->execute(3, 1, 5,  8,  8, 2, 18, 1, 1); #1. Choice between these two.
+  $statementInsertLoopInfoId->execute(4, 0, 7,  8,  8, 3, 28, 2, 1); #2.
+  $statementInsertLoopInfoId->execute(5, 1, 9, 11, 10, 3, 30, 3, 1); 
+
+  #LoopId_FK, TransactionId_FK
+  $statementInsertLoops->execute(1,  1);
+  $statementInsertLoops->execute(1,  2);
+  $statementInsertLoops->execute(1,  4);
+  
+  $statementInsertLoops->execute(2,  3);
+  $statementInsertLoops->execute(2,  4);
+  
+  $statementInsertLoops->execute(3,  5);
+  $statementInsertLoops->execute(3,  6);
+  $statementInsertLoops->execute(3,  8);
+  
+  $statementInsertLoops->execute(4,  7);
+  $statementInsertLoops->execute(4,  8);
+  
+  $statementInsertLoops->execute(5,  9);
+  $statementInsertLoops->execute(5, 10);
+  $statementInsertLoops->execute(5, 11);
+}
+
+
+say "Test 37 - Best loops with different start transaction and same end transaction - not first";
+{
+  initialise5();
+  
+  my $exception = exception { $testModule->applyHeuristicLoops(0); };
+  is ($exception, undef ,"No exception thrown"); #not first restriction
+  
+  is (loopIdIncluded(1),0,"loop 1 not included and remained that way."); 
+  is (loopIdIncluded(2),0,"loop 2 not included and remained that way."); 
+  is (loopIdIncluded(3),1,"loop 3 was included and was selected."); 
+  is (loopIdIncluded(4),0,"loop 4 was included but was discounted."); 
+  is (loopIdIncluded(5),0,"loop 5 was included but was discounted."); 
+}
+
+
+say "Test 38 - Best loops with different start transaction and same end transaction - first";
+{
+  initialise5();
+  
+  my $exception = exception { $testModule->applyHeuristicLoops(1); };
+  is ($exception, undef ,"No exception thrown"); #first restriction
+  
+  is (loopIdIncluded(1),1,"loop 1 not included but was reset and selected."); 
+  is (loopIdIncluded(2),0,"loop 2 not included but was reset and discounted."); 
+  is (loopIdIncluded(3),0,"loop 3 was included and was discounted."); 
+  is (loopIdIncluded(4),0,"loop 4 was included but was discounted."); 
+  is (loopIdIncluded(5),0,"loop 5 was included but was discounted."); 
+}
+
+
+
 done_testing();
+
