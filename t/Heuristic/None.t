@@ -537,7 +537,7 @@ $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
 
 my $exception = exception { $testModule->applyHeuristicCandinates(1); };
-is ($exception, undef ,"No exception thrown"); #not first restriction
+is ($exception, undef ,"No exception thrown"); #first restriction
 
 is (candinateTransactionIdIncluded(1),1,"id 1 is included."); 
 is (candinateTransactionIdIncluded(2),0,"id 2 is discounted."); 
@@ -558,7 +558,7 @@ $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
 
 my $exception = exception { $testModule->applyHeuristicCandinates(1); };
-is ($exception, undef ,"No exception thrown"); #not first restriction
+is ($exception, undef ,"No exception thrown"); #first restriction
 
 is (candinateTransactionIdIncluded(1),1,"id 1 is included."); 
 is (candinateTransactionIdIncluded(2),0,"id 2 is discounted."); 
@@ -579,7 +579,7 @@ $insertStatementCandinateTransactions->execute(1, 1, 1, 88, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(3, 1, 1, 4,  1, 1, 1, 1, 1);
 
 my $exception = exception { $testModule->applyHeuristicCandinates(1); };
-is ($exception, undef ,"No exception thrown"); #not first restriction
+is ($exception, undef ,"No exception thrown"); #first restriction
 
 is (candinateTransactionIdIncluded(1),0,"id 88 is discounted."); 
 is (candinateTransactionIdIncluded(2),0,"id 7 is discounted."); 
@@ -600,7 +600,7 @@ $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
 
 my $exception = exception { $testModule->applyHeuristicCandinates(1); };
-is ($exception, undef ,"No exception thrown"); #not first restriction
+is ($exception, undef ,"No exception thrown"); #first restriction
 
 is (candinateTransactionIdIncluded(1),1,"id 1 is included (resetted)."); 
 is (candinateTransactionIdIncluded(2),0,"id 2 is discounted."); 
@@ -621,7 +621,7 @@ $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
 $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 0);
 
 my $exception = exception { $testModule->applyHeuristicCandinates(1); };
-is ($exception, undef ,"No exception thrown"); #not first restriction
+is ($exception, undef ,"No exception thrown"); #first restriction
 
 is (candinateTransactionIdIncluded(1),1,"id 1 is included."); 
 is (candinateTransactionIdIncluded(2),0,"id 2 is not included, but is reset and discounted anyway."); 
@@ -642,7 +642,7 @@ $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 0);
 $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 0);
 
 my $exception = exception { $testModule->applyHeuristicCandinates(1); };
-is ($exception, undef ,"No exception thrown"); #not first restriction
+is ($exception, undef ,"No exception thrown"); #first restriction
 
 is (candinateTransactionIdIncluded(1),1,"id 1 is included (resetted)."); 
 is (candinateTransactionIdIncluded(2),0,"id 2 is not included, but is reset and discounted anyway."); 
