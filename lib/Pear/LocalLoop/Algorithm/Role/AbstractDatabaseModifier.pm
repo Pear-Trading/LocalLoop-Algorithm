@@ -7,7 +7,7 @@ use Pear::LocalLoop::Algorithm::Debug;
 
 has dbh => (
   is => 'ro',
-  default => sub { return Pear::LocalLoop::Algorithm::Main->dbi(); },
+  default => sub { return Pear::LocalLoop::Algorithm::Main->instance()->dbh(); },
   lazy => 1,
 );
 
