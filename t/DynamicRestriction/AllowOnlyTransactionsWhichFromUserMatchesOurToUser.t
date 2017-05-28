@@ -13,7 +13,7 @@ use FindBin;
 
 Pear::LocalLoop::Algorithm::Main->setTestingMode();
 
-my $main = Pear::LocalLoop::Algorithm::Main->new();
+my $main = Pear::LocalLoop::Algorithm::Main->instance();
 my $dbh = $main->dbh;
 
 

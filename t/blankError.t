@@ -7,7 +7,7 @@ use Pear::LocalLoop::Algorithm::ProcessingTypeContainer;
 
 Pear::LocalLoop::Algorithm::Main->setTestingMode();
 
-my $main = Pear::LocalLoop::Algorithm::Main->new();
+my $main = Pear::LocalLoop::Algorithm::Main->instance();
 
 like(exception { $main->process(); }, qr/Settings are undefined/, 'Settings are undefined exception');
 
