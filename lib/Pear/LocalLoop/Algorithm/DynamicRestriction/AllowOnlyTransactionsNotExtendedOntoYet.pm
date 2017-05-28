@@ -15,11 +15,57 @@ with ('Pear::LocalLoop::Algorithm::Role::IDynamicRestriction');
 
 #This allows to connect back to yourself. TODO
 
+has statementSelectNextTransactionInChain => (
+  is => 'ro', 
+  default => sub {
+    my ($self) = @_;
+    return $self->dbh()->prepare("SELECT MIN(TransactionId_FK) FROM CurrentChains WHERE ChainId = ? AND ? < TransactionId_FK GROUP BY ChainId");
+  },
+  lazy => 1,
+);
+
+has statementUpdateStartOrMiddleOfChain => (
+  is => 'ro', 
+  default => sub {
+    my ($self) = @_;
+    return $self->dbh()->prepare("UPDATE ProcessedTransactions SET Included = 0 WHERE Included != 0 AND (TransactionId = ? OR TransactionId IN (SELECT ToTransactionId_FK FROM BranchedTransactions WHERE ChainId_FK = ? AND FromTransactionId_FK = ? ))");
+  },
+  lazy => 1,
+);
+
+has statementUpdateStartOrMiddleOfChainFirst => (
+  is => 'ro', 
+  default => sub {
+    my ($self) = @_;
+    return $self->dbh()->prepare("UPDATE ProcessedTransactions SET Included = 1 WHERE Included = 0 AND (TransactionId != ? AND TransactionId NOT IN (SELECT ToTransactionId_FK FROM BranchedTransactions WHERE ChainId_FK = ? AND FromTransactionId_FK = ? ))");
+  },
+  lazy => 1,
+);
+
+has statementUpdateEndOfChain => (
+  is => 'ro', 
+  default => sub {
+    my ($self) = @_;
+    return $self->dbh()->prepare("UPDATE ProcessedTransactions SET Included = 0 WHERE Included != 0 AND TransactionId IN (SELECT ToTransactionId_FK FROM BranchedTransactions WHERE ChainId_FK = ? AND FromTransactionId_FK = ? )");
+  },
+  lazy => 1,
+);
+
+has statementUpdateEndOfChainFirst => (
+  is => 'ro', 
+  default => sub {
+    my ($self) = @_;
+    return $self->dbh()->prepare("UPDATE ProcessedTransactions SET Included = 1 WHERE Included = 0 AND TransactionId NOT IN (SELECT ToTransactionId_FK FROM BranchedTransactions WHERE ChainId_FK = ? AND FromTransactionId_FK = ? )");
+  },
+  lazy => 1,
+);
+
+
 sub applyDynamicRestriction {
   debugMethodStart();
 
   #We assume transactionId and chainId are both valid.
-  my ($self, $transactionId, $chainId, $isFirstRestriction) = @_;
+  my ($self, $transactionId, $chainId, $isFirst) = @_;
   my $dbh = $self->dbh();
   
   if ( ! defined $transactionId) {
@@ -28,11 +74,11 @@ sub applyDynamicRestriction {
   elsif ( ! defined $chainId) {
     die "chainId cannot be undefined.";
   }
-  elsif ( ! defined $isFirstRestriction) {
-    die "isFirstRestriction cannot be undefined.";
+  elsif ( ! defined $isFirst) {
+    die "isFirst cannot be undefined.";
   }
   
-  #say "# tx:$transactionId ch:$chainId 1st:$isFirstRestriction";
+  #say "# tx:$transactionId ch:$chainId 1st:$isFirst";
 
   #Select next transaction in the chain, if undefined that means the inputted transaction id is the last in the chain.  
   #FIXME BUG IN SQLite DBI? Does the the aggregate functions require group by. In the "None" heuristic they don't...
@@ -40,29 +86,24 @@ sub applyDynamicRestriction {
   #my $statementNextTransactionInChain = $dbh->prepare("SELECT ChainStatsId_FK, MIN(TransactionId_FK) FROM CurrentChains WHERE ChainId = ? AND ? < TransactionId_FK ");
   #my $minTransactionId = @{$dbh->selectrow_arrayref("SELECT ChainStatsId_FK, MIN(TransactionId_FK) FROM CurrentChains WHERE ChainId = ? AND ? < TransactionId_FK ", undef, ($chainId, $transactionId))}[0];
   
-  my $statementNextTransactionInChain = $dbh->prepare("SELECT MIN(TransactionId_FK) FROM CurrentChains WHERE ChainId = ? AND ? < TransactionId_FK GROUP BY ChainId");
-  
+  my $statementNextTransactionInChain = $self->statementSelectNextTransactionInChain();
   $statementNextTransactionInChain->execute($chainId, $transactionId);
   my ($minTransactionId) = $statementNextTransactionInChain->fetchrow_array();
   
   #Is is at the start or in the middle of a chain.
   if (defined $minTransactionId) {
-    my $statementUpdate = $dbh->prepare("UPDATE ProcessedTransactions SET Included = 0 WHERE Included != 0 AND (TransactionId = ? OR TransactionId IN (SELECT ToTransactionId_FK FROM BranchedTransactions WHERE ChainId_FK = ? AND FromTransactionId_FK = ? ))");
-    $statementUpdate->execute($minTransactionId, $chainId, $transactionId);
+    $self->statementUpdateStartOrMiddleOfChain()->execute($minTransactionId, $chainId, $transactionId);
   
-    if ($isFirstRestriction){
-      my $statementUpdateFirst = $dbh->prepare("UPDATE ProcessedTransactions SET Included = 1 WHERE Included = 0 AND (TransactionId != ? AND TransactionId NOT IN (SELECT ToTransactionId_FK FROM BranchedTransactions WHERE ChainId_FK = ? AND FromTransactionId_FK = ? ))");
-      $statementUpdateFirst->execute($minTransactionId, $chainId, $transactionId);
+    if ($isFirst){
+      $self->statementUpdateStartOrMiddleOfChainFirst()->execute($minTransactionId, $chainId, $transactionId);
     }
   }
   #Is at the end of a chain.
   else {
-    my $statementUpdate = $dbh->prepare("UPDATE ProcessedTransactions SET Included = 0 WHERE Included != 0 AND TransactionId IN (SELECT ToTransactionId_FK FROM BranchedTransactions WHERE ChainId_FK = ? AND FromTransactionId_FK = ? )");
-    $statementUpdate->execute($chainId, $transactionId);
+    $self->statementUpdateEndOfChain()->execute($chainId, $transactionId);
   
-    if ($isFirstRestriction){
-      my $statementUpdateFirst = $dbh->prepare("UPDATE ProcessedTransactions SET Included = 1 WHERE Included = 0 AND TransactionId NOT IN (SELECT ToTransactionId_FK FROM BranchedTransactions WHERE ChainId_FK = ? AND FromTransactionId_FK = ? )");
-      $statementUpdateFirst->execute($chainId, $transactionId);
+    if ($isFirst){
+      $self->statementUpdateEndOfChainFirst()->execute($chainId, $transactionId);
     }
   }
 
