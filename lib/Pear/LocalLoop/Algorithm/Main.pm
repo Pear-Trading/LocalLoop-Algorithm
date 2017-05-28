@@ -13,7 +13,6 @@ use Pear::LocalLoop::Algorithm::ChainTransaction;
 use Carp::Always;
 
 
-
 #FIXME move into a config file and dynamically read it in.
 my $dbConfig = {
   dsn => "dbi:SQLite:dbname=transactions.db",
@@ -95,6 +94,9 @@ sub process {
   
   debugMethodMiddle("Inputted settings:");
   say ("\n".Dumper($settings));
+    
+    
+  $dbh->{AutoCommit} = 0;
   
   $self->_statementDeleteTuplesProcessedTransactions()->execute();
   $self->_statementIntoTuplesFromOriginalTransactionsIntoProcessedTransactions()->execute();
@@ -104,19 +106,27 @@ sub process {
   $settings->applyStaticRestrictions();
   $settings->initAfterStaticRestrictions();
   
+  $dbh->commit();
+  
   debugMethodMiddle("Before loop");
   
+  my $counter = 1;
   for (my $nextTransactionId = $settings->nextTransactionId(); 
     defined $nextTransactionId; 
-    $nextTransactionId = $settings->nextTransactionId())
+    $nextTransactionId = $settings->nextTransactionId(), $counter++)
   {
+    say "$counter";
     debugMethodMiddle("TransactionLoop: $nextTransactionId");
     $self->_loopGeneration($settings, $nextTransactionId);
-    
+    $dbh->commit();
+
   }
   
   #This may be here or the last line in the for loop, depending on when you want the loops to be selected.
   $self->_selectLoops($settings);
+  
+  $dbh->commit();
+  $dbh->{AutoCommit} = 1;
   
   debugMethodEnd();
 }
