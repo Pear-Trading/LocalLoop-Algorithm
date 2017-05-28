@@ -11,23 +11,36 @@ with ('Pear::LocalLoop::Algorithm::Role::ILoopDynamicRestriction');
 
 #Prevent the selection of any loops that have been selected previously.
 
+has disallowSelectionOfAlreadySelectedLoops => (
+  is => 'ro',
+  default => sub {
+    my ($self) = @_;
+    return $self->dbh()->prepare("UPDATE LoopInfo SET Included = 0 WHERE Included != 0 AND Active != 0");
+  },
+  lazy => 1,
+);
+
+has disallowSelectionOfAlreadySelectedLoopsFirstRestriction => (
+  is => 'ro',
+  default => sub {
+    my ($self) = @_;
+    return $self->dbh()->prepare("UPDATE LoopInfo SET Included = 1 WHERE Included = 0 AND Active = 0");
+  },
+  lazy => 1,
+);
+
 sub applyLoopDynamicRestriction {
   debugMethodStart();
-
   my ($self, $isFirstRestriction) = @_;
-  my $dbh = $self->dbh();
   
   if ( ! defined $isFirstRestriction ) {
     die "isFirstRestriction cannot be undefined";
   }
   
-  #FIXME move prepare statements outside this method so it does not waste resources every time.
-  my $statement = $dbh->prepare("UPDATE LoopInfo SET Included = 0 WHERE Included != 0 AND Active != 0");
-  $statement->execute();
+  $self->disallowSelectionOfAlreadySelectedLoops->execute();
   
   if ($isFirstRestriction){
-    my $statement = $dbh->prepare("UPDATE LoopInfo SET Included = 1 WHERE Included = 0 AND Active = 0");
-    $statement->execute();
+    $self->disallowSelectionOfAlreadySelectedLoopsFirstRestriction->execute();
   }
   
   debugMethodEnd();
