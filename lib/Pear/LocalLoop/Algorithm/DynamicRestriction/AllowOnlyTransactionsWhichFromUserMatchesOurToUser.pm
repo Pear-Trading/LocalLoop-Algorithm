@@ -14,31 +14,57 @@ with ('Pear::LocalLoop::Algorithm::Role::IDynamicRestriction');
 
 #If it's the first restriction then set all of the from users to be included.
 
+
+has statementSelectToUserOfATransaction => (
+  is => 'ro', 
+  default => sub {
+    my ($self) = @_;
+    return $self->dbh()->prepare("SELECT ToUserId FROM ProcessedTransactions WHERE TransactionId = ?");
+  },
+  lazy => 1,
+);
+
+has statementAllowOnlyTransactionsWhichFromUserMatchesOurToUser => (
+  is => 'ro', 
+  default => sub {
+    my ($self) = @_;
+    return $self->dbh()->prepare("UPDATE ProcessedTransactions SET Included = 0 WHERE Included != 0 AND FromUserId != ?");
+  },
+  lazy => 1,
+);
+
+has statementAllowOnlyTransactionsWhichFromUserMatchesOurToUserFirst => (
+  is => 'ro', 
+  default => sub {
+    my ($self) = @_;
+    return $self->dbh()->prepare("UPDATE ProcessedTransactions SET Included = 1 WHERE Included = 0 AND FromUserId = ?");
+  },
+  lazy => 1,
+);
+
 sub applyDynamicRestriction {
   debugMethodStart();
-  
-  my ($self, $transactionId, $chainId, $isFirstRestriction) = @_;
-  my $dbh = $self->dbh();
+  my ($self, $transactionId, $chainId, $isFirst) = @_;
   
   #It does not matter if $chainid is null as it's unused.
   if ( ! defined $transactionId ) {
     die "transactionId cannot be undefined";
   }
-  elsif ( ! defined $isFirstRestriction ) {
-    die "isFirstRestriction cannot be undefined";
+  elsif ( ! defined $isFirst ) {
+    die "isFirst cannot be undefined";
   }
   
+  my $statementSelectToUserOfATransaction = $self->statementSelectToUserOfATransaction();
+  $statementSelectToUserOfATransaction->execute($transactionId);
   
-  my $fromUserId = @{$dbh->selectrow_arrayref("SELECT ToUserId FROM ProcessedTransactions WHERE TransactionId = ?", undef, ($transactionId))}[0];
+  my ($fromUserId) = $statementSelectToUserOfATransaction->fetchrow_array();
   
   #Set all after the max transaction id to not be included.
-  my $statement = $dbh->prepare("UPDATE ProcessedTransactions SET Included = 0 WHERE Included != 0 AND FromUserId != ?");
-  $statement->execute($fromUserId);
+  $self->statementAllowOnlyTransactionsWhichFromUserMatchesOurToUser()->execute($fromUserId);
   
-  if ($isFirstRestriction) {
+  if ($isFirst) {
     #Set all transactions before or on the max id to be be included
-    my $statement = $dbh->prepare("UPDATE ProcessedTransactions SET Included = 1 WHERE Included = 0 AND FromUserId = ?");
-    $statement->execute($fromUserId);
+    $self->statementAllowOnlyTransactionsWhichFromUserMatchesOurToUserFirst()->execute($fromUserId);
   }
   
   debugMethodEnd();
