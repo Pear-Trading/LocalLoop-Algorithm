@@ -8,4 +8,5 @@ requires 'Test::More';
 requires 'Test::Exception';
 requires 'Test::Fatal';
 requires 'Path::Class::File';
+requires 'MooX::Singleton';
 
