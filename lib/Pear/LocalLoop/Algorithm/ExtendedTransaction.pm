@@ -38,6 +38,15 @@ has noCandinateTransactionsLeft => (
   default => sub { return 0; }
 );
 
+has statementToUserIdOfTransaction => (
+  is => 'ro',
+  default => sub {
+    my ($self) = @_;
+    return $self->dbh()->prepare("SELECT ToUserId FROM ProcessedTransactions WHERE TransactionId = ?");
+  },
+  lazy => 1,
+);
+
 sub hasLoopFormed {
   my ($self) = @_;
   my $dbh = $self->dbh();
@@ -47,10 +56,9 @@ sub hasLoopFormed {
     return 0;
   }
   
-  my $statementFromUserId = $dbh->prepare("SELECT ToUserId FROM ProcessedTransactions WHERE TransactionId = ?");
-  $statementFromUserId->execute($extendedTrans->transactionId);
-  
-  my ($toUserId) = $statementFromUserId->fetchrow_array();
+  my $statementToUserIdOfTransaction = $self->statementToUserIdOfTransaction();
+  $statementToUserIdOfTransaction->execute($extendedTrans->transactionId);
+  my ($toUserId) = $statementToUserIdOfTransaction->fetchrow_array();
   
   #Loop has been formed?
   return ($self->loopStartEndUserId() == $toUserId);
