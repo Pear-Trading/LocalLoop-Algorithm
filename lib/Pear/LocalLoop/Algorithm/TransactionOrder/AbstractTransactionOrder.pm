@@ -13,7 +13,7 @@ has tableName => (
   is => 'ro',
   default => sub {
     my ($self) = @_;
-    return Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier->uniqueTableName(ref($self), "Order");
+    return $self->uniqueTableName(ref($self), "Order");
   },
   lazy => 1, 
 );
