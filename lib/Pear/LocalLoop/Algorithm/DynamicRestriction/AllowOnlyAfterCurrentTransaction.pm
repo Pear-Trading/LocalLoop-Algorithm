@@ -15,7 +15,7 @@ with ('Pear::LocalLoop::Algorithm::Role::IDynamicRestriction');
 #before itself and itself to 0.
 
 
-has statementAllowOnlyAfterCurrentTransaction => (
+has _statementAllowOnlyAfterCurrentTransaction => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
@@ -24,7 +24,7 @@ has statementAllowOnlyAfterCurrentTransaction => (
   lazy => 1,
 );
 
-has statementAllowOnlyAfterCurrentTransactionFirst => (
+has _statementAllowOnlyAfterCurrentTransactionFirst => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
@@ -48,10 +48,10 @@ sub applyDynamicRestriction {
     die "isFirst cannot be undefined";
   }
   
-  $self->statementAllowOnlyAfterCurrentTransaction()->execute($transactionId);
+  $self->_statementAllowOnlyAfterCurrentTransaction()->execute($transactionId);
   
   if ($isFirst){
-    $self->statementAllowOnlyAfterCurrentTransactionFirst()->execute($transactionId);
+    $self->_statementAllowOnlyAfterCurrentTransactionFirst()->execute($transactionId);
   }
   
   debugMethodEnd();

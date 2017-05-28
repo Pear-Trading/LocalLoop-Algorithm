@@ -15,7 +15,7 @@ with ('Pear::LocalLoop::Algorithm::Role::IDynamicRestriction');
 #If it's the first restriction then set all of the from users to be included.
 
 
-has statementSelectToUserOfATransaction => (
+has _statementSelectToUserOfATransaction => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
@@ -54,7 +54,7 @@ sub applyDynamicRestriction {
     die "isFirst cannot be undefined";
   }
   
-  my $statementSelectToUserOfATransaction = $self->statementSelectToUserOfATransaction();
+  my $statementSelectToUserOfATransaction = $self->_statementSelectToUserOfATransaction();
   $statementSelectToUserOfATransaction->execute($transactionId);
   
   my ($fromUserId) = $statementSelectToUserOfATransaction->fetchrow_array();

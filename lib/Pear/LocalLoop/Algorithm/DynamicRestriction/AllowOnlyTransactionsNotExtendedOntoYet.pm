@@ -15,7 +15,7 @@ with ('Pear::LocalLoop::Algorithm::Role::IDynamicRestriction');
 
 #This allows to connect back to yourself. TODO
 
-has statementSelectNextTransactionInChain => (
+has _statementSelectNextTransactionInChain => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
@@ -24,7 +24,7 @@ has statementSelectNextTransactionInChain => (
   lazy => 1,
 );
 
-has statementUpdateStartOrMiddleOfChain => (
+has _statementUpdateStartOrMiddleOfChain => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
@@ -33,7 +33,7 @@ has statementUpdateStartOrMiddleOfChain => (
   lazy => 1,
 );
 
-has statementUpdateStartOrMiddleOfChainFirst => (
+has _statementUpdateStartOrMiddleOfChainFirst => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
@@ -42,7 +42,7 @@ has statementUpdateStartOrMiddleOfChainFirst => (
   lazy => 1,
 );
 
-has statementUpdateEndOfChain => (
+has _statementUpdateEndOfChain => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
@@ -51,7 +51,7 @@ has statementUpdateEndOfChain => (
   lazy => 1,
 );
 
-has statementUpdateEndOfChainFirst => (
+has _statementUpdateEndOfChainFirst => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
@@ -86,24 +86,24 @@ sub applyDynamicRestriction {
   #my $statementNextTransactionInChain = $dbh->prepare("SELECT ChainStatsId_FK, MIN(TransactionId_FK) FROM CurrentChains WHERE ChainId = ? AND ? < TransactionId_FK ");
   #my $minTransactionId = @{$dbh->selectrow_arrayref("SELECT ChainStatsId_FK, MIN(TransactionId_FK) FROM CurrentChains WHERE ChainId = ? AND ? < TransactionId_FK ", undef, ($chainId, $transactionId))}[0];
   
-  my $statementNextTransactionInChain = $self->statementSelectNextTransactionInChain();
+  my $statementNextTransactionInChain = $self->_statementSelectNextTransactionInChain();
   $statementNextTransactionInChain->execute($chainId, $transactionId);
   my ($minTransactionId) = $statementNextTransactionInChain->fetchrow_array();
   
   #Is is at the start or in the middle of a chain.
   if (defined $minTransactionId) {
-    $self->statementUpdateStartOrMiddleOfChain()->execute($minTransactionId, $chainId, $transactionId);
+    $self->_statementUpdateStartOrMiddleOfChain()->execute($minTransactionId, $chainId, $transactionId);
   
     if ($isFirst){
-      $self->statementUpdateStartOrMiddleOfChainFirst()->execute($minTransactionId, $chainId, $transactionId);
+      $self->_statementUpdateStartOrMiddleOfChainFirst()->execute($minTransactionId, $chainId, $transactionId);
     }
   }
   #Is at the end of a chain.
   else {
-    $self->statementUpdateEndOfChain()->execute($chainId, $transactionId);
+    $self->_statementUpdateEndOfChain()->execute($chainId, $transactionId);
   
     if ($isFirst){
-      $self->statementUpdateEndOfChainFirst()->execute($chainId, $transactionId);
+      $self->_statementUpdateEndOfChainFirst()->execute($chainId, $transactionId);
     }
   }
 

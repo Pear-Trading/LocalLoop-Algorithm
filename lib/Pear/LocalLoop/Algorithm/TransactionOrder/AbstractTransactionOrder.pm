@@ -9,7 +9,7 @@ use Pear::LocalLoop::Algorithm::Debug;
 extends 'Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier';
 with ('Pear::LocalLoop::Algorithm::Role::ITransactionOrder');
 
-has tableName => (
+has _tableName => (
   is => 'ro',
   default => sub {
     my ($self) = @_;
@@ -18,22 +18,22 @@ has tableName => (
   lazy => 1, 
 );
 
-has statementDropTable => (
+has _statementDropTable => (
   is => 'ro',
   default => sub {
     my ($self) = @_;
-    my $tableNameOrder = $self->tableName();
+    my $tableNameOrder = $self->_tableName();
     return $self->dbh()->prepare("DROP TABLE IF EXISTS $tableNameOrder");
   },
   lazy => 1, 
 );
 
-has statementCreateTable => (
+has _statementCreateTable => (
   is => 'ro',
   default => sub {
     my ($self) = @_;
     
-    my $tableNameOrder = $self->tableName();
+    my $tableNameOrder = $self->_tableName();
     return $self->dbh()->prepare(
       "CREATE TABLE $tableNameOrder (" . 
       "OrderId INTEGER PRIMARY KEY NOT NULL, " . 
@@ -45,17 +45,17 @@ has statementCreateTable => (
   lazy => 1, 
 );
 
-has statementInsertTransactionsIntoTable => (
+has _statementInsertTransactionsIntoTable => (
   is => 'ro',
   default => sub {
     my ($self) = @_;
-    my $tableNameOrder = $self->tableName();
+    my $tableNameOrder = $self->_tableName();
     return $self->dbh()->prepare("INSERT INTO $tableNameOrder (OrderId, TransactionId) VALUES (?, ?)");
   },
   lazy => 1, 
 );
 
-has statementSelectInsertionOrder => (
+has _statementSelectInsertionOrder => (
   is => 'ro',
   default => sub {
     my ($self) = @_;
@@ -74,12 +74,12 @@ sub initAfterStaticRestrictions {
   debugMethodStart();
   my ($self) = @_;
   
-  $self->statementDropTable()->execute();
-  $self->statementCreateTable()->execute();
+  $self->_statementDropTable()->execute();
+  $self->_statementCreateTable()->execute();
   
-  my $statementInsert = $self->statementInsertTransactionsIntoTable();
+  my $statementInsert = $self->_statementInsertTransactionsIntoTable();
   
-  my $statementSelect = $self->statementSelectInsertionOrder();
+  my $statementSelect = $self->_statementSelectInsertionOrder();
   $statementSelect->execute();
   
   my $counter = 1;
@@ -93,21 +93,21 @@ sub initAfterStaticRestrictions {
 
 
 
-has statementSelectNextTransaction => (
+has _statementSelectNextTransaction => (
   is => 'ro',
   default => sub {
     my ($self) = @_;
-    my $tableNameOrder = $self->tableName();
+    my $tableNameOrder = $self->_tableName();
     return $self->dbh()->prepare("SELECT TransactionId FROM $tableNameOrder WHERE Used = 0 LIMIT 1");
   },
   lazy => 1, 
 );
 
-has statementUpdateSetTransactionAsUsed => (
+has _statementUpdateSetTransactionAsUsed => (
   is => 'ro',
   default => sub {
     my ($self) = @_;
-    my $tableNameOrder = $self->tableName();
+    my $tableNameOrder = $self->_tableName();
     return $self->dbh()->prepare("UPDATE $tableNameOrder SET Used = 1 WHERE TransactionId = ?");
   },
   lazy => 1, 
@@ -119,14 +119,14 @@ sub nextTransactionId {
   my ($self) = @_;
 
   
-  my $statementSelectNextTransaction = $self->statementSelectNextTransaction();
+  my $statementSelectNextTransaction = $self->_statementSelectNextTransaction();
   $statementSelectNextTransaction->execute();
   
   my ($nextTransactionId) = $statementSelectNextTransaction->fetchrow_array();
 
   #If we have not passed the last value.  
   if (defined $nextTransactionId) {
-    $self->statementUpdateSetTransactionAsUsed()->execute($nextTransactionId);
+    $self->_statementUpdateSetTransactionAsUsed()->execute($nextTransactionId);
   }
   
   debugMethodEnd();

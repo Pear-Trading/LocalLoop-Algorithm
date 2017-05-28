@@ -7,7 +7,7 @@ use Pear::LocalLoop::Algorithm::Debug;
 extends 'Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier';
 with ('Pear::LocalLoop::Algorithm::Role::IHeuristic');
 
-has selectChainMinimumTransactionId => (
+has _selectChainMinimumTransactionId => (
   is => 'ro',
   default => sub {
     my ($self) = @_;
@@ -16,7 +16,7 @@ has selectChainMinimumTransactionId => (
   lazy => 1,
 );
 
-has selectChainMinimumTransactionIdFirst => (
+has _selectChainMinimumTransactionIdFirst => (
   is => 'ro',
   default => sub {
     my ($self) = @_;
@@ -25,7 +25,7 @@ has selectChainMinimumTransactionIdFirst => (
   lazy => 1,
 );
 
-has selectChainNone => (
+has _selectChainNone => (
   is => 'ro',
   default => sub {
     my ($self) = @_;
@@ -34,7 +34,7 @@ has selectChainNone => (
   lazy => 1,
 );
 
-has selectChainNoneFirst => (
+has _selectChainNoneFirst => (
   is => 'ro',
   default => sub {
     my ($self) = @_;
@@ -43,7 +43,7 @@ has selectChainNoneFirst => (
   lazy => 1,
 );
 
-has selectChainNoSelectedTransaction => (
+has _selectChainNoSelectedTransaction => (
   is => 'ro',
   default => sub {
     my ($self) = @_;
@@ -66,7 +66,7 @@ sub applyHeuristic {
     die "isFirstRestriction cannot be undefined.";
   }
   
-  my $statementMinTransaction = ($isFirst ? $self->selectChainMinimumTransactionIdFirst() : $self->selectChainMinimumTransactionId());
+  my $statementMinTransaction = ($isFirst ? $self->_selectChainMinimumTransactionIdFirst() : $self->_selectChainMinimumTransactionId());
   $statementMinTransaction->execute($transactionId);
   
   my ($nextTransactionId) = $statementMinTransaction->fetchrow_array();
@@ -76,15 +76,15 @@ sub applyHeuristic {
   #There is at least one next transaction id.
   if (defined $nextTransactionId)
   {
-    $self->selectChainNone()->execute($nextTransactionId);
+    $self->_selectChainNone()->execute($nextTransactionId);
     
     if ($isFirst) {
-      $self->selectChainNoneFirst()->execute($nextTransactionId);
+      $self->_selectChainNoneFirst()->execute($nextTransactionId);
     }
   }
   #No next value so set all valued to not be included.
   else {
-    $self->selectChainNoSelectedTransaction()->execute();
+    $self->_selectChainNoSelectedTransaction()->execute();
   }
   
   debugMethodEnd();

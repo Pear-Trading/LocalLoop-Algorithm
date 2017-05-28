@@ -11,7 +11,7 @@ with ('Pear::LocalLoop::Algorithm::Role::ILoopDynamicRestriction');
 
 #Prevent the selection of any loops that have been selected previously.
 
-has statementDisallowLoopsWhichHaveTransactionInActiveLoops => (
+has _statementDisallowLoopsWhichHaveTransactionInActiveLoops => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
@@ -20,7 +20,7 @@ has statementDisallowLoopsWhichHaveTransactionInActiveLoops => (
   lazy => 1,
 );
 
-has statementDisallowLoopsWhichHaveTransactionInActiveLoopsFirstRestriction => (
+has _statementDisallowLoopsWhichHaveTransactionInActiveLoopsFirstRestriction => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
@@ -41,10 +41,10 @@ sub applyLoopDynamicRestriction {
   # SELECT DISTINCT Loops.TransactionId_FK FROM Loops, LoopInfo  WHERE Loops.LoopId_FK = LoopInfo.LoopId AND LoopInfo.Active != 0
   # SELECT DISTINCT Loops.LoopId_FK FROM Loops WHERE Loops.TransactionId_FK IN (SELECT DISTINCT Loops.TransactionId_FK FROM Loops, LoopInfo  WHERE Loops.LoopId_FK = LoopInfo.LoopId AND LoopInfo.Active != 0)
   
-  $self->statementDisallowLoopsWhichHaveTransactionInActiveLoops()->execute();
+  $self->_statementDisallowLoopsWhichHaveTransactionInActiveLoops()->execute();
   
   if ($isFirstRestriction){
-    $self->statementDisallowLoopsWhichHaveTransactionInActiveLoopsFirstRestriction()->execute();
+    $self->_statementDisallowLoopsWhichHaveTransactionInActiveLoopsFirstRestriction()->execute();
   }
   
   debugMethodEnd();
