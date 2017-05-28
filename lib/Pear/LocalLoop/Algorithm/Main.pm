@@ -1,6 +1,8 @@
 package Pear::LocalLoop::Algorithm::Main;
 
 use Moo;
+with 'MooX::Singleton';
+
 use Data::Dumper;
 use DBI;
 use Pear::LocalLoop::Algorithm::StaticRestriction::RemoveTransactionsThatCannotFormALoop;
@@ -8,6 +10,9 @@ use v5.10;
 use Pear::LocalLoop::Algorithm::Debug;
 use Pear::LocalLoop::Algorithm::ExtendedTransaction;
 use Pear::LocalLoop::Algorithm::ChainTransaction;
+use Carp::Always;
+
+
 
 #FIXME move into a config file and dynamically read it in.
 my $dbConfig = {
@@ -17,8 +22,8 @@ my $dbConfig = {
 };
 
 my $dbTestConfig = {
-  dsn => "dbi:SQLite:dbname=transactions-test.db",
-#  dsn => "dbi:SQLite:dbname=:memory:",
+#  dsn => "dbi:SQLite:dbname=transactions-test.db",
+  dsn => "dbi:SQLite:dbname=:memory:",
   user => undef,
   pass => undef,
 };
@@ -34,7 +39,6 @@ sub _dbi_test {
   my $self = shift;
   return DBI->connect($dbTestConfig->{dsn},$dbTestConfig->{user},$dbTestConfig->{pass});
 };
-
 
 has dbh => (
   is => 'ro',
