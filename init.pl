@@ -34,7 +34,7 @@ if ($debug) {
   Pear::LocalLoop::Algorithm::Debug->setDebugMode();
 }
 
-my $main = Pear::LocalLoop::Algorithm::Main->new();
+my $main = Pear::LocalLoop::Algorithm::Main->instance();
 
 #FIXME It should not have this in the final version, but for now use this for state management.
 my $dbh = $main->dbi();
