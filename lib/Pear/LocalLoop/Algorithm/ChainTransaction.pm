@@ -7,8 +7,6 @@ use Data::Dumper;
 use Pear::LocalLoop::Algorithm::ExtendedTransaction;
 use Pear::LocalLoop::Algorithm::Debug;
 
-extends('Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier');
-
 
 has transactionId => (
   is => 'ro',
