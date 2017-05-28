@@ -4,6 +4,9 @@ use Moo;
 use Pear::LocalLoop::Algorithm::Debug;
 use DBI;
 
+extends 'Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier';
+
+
 has staticRestrictionsArray => (
   is => 'ro',
   default => sub { return []; },
@@ -101,6 +104,15 @@ sub nextTransactionId {
   debugMethodEnd();
   return $nextId;
 }
+
+has _statementDynamicRestrictionsAndHeuristicsReset => (
+  is => 'ro', 
+  default => sub {
+    my ($self) = @_;
+    return $self->dbh()->prepare("UPDATE ProcessedTransactions SET Included = 1 WHERE Included = 0");
+  },
+  lazy => 1,
+);
   
 
 sub applyDynamicRestrictionsAndHeuristics {
@@ -132,14 +144,20 @@ sub applyDynamicRestrictionsAndHeuristics {
   #Nothing applied? Reset all of the included values
   if ($isFirst) {
     debugMethodMiddle("No dynamic restrictions or heuristics executed. All transactions reset.");
-    
-    my $dbh = Pear::LocalLoop::Algorithm::Main->dbi();
-    my $statement = $dbh->prepare("UPDATE ProcessedTransactions SET Included = 1 WHERE Included = 0");
-    $statement->execute();
+    $self->_statementDynamicRestrictionsAndHeuristicsReset()->execute();
   }
   
   debugMethodEnd();
 }
+
+has _statementHeuristicsCandinatesReset => (
+  is => 'ro', 
+  default => sub {
+    my ($self) = @_;
+    return $self->dbh()->prepare("UPDATE CandinateTransactions SET Included = 1 WHERE Included = 0");
+  },
+  lazy => 1,
+);
 
 sub applyHeuristicsCandinates {
   debugMethodStart();
@@ -155,14 +173,21 @@ sub applyHeuristicsCandinates {
   #Nothing applied? Reset all of the included values.
   if ($isFirst) {
     debugMethodMiddle("No heuristics executed. All candinate transactions reset.");
-    
-    my $dbh = Pear::LocalLoop::Algorithm::Main->dbi();
-    my $statement = $dbh->prepare("UPDATE CandinateTransactions SET Included = 1 WHERE Included = 0");
-    $statement->execute();
+    $self->_statementHeuristicsCandinatesReset()->execute();
   }
   
   debugMethodEnd();
 }
+
+
+has _statementLoopDynamicRestrictionsAndHeuristicsReset => (
+  is => 'ro', 
+  default => sub {
+    my ($self) = @_;
+    return $self->dbh()->prepare("UPDATE LoopStats SET Included = 1 WHERE Included = 0");
+  },
+  lazy => 1,
+);
 
 sub applyLoopDynamicRestrictionsAndHeuristics {
   debugMethodStart();
@@ -182,14 +207,20 @@ sub applyLoopDynamicRestrictionsAndHeuristics {
   #Nothing applied? Reset all of the included values.
   if ($isFirst) {
     debugMethodMiddle("No dynamic restrictions or heuristics executed. All loops reset.");
-    
-    my $dbh = Pear::LocalLoop::Algorithm::Main->dbi();
-    my $statement = $dbh->prepare("UPDATE LoopStats SET Included = 1 WHERE Included = 0");
-    $statement->execute();
+    $self->_statementLoopDynamicRestrictionsAndHeuristicsReset->execute();
   }
   
   debugMethodEnd();
 }
+
+has _statementDumpTransactionsIncluded => (
+  is => 'ro', 
+  default => sub {
+    my ($self) = @_;
+    return $self->dbh()->prepare("SELECT TransactionId, Included FROM ProcessedTransactions ORDER BY TransactionId");
+  },
+  lazy => 1,
+);
 
 sub _dumpTransactionsIncluded {
 
@@ -197,12 +228,12 @@ sub _dumpTransactionsIncluded {
     my ($self) = @_;
     my $dbh = Pear::LocalLoop::Algorithm::Main->dbi();
     
-    my $statement = $dbh->prepare("SELECT TransactionId, Included FROM ProcessedTransactions ORDER BY TransactionId");
+    my $statement = $self->_statementDumpTransactionsIncluded();
     $statement->execute();
     
     my $string = "";
     my $isFirst = 1;
-    while (my ($transactionId, $included) = $statement->fetchrow_array) {
+    while (my ($transactionId, $included) = $statement->fetchrow_array()) {
       my $comma = ($isFirst ? "" : ", ");
       $string = $string . $comma . "$transactionId=" . ($included ? "T" : "F");
       $isFirst = 0;
@@ -212,13 +243,22 @@ sub _dumpTransactionsIncluded {
   }
 }
 
+has _statementDumpCandinateTransactionsIncluded => (
+  is => 'ro', 
+  default => sub {
+    my ($self) = @_;
+    return $self->dbh()->prepare("SELECT CandinateTransactionsId, Included FROM CandinateTransactions ORDER BY CandinateTransactionsId");
+  },
+  lazy => 1,
+);
+
 sub _dumpCandinateTransactionsIncluded {
   
   if (isDebug()) {
     my ($self) = @_;
     my $dbh = Pear::LocalLoop::Algorithm::Main->dbi();
     
-    my $statement = $dbh->prepare("SELECT CandinateTransactionsId, Included FROM CandinateTransactions ORDER BY CandinateTransactionsId");
+    my $statement = $self->_statementDumpCandinateTransactionsIncluded();
     $statement->execute();
     
     my $string = "";
