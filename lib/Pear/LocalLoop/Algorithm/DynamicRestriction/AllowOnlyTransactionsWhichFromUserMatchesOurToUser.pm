@@ -6,7 +6,7 @@ use Data::Dumper;
 use DBI;
 use Pear::LocalLoop::Algorithm::Debug;
 
-extends 'Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier';
+extends("Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier");
 with ('Pear::LocalLoop::Algorithm::Role::IDynamicRestriction');
 
 #When considering the next transaction the current transactions "to user" must be the same as the next "from user".

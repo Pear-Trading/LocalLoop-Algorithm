@@ -4,7 +4,7 @@ use Moo;
 use Pear::LocalLoop::Algorithm::Debug;
 use DBI;
 
-extends 'Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier';
+extends("Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier");
 
 
 has staticRestrictionsArray => (

@@ -4,7 +4,7 @@ use Moo;
 use v5.10;
 use Pear::LocalLoop::Algorithm::Debug;
 
-extends 'Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier';
+extends("Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier");
 with ('Pear::LocalLoop::Algorithm::Role::IHeuristic');
 
 has _selectChainMinimumTransactionId => (

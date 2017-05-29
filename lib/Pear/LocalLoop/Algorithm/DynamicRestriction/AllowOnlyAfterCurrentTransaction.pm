@@ -6,7 +6,7 @@ use Data::Dumper;
 use DBI;
 use Pear::LocalLoop::Algorithm::Debug;
 
-extends 'Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier';
+extends("Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier");
 with ('Pear::LocalLoop::Algorithm::Role::IDynamicRestriction');
 
 #If it is the first restriction then set included in all of the transactions 

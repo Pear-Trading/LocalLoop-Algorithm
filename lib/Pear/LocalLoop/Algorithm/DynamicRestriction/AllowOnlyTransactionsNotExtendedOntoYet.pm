@@ -6,7 +6,7 @@ use Data::Dumper;
 use DBI;
 use Pear::LocalLoop::Algorithm::Debug;
 
-extends 'Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier';
+extends("Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier");
 with ('Pear::LocalLoop::Algorithm::Role::IDynamicRestriction');
 
 #Maintain a list of all transactions which this chain and transaction pair have extended onto, prevent it from

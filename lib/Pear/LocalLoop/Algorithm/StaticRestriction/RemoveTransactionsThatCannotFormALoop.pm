@@ -4,7 +4,7 @@ use Moo;
 use v5.10;
 use Data::Dumper;
 use Pear::LocalLoop::Algorithm::Debug;
-extends 'Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier';
+extends("Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier");
 with ('Pear::LocalLoop::Algorithm::Role::IStaticRestriction');
 
 has _tableName => (
