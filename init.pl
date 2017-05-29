@@ -20,6 +20,7 @@ use Pear::LocalLoop::Algorithm::TransactionOrder::EarliestFirst;
 use Pear::LocalLoop::Algorithm::TransactionOrder::LargestTransactionValueFirst;
 use Pear::LocalLoop::Algorithm::LoopDynamicRestriction::DisallowLoopsWhichHaveTransactionsInActiveLoops;
 use Pear::LocalLoop::Algorithm::LoopDynamicRestriction::DisallowSelectionOfAlreadySelectedLoops;
+use Pear::LocalLoop::Algorithm::Heuristic::PrioritiseFindingLoops;
 
 
 my $debug = 0;
@@ -50,7 +51,8 @@ my $extendedOnto = Pear::LocalLoop::Algorithm::DynamicRestriction::AllowOnlyTran
 my $dynamicRestrictions = [$matchId, $extendedOnto, $afterCurrent];
 
 my $none = Pear::LocalLoop::Algorithm::Heuristic::None->new();
-my $heuristics = [$none];
+my $findFirstFinish = Pear::LocalLoop::Algorithm::Heuristic::PrioritiseFindingLoops->new();
+my $heuristics = [$findFirstFinish, $none];
 
 my $disallowSelectedLoops = Pear::LocalLoop::Algorithm::LoopDynamicRestriction::DisallowSelectionOfAlreadySelectedLoops->new();
 my $disallowTransactionsInLoops = Pear::LocalLoop::Algorithm::LoopDynamicRestriction::DisallowLoopsWhichHaveTransactionsInActiveLoops->new();
