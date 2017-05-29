@@ -20,12 +20,6 @@ has fromTransaction => (
   default => sub { return undef; }
 );
 
-
-has loopStartEndUserId => (
-  is => 'ro',
-  required => 1,
-);
-
 has firstTransaction => (
   is => 'ro', 
   required => 0,
@@ -38,6 +32,7 @@ has noCandinateTransactionsLeft => (
   default => sub { return 0; }
 );
 
+
 has statementToUserIdOfTransaction => (
   is => 'ro',
   default => sub {
@@ -48,7 +43,8 @@ has statementToUserIdOfTransaction => (
 );
 
 sub hasLoopFormed {
-  my ($self) = @_;
+  my ($self, $loopGenerationContext) = @_;
+  
   my $dbh = $self->dbh();
   
   my $extendedTrans = $self->extendedTransaction;
@@ -59,21 +55,21 @@ sub hasLoopFormed {
   my $statementToUserIdOfTransaction = $self->statementToUserIdOfTransaction();
   $statementToUserIdOfTransaction->execute($extendedTrans->transactionId);
   my ($toUserId) = $statementToUserIdOfTransaction->fetchrow_array();
-  
+
   #Loop has been formed?
-  return ($self->loopStartEndUserId() == $toUserId);
+  return ($toUserId == $loopGenerationContext->userIdWhichCreatesALoop());
 }
 
 sub hasFinished {
-  my ($self) = @_;
+  my ($self, $loopGenerationContext) = @_;
   
-  return ($self->noCandinateTransactionsLeft() || $self->hasLoopFormed());
+  return ($self->noCandinateTransactionsLeft() || $self->hasLoopFormed($loopGenerationContext));
 }
 
 sub isStillFormingLoops {
-  my ($self) = @_;  
+  my ($self, $loopGenerationContext) = @_;  
   
-  return (! $self->noCandinateTransactionsLeft() && $self->hasLoopFormed());
+  return (! $self->noCandinateTransactionsLeft() && $self->hasLoopFormed($loopGenerationContext));
 }
 
 #TODO we assume $compare is the correct class.
@@ -91,9 +87,6 @@ sub equals {
     return 0;
   }
   elsif ( ! Pear::LocalLoop::Algorithm::ChainTransaction->equals($compare1->fromTransaction(), $compare2->fromTransaction()) ) {
-    return 0;
-  }
-  elsif ($compare1->loopStartEndUserId() != $compare2->loopStartEndUserId()) {
     return 0;
   }
   elsif ($compare1->firstTransaction() != $compare2->firstTransaction()) {
