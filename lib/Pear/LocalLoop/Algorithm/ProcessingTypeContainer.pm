@@ -231,9 +231,11 @@ sub _dumpTransactionsIncluded {
     my $string = "";
     my $isFirst = 1;
     while (my ($transactionId, $included) = $statement->fetchrow_array()) {
-      my $comma = ($isFirst ? "" : ", ");
-      $string = $string . $comma . "$transactionId=" . ($included ? "T" : "F");
-      $isFirst = 0;
+      if ($included) {
+        my $comma = ($isFirst ? "" : ", ");
+        $string = $string . $comma . "$transactionId=T";
+        $isFirst = 0;
+      }
     }
     
     debugMethodMiddle("TransactionsIncludedDump: ".$string);
@@ -261,9 +263,11 @@ sub _dumpCandinateTransactionsIncluded {
     my $string = "";
     my $isFirst = 1;
     while (my ($transactionId, $included) = $statement->fetchrow_array) {
-      my $comma = ($isFirst ? "" : ", ");
-      $string = $string . $comma . "$transactionId=" . ($included ? "T" : "F");
-      $isFirst = 0;
+      if ($included) {
+        my $comma = ($isFirst ? "" : ", ");
+        $string = $string . $comma . "$transactionId=T";
+        $isFirst = 0;
+      }
     }
     
     debugMethodMiddle("CandinateTransactionsIncludedDump: ".$string);
