@@ -10,6 +10,8 @@ use v5.10;
 use Pear::LocalLoop::Algorithm::Debug;
 use Pear::LocalLoop::Algorithm::ExtendedTransaction;
 use Pear::LocalLoop::Algorithm::ChainTransaction;
+use Pear::LocalLoop::Algorithm::ChainGenerationContext;
+use Pear::LocalLoop::Algorithm::LoopGenerationContext;
 use Carp::Always;
 
 
@@ -312,6 +314,10 @@ sub _loopGeneration {
   $statementTransactionValue->execute($nextTransactionId); 
   my ($fromUserId, $transactionValue) = $statementTransactionValue->fetchrow_array();
   
+  my $loopGenerationContext = Pear::LocalLoop::Algorithm::LoopGenerationContext->new({
+    userIdWhichCreatesALoop => $fromUserId,
+  });
+  
   debugMethodMiddle(" Candinate fromUserId:$fromUserId value:$transactionValue");
   
   my $candinateId = $self->_newCandinateTransactionsId();
@@ -324,9 +330,9 @@ sub _loopGeneration {
   
   my $extendedTransaction = undef;
   
-  while ( ! ($extendedTransaction = $self->_getNextBestCandinateTransactionAnalysis($settings, $fromUserId))->hasFinished() ) {
+  while ( ! ($extendedTransaction = $self->_getNextBestCandinateTransactionAnalysis($settings, $loopGenerationContext))->hasFinished($loopGenerationContext) ) {
     debugMethodMiddle("1st while loop start");
-    $self->_selectNextBestCandinateTransactions($settings, $extendedTransaction);
+    $self->_selectNextBestCandinateTransactions($settings, $extendedTransaction, $loopGenerationContext);
     
     #sleep (10);
     debugMethodMiddle("1st while loop end");
@@ -337,7 +343,7 @@ sub _loopGeneration {
   #care of this. Also as we have processed the loops we may as well store them it would a waste of resouces 
   #not to, as some other loop may become inactive which results in these poor loops becoming active.
   while ( ! $extendedTransaction->noCandinateTransactionsLeft() ) {
-    $extendedTransaction = $self->_getNextBestCandinateTransactionAnalysis($settings, $fromUserId);
+    $extendedTransaction = $self->_getNextBestCandinateTransactionAnalysis($settings, $loopGenerationContext);
   }
   
 
@@ -420,8 +426,9 @@ has _statementSelectTheNumberOfTransactionsFromTheSamePointInTheChain => (
 #If this function is changed structurally in which the assumption becomes false then update the test too.
 sub _selectNextBestCandinateTransactions {
   debugMethodStart();
-  my ($self, $settings, $extendedTransaction) = @_;
-  my $dbh = $self->dbh;
+  my ($self, $settings, $extendedTransaction, $loopGenerationContextInstance) = @_;
+  
+  my $userIdThatFormsALoop = $loopGenerationContextInstance->userIdWhichCreatesALoop();
  
   my $statementTransactionValue = $self->_statementSelectProcessedTransactionValue();
   my $statementInsertCandinate = $self->_statementInsertIntoCandinateTransactionsAllParamsExceptIncludedAndHeuristic();
@@ -466,7 +473,13 @@ sub _selectNextBestCandinateTransactions {
     }
     
     debugMethodMiddle("WhileLoop: ForEachLoop. Applying dynamic restrictions");
-    $settings->applyDynamicRestrictionsAndHeuristics($transactionId, $chainId);
+    my $chainGenerationContext = Pear::LocalLoop::Algorithm::ChainGenerationContext->new({
+      currentChainId => $chainId,
+      currentTransactionId => $transactionId, 
+      userIdWhichCreatesALoop => $userIdThatFormsALoop,
+    });
+    
+    $settings->applyDynamicRestrictionsAndHeuristics($chainGenerationContext);
 
     debugMethodMiddle("WhileLoop: ForEachLoop. Done heuristics");
     
@@ -562,13 +575,12 @@ has _statementSelectTransactionIdAndChainStatsIdFromTheSpecifiedChainIdAndOnOrBe
 #TODO needs a better name.
 sub _getNextBestCandinateTransactionAnalysis {
   debugMethodStart();  
-  my ($self, $settings, $loopStartId) = @_;
-  my $dbh = $self->dbh;
+  my ($self, $settings, $loopGenerationContextInstance) = @_;
   
   my $statementInsertChains = $self->_statementInsertIntoCurrentChainChainIdTransactionIdAndChainStatsId();
   my $statementInsertChainStats = $self->_statementInsertIntoChainStatsIdMinValueLengthTotalValueAndNumMinValues();
 
-  my ($hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues) = @{$self->_getNextBestCandinateTransaction($settings)};
+  my ($hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues) = @{$self->_getNextBestCandinateTransaction($settings, $loopGenerationContextInstance)};
   
   my $transactionsToAnalyseNext = undef;
   
@@ -576,7 +588,6 @@ sub _getNextBestCandinateTransactionAnalysis {
     debugMethodMiddle("No row");
     $transactionsToAnalyseNext = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
       noCandinateTransactionsLeft => 1,
-      loopStartEndUserId => $loopStartId,
     });
     
     debugMethodMiddle("ReturnVals(Finished): " . Dumper($transactionsToAnalyseNext));
@@ -605,7 +616,6 @@ sub _getNextBestCandinateTransactionAnalysis {
 
     $transactionsToAnalyseNext = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
       firstTransaction => 1,
-      loopStartEndUserId => $loopStartId,
       extendedTransaction => $extendedTransaction,
     });
     debugMethodMiddle("ReturnVals(To): " . Dumper($transactionsToAnalyseNext));
@@ -665,7 +675,6 @@ sub _getNextBestCandinateTransactionAnalysis {
     $transactionsToAnalyseNext = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
       extendedTransaction => $extendedTransaction,
       fromTransaction => $fromTransaction,
-      loopStartEndUserId => $loopStartId,
     });
     debugMethodMiddle("ReturnVals(FromAndTo): " . Dumper($transactionsToAnalyseNext));
   }
@@ -705,7 +714,7 @@ has _statementSelectCandinateTransactionInformationWhenItsIncluded => (
 
 sub _getNextBestCandinateTransaction {  
   debugMethodStart();  
-  my ($self, $settings) = @_;
+  my ($self, $settings, $loopGenerationContextInstance) = @_;
   
   my $dbh = $self->dbh;
   
@@ -729,7 +738,7 @@ sub _getNextBestCandinateTransaction {
   }
   else {
   
-    $settings->applyHeuristicsCandinates();
+    $settings->applyHeuristicsCandinates($loopGenerationContextInstance);
     
     my $statementSelectRows = $self->_statementSelectCandinateTransactionInformationWhenItsIncluded();
     $statementSelectRows->execute();

@@ -5,6 +5,7 @@ use Pear::LocalLoop::Algorithm::Main;
 use Pear::LocalLoop::Algorithm::ProcessingTypeContainer;
 use Pear::LocalLoop::Algorithm::ExtendedTransaction;
 use Pear::LocalLoop::Algorithm::ChainTransaction;
+use Pear::LocalLoop::Algorithm::LoopGenerationContext;
 use Pear::LocalLoop::Algorithm::Heuristic::None;
 use Pear::LocalLoop::Algorithm::DynamicRestriction::AllowOnlyTransactionsWhichFromUserMatchesOurToUser;
 use Pear::LocalLoop::Algorithm::DynamicRestriction::AllowOnlyAfterCurrentTransaction;
@@ -132,7 +133,6 @@ say "Test 1 - First transaction with no possible transactions to extend onto.";
   
   my $inputTransactionState = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
     firstTransaction => 1,
-    loopStartEndUserId => $startLoopId,
     extendedTransaction => Pear::LocalLoop::Algorithm::ChainTransaction->new({
       transactionId => 1,
       chainId => 1,
@@ -140,12 +140,16 @@ say "Test 1 - First transaction with no possible transactions to extend onto.";
     }),
   });
   
+  my $inputLoopGenerationContext = Pear::LocalLoop::Algorithm::LoopGenerationContext->new({
+    userIdWhichCreatesALoop => $startLoopId,
+  });
+
   is (numCandinateTransactionRows(), 0, "There is no candinate transaction rows before invocation.");
   is (numCurrentChainsRows(), 1, "There is 1 current chains row before invocation.");
   is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState); };
+  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
   is (numCandinateTransactionRows(), 0,"There is no candinate transaction rows before invocation.");
@@ -174,7 +178,6 @@ say "Test 2 - First transaction with 1 possible transactions to extend onto.";
   
   my $inputTransactionState = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
     firstTransaction => 1,
-    loopStartEndUserId => $startLoopId,
     extendedTransaction => Pear::LocalLoop::Algorithm::ChainTransaction->new({
       transactionId => 1,
       chainId => 1,
@@ -182,12 +185,16 @@ say "Test 2 - First transaction with 1 possible transactions to extend onto.";
     }),
   });
   
+  my $inputLoopGenerationContext = Pear::LocalLoop::Algorithm::LoopGenerationContext->new({
+    userIdWhichCreatesALoop => $startLoopId,
+  });
+
   is (numCandinateTransactionRows(), 0, "There is no candinate transaction rows before invocation.");
   is (numCurrentChainsRows(), 1, "There is 1 current chains row before invocation.");
   is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState); };
+  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
   is (numCandinateTransactionRows(), 1,"There is 1 candinate transaction row after invocation.");
@@ -229,7 +236,6 @@ say "Test 3 - First transaction with 2 (or more) possible transactions to extend
   
   my $inputTransactionState = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
     firstTransaction => 1,
-    loopStartEndUserId => $startLoopId,
     extendedTransaction => Pear::LocalLoop::Algorithm::ChainTransaction->new({
       transactionId => 1,
       chainId => 1,
@@ -237,12 +243,16 @@ say "Test 3 - First transaction with 2 (or more) possible transactions to extend
     }),
   });
   
+  my $inputLoopGenerationContext = Pear::LocalLoop::Algorithm::LoopGenerationContext->new({
+    userIdWhichCreatesALoop => $startLoopId,
+  });
+
   is (numCandinateTransactionRows(), 0, "There is no candinate transaction rows before invocation.");
   is (numCurrentChainsRows(), 1, "There is 1 current chains row before invocation.");
   is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState); };
+  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
   is (numCandinateTransactionRows(), 2, "There is 2 candinate transaction rows after invocation.");
@@ -284,7 +294,6 @@ say "Test 4 - First transaction with 1 possible transactions to extend onto, nex
   
   my $inputTransactionState = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
     firstTransaction => 1,
-    loopStartEndUserId => $startLoopId,
     extendedTransaction => Pear::LocalLoop::Algorithm::ChainTransaction->new({
       transactionId => 1,
       chainId => 1,
@@ -292,12 +301,16 @@ say "Test 4 - First transaction with 1 possible transactions to extend onto, nex
     }),
   });
   
+  my $inputLoopGenerationContext = Pear::LocalLoop::Algorithm::LoopGenerationContext->new({
+    userIdWhichCreatesALoop => $startLoopId,
+  });
+
   is (numCandinateTransactionRows(), 0, "There is no candinate transaction rows before invocation.");
   is (numCurrentChainsRows(), 1, "There is 1 current chains row before invocation.");
   is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState); };
+  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
   is (numCandinateTransactionRows(), 1,"There is 1 candinate transaction row after invocation.");
@@ -334,7 +347,6 @@ say "Test 5 - First transaction with 1 possible transactions to extend onto, nex
   
   my $inputTransactionState = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
     firstTransaction => 1,
-    loopStartEndUserId => $startLoopId,
     extendedTransaction => Pear::LocalLoop::Algorithm::ChainTransaction->new({
       transactionId => 1,
       chainId => 1,
@@ -342,12 +354,16 @@ say "Test 5 - First transaction with 1 possible transactions to extend onto, nex
     }),
   });
   
+  my $inputLoopGenerationContext = Pear::LocalLoop::Algorithm::LoopGenerationContext->new({
+    userIdWhichCreatesALoop => $startLoopId,
+  });
+
   is (numCandinateTransactionRows(), 0, "There is no candinate transaction rows before invocation.");
   is (numCurrentChainsRows(), 1, "There is 1 current chains row before invocation.");
   is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState); };
+  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
   is (numCandinateTransactionRows(), 1,"There is 1 candinate transaction row after invocation.");
@@ -383,7 +399,6 @@ say "Test 6 - First transaction with 1 possible transactions to extend onto, nex
   
   my $inputTransactionState = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
     firstTransaction => 1,
-    loopStartEndUserId => $startLoopId,
     extendedTransaction => Pear::LocalLoop::Algorithm::ChainTransaction->new({
       transactionId => 1,
       chainId => 1,
@@ -391,12 +406,16 @@ say "Test 6 - First transaction with 1 possible transactions to extend onto, nex
     }),
   });
   
+  my $inputLoopGenerationContext = Pear::LocalLoop::Algorithm::LoopGenerationContext->new({
+    userIdWhichCreatesALoop => $startLoopId,
+  });
+
   is (numCandinateTransactionRows(), 0, "There is no candinate transaction rows before invocation.");
   is (numCurrentChainsRows(), 1, "There is 1 current chains row before invocation.");
   is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState); };
+  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
   is (numCandinateTransactionRows(), 1,"There is 1 candinate transaction row after invocation.");
@@ -445,15 +464,18 @@ say "Test 7 - Not first transaction with 2 possible transactions to extend onto 
       chainId => 1, 
       fromTo => 'from',
     }),
-    loopStartEndUserId => $startLoopId,
   });
   
+  my $inputLoopGenerationContext = Pear::LocalLoop::Algorithm::LoopGenerationContext->new({
+    userIdWhichCreatesALoop => $startLoopId,
+  });
+
   is (numCandinateTransactionRows(), 0, "There is no candinate transaction rows before invocation.");
   is (numCurrentChainsRows(), 2, "There is 1 current chains row before invocation.");
   is (numCurrentChainsStatsRows(), 2, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState); };
+  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
   is (numCandinateTransactionRows(), 2,"There is 2 candinate transaction rows after invocation.");
@@ -520,15 +542,18 @@ say "Test 8 - Not first transaction, existing candinate transaction prevents the
       chainId => 1, 
       fromTo => 'from',
     }),
-    loopStartEndUserId => $startLoopId,
   });
   
+  my $inputLoopGenerationContext = Pear::LocalLoop::Algorithm::LoopGenerationContext->new({
+    userIdWhichCreatesALoop => $startLoopId,
+  });
+
   is (numCandinateTransactionRows(), 1, "There is 1 candinate transaction row before invocation.");
   is (numCurrentChainsRows(), 2, "There is 2 current chains rows before invocation.");
   is (numCurrentChainsStatsRows(), 2, "There is 2 current chains stats rows before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState); };
+  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
   #Importantly candinate transaction 1 -> 4 does not exist.
