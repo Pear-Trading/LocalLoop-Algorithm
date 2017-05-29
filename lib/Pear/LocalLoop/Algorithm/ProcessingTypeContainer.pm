@@ -117,26 +117,23 @@ has _statementDynamicRestrictionsAndHeuristicsReset => (
 
 sub applyDynamicRestrictionsAndHeuristics {
   debugMethodStart();
-  my ($self, $transactionId, $chainId) = @_;
+  my ($self, $chainGenerationContextInstance) = @_;
   
-  debugMethodMiddle(__LINE__, "InputParams: TransactionId:$transactionId ChainId:$chainId");
+  #debugMethodMiddle("Inputted data:" . Dumper ($chainGenerationContextInstance));
   
-  if (! defined $transactionId) {
-    die "transactionId cannot be undefined."
-  }
-  elsif (! defined $chainId) {
-    die "chainId cannot be undefined."
+  if (! defined $chainGenerationContextInstance) {
+    die "chainGenerationContextInstance cannot be undefined."
   }
   
   my $isFirst = 1;
   foreach my $dynamicRestriction (@{$self->dynamicRestrictionsArray()}) {
-    $dynamicRestriction->applyDynamicRestriction($transactionId, $chainId, $isFirst);
+    $dynamicRestriction->applyDynamicRestriction($isFirst, $chainGenerationContextInstance);
     $self->_dumpTransactionsIncluded();
     $isFirst = 0;
   }
   
   foreach my $heuristic (@{$self->heuristicArray()}) {
-    $heuristic->applyHeuristic($transactionId, $chainId, $isFirst);
+    $heuristic->applyHeuristic($isFirst, $chainGenerationContextInstance);
     $self->_dumpTransactionsIncluded();
     $isFirst = 0;
   }    
@@ -161,11 +158,11 @@ has _statementHeuristicsCandinatesReset => (
 
 sub applyHeuristicsCandinates {
   debugMethodStart();
-  my ($self) = @_;
+  my ($self, $loopGenerationContextInstance) = @_;
 
   my $isFirst = 1;
   foreach my $heuristic (@{$self->heuristicArray()}) {
-    $heuristic->applyHeuristicCandinates($isFirst);
+    $heuristic->applyHeuristicCandinates($isFirst, $loopGenerationContextInstance);
     $self->_dumpCandinateTransactionsIncluded();
     $isFirst = 0;
   }    
