@@ -120,7 +120,10 @@ sub process {
     say "$counter";
     debugMethodMiddle("TransactionLoop: $nextTransactionId");
     $self->_loopGeneration($settings, $nextTransactionId);
-    $dbh->commit();
+    
+    if (($counter % 250) == 0) {
+      $dbh->commit();
+    }
 
   }
   
