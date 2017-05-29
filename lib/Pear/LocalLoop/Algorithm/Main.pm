@@ -173,15 +173,19 @@ sub _selectLoops {
   my $statementResetAllActiveLoops = $self->_statementUpdateLoopInfoSetActiveToZeroWhereActiveIsNotZero();
   
   $statementResetAllActiveLoops->execute();
+  
+  my $counter = 1;
   #Insert one loop at a time as the activating of a loop may break the other loops (consistency of the loops).
   my $loopId = undef; 
   do {
+    say "$counter";
     $settings->applyLoopDynamicRestrictionsAndHeuristics();
     $statementSelectOneIncludedLoopId->execute();
     ($loopId) = $statementSelectOneIncludedLoopId->fetchrow_array();
     if (defined $loopId) {
       $statementSetLoopToActive->execute($loopId);
     }
+    $counter++;
   } while (defined $loopId); #Continue looping while loops can co-exist.
   
   debugMethodEnd();
