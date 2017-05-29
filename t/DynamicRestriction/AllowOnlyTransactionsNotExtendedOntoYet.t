@@ -3,6 +3,7 @@ use Test::Exception;
 use Test::Fatal qw(dies_ok exception);
 use Pear::LocalLoop::Algorithm::Main;
 use Pear::LocalLoop::Algorithm::ProcessingTypeContainer;
+use Pear::LocalLoop::Algorithm::ChainGenerationContext;
 use Pear::LocalLoop::Algorithm::DynamicRestriction::AllowOnlyTransactionsNotExtendedOntoYet;
 use Path::Class::File;
 use v5.10;
@@ -60,6 +61,17 @@ sub initialise {
   $statementInsertCurrentChainStats->execute(1, 10, 1, 10, 1);
 }
 
+my $ignore = -1;
+
+sub newChainGenerationContext {
+  my ($currentChainId, $currentTransactionId) = @_;
+  return Pear::LocalLoop::Algorithm::ChainGenerationContext->new({
+    userIdWhichCreatesALoop => $ignore,
+    currentChainId => $currentChainId,
+    currentTransactionId => $currentTransactionId,
+  });
+}
+
 #TODO description.
 
 
@@ -74,8 +86,8 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 1);
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 1);
 
-#transactionId, chainId, use first restriction?
-my $exception = exception { $testModule->applyDynamicRestriction(1, 1, 0); };
+#use first restriction, chainId and transactionId, 
+my $exception = exception { $testModule->applyDynamicRestriction(0, newChainGenerationContext(1, 1)); };
 is ($exception, undef ,"No exception thrown");
 
 is (transactionIdIncluded(1),1,"Can link to id 1 (can link to yourself)."); 
@@ -89,22 +101,22 @@ is (transactionIdIncluded(6),1,"Can link to id 6.");
 
 say "Test 2 - No chains present (no restrictions), transaction id undef";
 initialise();
-#transactionId, chainId, use first restriction?
-dies_ok { $testModule->applyDynamicRestriction(undef, 1, 0); } "Exception thrown, transaction id missing.";
+#use first restriction, chainId and transactionId, 
+dies_ok { $testModule->applyDynamicRestriction(0, newChainGenerationContext(1, undef)); } "Exception thrown, transaction id missing.";
 
 
 
 say "Test 3 - No chains present (no restrictions), chain id undef";
 initialise();
-#transactionId, chainId, use first restriction?
-dies_ok { $testModule->applyDynamicRestriction(1, undef, 0); } "Exception thrown, transaction id missing.";
+#use first restriction, chainId and transactionId, 
+dies_ok { $testModule->applyDynamicRestriction(0, newChainGenerationContext(undef, 1)); } "Exception thrown,  chain id id missing.";
 
 
 
 say "Test 4 - No chains present (no restrictions), use first restriction id undef";
 initialise();
-#transactionId, chainId, use first restriction?
-dies_ok { $testModule->applyDynamicRestriction(1, 1, undef); } "Exception thrown, transaction id missing.";
+#use first restriction, chainId and transactionId, 
+dies_ok { $testModule->applyDynamicRestriction(undef, newChainGenerationContext(1, 1)); } "Exception thrown, first undef.";
 
 
 
@@ -124,8 +136,8 @@ $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
-#transactionId, chainId, use first restriction?
-my $exception = exception { $testModule->applyDynamicRestriction(1, 1, 0); };
+#use first restriction, chainId and transactionId, 
+my $exception = exception { $testModule->applyDynamicRestriction(0, newChainGenerationContext(1, 1)); };
 is ($exception, undef ,"No exception thrown");
 
 is (transactionIdIncluded(1),1,"Can link to id 1 (can link to yourself)."); 
@@ -153,8 +165,8 @@ $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
-#transactionId, chainId, use first restriction?
-my $exception = exception { $testModule->applyDynamicRestriction(1, 1, 0); };
+#use first restriction, chainId and transactionId, 
+my $exception = exception { $testModule->applyDynamicRestriction(0, newChainGenerationContext(1, 1)); };
 is ($exception, undef ,"No exception thrown");
 
 is (transactionIdIncluded(1),1,"Can link to id 1 (can link to yourself)."); 
@@ -182,8 +194,8 @@ $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
-#transactionId, chainId, use first restriction?
-my $exception = exception { $testModule->applyDynamicRestriction(1, 1, 0); };
+#use first restriction, chainId and transactionId, 
+my $exception = exception { $testModule->applyDynamicRestriction(0, newChainGenerationContext(1, 1)); };
 is ($exception, undef ,"No exception thrown");
 
 is (transactionIdIncluded(1),0,"Can't link to id 1 (not included)."); 
@@ -211,8 +223,8 @@ $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
-#transactionId, chainId, use first restriction?
-my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 0); };
+#use first restriction, chainId and transactionId, 
+my $exception = exception { $testModule->applyDynamicRestriction(0, newChainGenerationContext(1, 3)); };
 is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.
@@ -241,8 +253,8 @@ $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
-#transactionId, chainId, use first restriction?
-my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 0); };
+#use first restriction, chainId and transactionId, 
+my $exception = exception { $testModule->applyDynamicRestriction(0, newChainGenerationContext(1, 3)); };
 is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.
@@ -271,8 +283,8 @@ $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
-#transactionId, chainId, use first restriction?
-my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 0); };
+#use first restriction, chainId and transactionId, 
+my $exception = exception { $testModule->applyDynamicRestriction(0, newChainGenerationContext(1, 3)); };
 is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.
@@ -308,8 +320,8 @@ $statementInsertCurrentChains->execute(2, 6, 1);
 #ChainId_FK, FromTransactionId_FK, ToTransactionId_FK
 $statementInsertBranchedTransactions->execute(1, 3, 6);
 
-#transactionId, chainId, use first restriction?
-my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 0); };
+#use first restriction, chainId and transactionId, 
+my $exception = exception { $testModule->applyDynamicRestriction(0, newChainGenerationContext(1, 3)); };
 is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.
@@ -345,8 +357,8 @@ $statementInsertCurrentChains->execute(2, 6, 1);
 #ChainId_FK, FromTransactionId_FK, ToTransactionId_FK
 $statementInsertBranchedTransactions->execute(1, 3, 6);
 
-#transactionId, chainId, use first restriction?
-my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 0); };
+#use first restriction, chainId and transactionId, 
+my $exception = exception { $testModule->applyDynamicRestriction(0, newChainGenerationContext(1, 3)); };
 is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.
@@ -382,8 +394,8 @@ $statementInsertCurrentChains->execute(2, 6, 1);
 #ChainId_FK, FromTransactionId_FK, ToTransactionId_FK
 $statementInsertBranchedTransactions->execute(1, 3, 6);
 
-#transactionId, chainId, use first restriction?
-my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 0); };
+#use first restriction, chainId and transactionId, 
+my $exception = exception { $testModule->applyDynamicRestriction(0, newChainGenerationContext(1, 3)); };
 is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.
@@ -413,8 +425,8 @@ $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
-#transactionId, chainId, use first restriction?
-my $exception = exception { $testModule->applyDynamicRestriction(1, 1, 1); };
+#use first restriction, chainId and transactionId, 
+my $exception = exception { $testModule->applyDynamicRestriction(1, newChainGenerationContext(1, 1)); };
 is ($exception, undef ,"No exception thrown");
 
 is (transactionIdIncluded(1),1,"Can link to id 1 (can link to yourself)."); 
@@ -442,8 +454,8 @@ $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
-#transactionId, chainId, use first restriction?
-my $exception = exception { $testModule->applyDynamicRestriction(1, 1, 1); };
+#use first restriction, chainId and transactionId, 
+my $exception = exception { $testModule->applyDynamicRestriction(1, newChainGenerationContext(1, 1)); };
 is ($exception, undef ,"No exception thrown");
 
 is (transactionIdIncluded(1),1,"Can link to id 1 (can link to yourself)."); 
@@ -471,8 +483,8 @@ $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
-#transactionId, chainId, use first restriction?
-my $exception = exception { $testModule->applyDynamicRestriction(1, 1, 1); };
+#use first restriction, chainId and transactionId, 
+my $exception = exception { $testModule->applyDynamicRestriction(1, newChainGenerationContext(1, 1)); };
 is ($exception, undef ,"No exception thrown");
 
 is (transactionIdIncluded(1),1,"Can link to id 1 (not included, but was reset, can link to self)."); 
@@ -500,8 +512,8 @@ $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
-#transactionId, chainId, use first restriction?
-my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 1); };
+#use first restriction, chainId and transactionId, 
+my $exception = exception { $testModule->applyDynamicRestriction(1, newChainGenerationContext(1, 3)); };
 is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.
@@ -530,8 +542,8 @@ $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
-#transactionId, chainId, use first restriction?
-my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 1); };
+#use first restriction, chainId and transactionId, 
+my $exception = exception { $testModule->applyDynamicRestriction(1, newChainGenerationContext(1, 3)); };
 is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.
@@ -560,8 +572,8 @@ $statementInsertCurrentChains->execute(1, 1, 1);
 $statementInsertCurrentChains->execute(1, 2, 1);
 $statementInsertCurrentChains->execute(1, 3, 1);
 
-#transactionId, chainId, use first restriction?
-my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 1); };
+#use first restriction, chainId and transactionId, 
+my $exception = exception { $testModule->applyDynamicRestriction(1, newChainGenerationContext(1, 3)); };
 is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.
@@ -597,8 +609,8 @@ $statementInsertCurrentChains->execute(2, 6, 1);
 #ChainId_FK, FromTransactionId_FK, ToTransactionId_FK
 $statementInsertBranchedTransactions->execute(1, 3, 6);
 
-#transactionId, chainId, use first restriction?
-my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 1); };
+#use first restriction, chainId and transactionId, 
+my $exception = exception { $testModule->applyDynamicRestriction(1, newChainGenerationContext(1, 3)); };
 is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.
@@ -634,8 +646,8 @@ $statementInsertCurrentChains->execute(2, 6, 1);
 #ChainId_FK, FromTransactionId_FK, ToTransactionId_FK
 $statementInsertBranchedTransactions->execute(1, 3, 6);
 
-#transactionId, chainId, use first restriction?
-my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 1); };
+#use first restriction, chainId and transactionId, 
+my $exception = exception { $testModule->applyDynamicRestriction(1, newChainGenerationContext(1, 3)); };
 is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.
@@ -671,8 +683,8 @@ $statementInsertCurrentChains->execute(2, 6, 1);
 #ChainId_FK, FromTransactionId_FK, ToTransactionId_FK
 $statementInsertBranchedTransactions->execute(1, 3, 6);
 
-#transactionId, chainId, use first restriction?
-my $exception = exception { $testModule->applyDynamicRestriction(3, 1, 1); };
+#use first restriction, chainId and transactionId, 
+my $exception = exception { $testModule->applyDynamicRestriction(1, newChainGenerationContext(1, 3)); };
 is ($exception, undef ,"No exception thrown");
 
 #Does not apply any restictions as it's the end of the chain.

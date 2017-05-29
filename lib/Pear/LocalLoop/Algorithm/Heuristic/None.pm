@@ -56,15 +56,16 @@ has _selectChainNoSelectedTransaction => (
 sub applyHeuristic {
   debugMethodStart();
   
-  my ($self, $transactionId, $chainId, $isFirst) = @_;
+  my ($self, $isFirst, $chainGenerationContextInstance) = @_;
   
-  #Chain id is not used so it does not matter if it's undefined.
-  if ( ! defined $transactionId) {
-    die "transactionId cannot be undefined.";
+  if ( ! defined $isFirst ) {
+    die "isFirst cannot be undefined";
   }
-  elsif ( ! defined $isFirst) {
-    die "isFirstRestriction cannot be undefined.";
+  elsif ( ! defined $chainGenerationContextInstance ) {
+    die "chainGenerationContextInstance cannot be undefined";
   }
+  
+  my $transactionId = $chainGenerationContextInstance->currentTransactionId();
   
   my $statementMinTransaction = ($isFirst ? $self->_selectChainMinimumTransactionIdFirst() : $self->_selectChainMinimumTransactionId());
   $statementMinTransaction->execute($transactionId);

@@ -37,16 +37,18 @@ has _statementAllowOnlyAfterCurrentTransactionFirst => (
 sub applyDynamicRestriction {
   debugMethodStart();
 
-  my ($self, $transactionId, $chainId, $isFirst) = @_;
+  my ($self, $isFirst, $chainGenerationContextInstance) = @_;
   my $dbh = $self->dbh();
   
   #We don't care if chainId is undefined as we don't use it.
-  if ( ! defined $transactionId ) {
-    die "transactionId cannot be undefined";
-  }
-  elsif ( ! defined $isFirst ) {
+  if ( ! defined $isFirst ) {
     die "isFirst cannot be undefined";
   }
+  elsif ( ! defined $chainGenerationContextInstance ) {
+    die "chainGenerationContextInstance cannot be undefined";
+  }
+  
+  my $transactionId = $chainGenerationContextInstance->currentTransactionId();
   
   $self->_statementAllowOnlyAfterCurrentTransaction()->execute($transactionId);
   

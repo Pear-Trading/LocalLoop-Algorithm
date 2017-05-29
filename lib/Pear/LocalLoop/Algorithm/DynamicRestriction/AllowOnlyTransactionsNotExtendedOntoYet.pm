@@ -65,18 +65,18 @@ sub applyDynamicRestriction {
   debugMethodStart();
 
   #We assume transactionId and chainId are both valid.
-  my ($self, $transactionId, $chainId, $isFirst) = @_;
+  my ($self, $isFirst, $chainGenerationContextInstance) = @_;
   my $dbh = $self->dbh();
   
-  if ( ! defined $transactionId) {
-    die "transactionId cannot be undefined.";
-  }
-  elsif ( ! defined $chainId) {
-    die "chainId cannot be undefined.";
-  }
-  elsif ( ! defined $isFirst) {
+  if ( ! defined $isFirst) {
     die "isFirst cannot be undefined.";
   }
+  elsif ( ! defined $chainGenerationContextInstance) {
+    die "chainGenerationContextInstance cannot be undefined.";
+  }
+  
+  my $transactionId = $chainGenerationContextInstance->currentTransactionId();
+  my $chainId = $chainGenerationContextInstance->currentChainId();
   
   #say "# tx:$transactionId ch:$chainId 1st:$isFirst";
 

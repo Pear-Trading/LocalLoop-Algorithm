@@ -3,6 +3,7 @@ use Test::Exception;
 use Test::Fatal qw(dies_ok exception);
 use Pear::LocalLoop::Algorithm::Main;
 use Pear::LocalLoop::Algorithm::ProcessingTypeContainer;
+use Pear::LocalLoop::Algorithm::ChainGenerationContext;
 use Pear::LocalLoop::Algorithm::DynamicRestriction::AllowOnlyAfterCurrentTransaction;
 use Path::Class::File;
 use v5.10;
@@ -47,6 +48,17 @@ sub transactionIdIncluded {
   return $hasIncludedId;
 }
 
+my $ignore = -1;
+
+sub newChainGenerationContext {
+  my ($userIdToLoopWith, $currentChainId, $currentTransactionId) = @_;
+  return Pear::LocalLoop::Algorithm::ChainGenerationContext->new({
+    userIdWhichCreatesALoop => $userIdToLoopWith,
+    currentChainId => $currentChainId,
+    currentTransactionId => $currentTransactionId,
+  });
+}
+
 #If it is the first restriction then set included in all of the transactions 
 #before itself and itself to 0, any after itself set to 1.
 #If it's not the first restriction then set included in all of the transactions 
@@ -63,7 +75,7 @@ $insertStatement->execute(2, 2, 3, 10, 1);
 $insertStatement->execute(3, 3, 4, 10, 1);
 $insertStatement->execute(4, 4, 1, 10, 1);
 
-my $exception = exception { $allowedAfterTest->applyDynamicRestriction(1, undef, 0); };
+my $exception = exception { $allowedAfterTest->applyDynamicRestriction(0 , newChainGenerationContext($ignore, $ignore, 1)); };
 is ($exception, undef ,"No exception thrown"); #id 1, not first restriction
 
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
@@ -81,7 +93,7 @@ $insertStatement->execute(2, 2, 3, 10, 1);
 $insertStatement->execute(3, 3, 4, 10, 1);
 $insertStatement->execute(4, 4, 1, 10, 1);
 
-my $exception = exception { $allowedAfterTest->applyDynamicRestriction(2, undef, 0); };
+my $exception = exception { $allowedAfterTest->applyDynamicRestriction(0, newChainGenerationContext($ignore, $ignore, 2)); };
 is ($exception, undef ,"No exception thrown"); #id 2, not first restriction
 
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
@@ -99,7 +111,7 @@ $insertStatement->execute(2, 2, 3, 10, 1);
 $insertStatement->execute(3, 3, 4, 10, 1);
 $insertStatement->execute(4, 4, 1, 10, 1);
 
-my $exception = exception { $allowedAfterTest->applyDynamicRestriction(3, undef, 0); };
+my $exception = exception { $allowedAfterTest->applyDynamicRestriction(0, newChainGenerationContext($ignore, $ignore, 3)); };
 is ($exception, undef ,"No exception thrown"); #id 3, not first restriction
 
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
@@ -117,7 +129,7 @@ $insertStatement->execute(2, 2, 3, 10, 1);
 $insertStatement->execute(3, 3, 4, 10, 1);
 $insertStatement->execute(4, 4, 1, 10, 1);
 
-my $exception = exception { $allowedAfterTest->applyDynamicRestriction(4, undef, 0); };
+my $exception = exception { $allowedAfterTest->applyDynamicRestriction(0, newChainGenerationContext($ignore, $ignore, 4)); };
 is ($exception, undef ,"No exception thrown"); #id 4, not first restriction
 
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
@@ -137,7 +149,7 @@ $insertStatement->execute(2, 2, 3, 10, 0);
 $insertStatement->execute(3, 3, 4, 10, 1);
 $insertStatement->execute(4, 4, 1, 10, 0);
 
-my $exception = exception { $allowedAfterTest->applyDynamicRestriction(1, undef, 0); };
+my $exception = exception { $allowedAfterTest->applyDynamicRestriction(0, newChainGenerationContext($ignore, $ignore, 1)); };
 is ($exception, undef ,"No exception thrown"); #id 1, not first restriction
 
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
@@ -156,7 +168,7 @@ $insertStatement->execute(2, 2, 3, 10, 0);
 $insertStatement->execute(3, 3, 4, 10, 0);
 $insertStatement->execute(4, 4, 1, 10, 0);
 
-my $exception = exception { $allowedAfterTest->applyDynamicRestriction(1, undef, 0); };
+my $exception = exception { $allowedAfterTest->applyDynamicRestriction(0, newChainGenerationContext($ignore, $ignore, 1)); };
 is ($exception, undef ,"No exception thrown"); #id 1, not first restriction
 
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
@@ -175,7 +187,7 @@ $insertStatement->execute(2, 2, 3, 10, 0);
 $insertStatement->execute(3, 3, 4, 10, 0);
 $insertStatement->execute(4, 4, 1, 10, 0);
 
-my $exception = exception { $allowedAfterTest->applyDynamicRestriction(1, undef, 1); };
+my $exception = exception { $allowedAfterTest->applyDynamicRestriction(1, newChainGenerationContext($ignore, $ignore, 1)); };
 is ($exception, undef ,"No exception thrown"); #id 1, first restriction
 
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
@@ -194,7 +206,7 @@ $insertStatement->execute(2, 2, 3, 10, 1);
 $insertStatement->execute(3, 3, 4, 10, 1);
 $insertStatement->execute(4, 4, 1, 10, 0);
 
-my $exception = exception { $allowedAfterTest->applyDynamicRestriction(2, undef, 1); };
+my $exception = exception { $allowedAfterTest->applyDynamicRestriction(1, newChainGenerationContext($ignore, $ignore, 2)); };
 is ($exception, undef ,"No exception thrown"); #id 2, first restriction
 
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
@@ -213,7 +225,7 @@ $insertStatement->execute(2, 2, 3, 10, 0);
 $insertStatement->execute(3, 3, 4, 10, 1);
 $insertStatement->execute(4, 4, 1, 10, 0);
 
-my $exception = exception { $allowedAfterTest->applyDynamicRestriction(3, undef, 1); };
+my $exception = exception { $allowedAfterTest->applyDynamicRestriction(1, newChainGenerationContext($ignore, $ignore, 3)); };
 is ($exception, undef ,"No exception thrown"); #id 3, first restriction
 
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
@@ -232,7 +244,7 @@ $insertStatement->execute(2, 2, 3, 10, 0);
 $insertStatement->execute(3, 3, 4, 10, 0);
 $insertStatement->execute(4, 4, 1, 10, 0);
 
-my $exception = exception { $allowedAfterTest->applyDynamicRestriction(4, undef, 1); };
+my $exception = exception { $allowedAfterTest->applyDynamicRestriction(1, newChainGenerationContext($ignore, $ignore, 4)); };
 is ($exception, undef ,"No exception thrown"); #id 4, first restriction
 
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 

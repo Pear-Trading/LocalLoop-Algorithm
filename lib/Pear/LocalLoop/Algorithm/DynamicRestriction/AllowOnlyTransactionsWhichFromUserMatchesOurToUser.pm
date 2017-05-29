@@ -44,15 +44,17 @@ has statementAllowOnlyTransactionsWhichFromUserMatchesOurToUserFirst => (
 
 sub applyDynamicRestriction {
   debugMethodStart();
-  my ($self, $transactionId, $chainId, $isFirst) = @_;
+  my ($self, $isFirst, $chainGenerationContextInstance) = @_;
   
   #It does not matter if $chainid is null as it's unused.
-  if ( ! defined $transactionId ) {
-    die "transactionId cannot be undefined";
-  }
-  elsif ( ! defined $isFirst ) {
+  if ( ! defined $isFirst ) {
     die "isFirst cannot be undefined";
   }
+  elsif ( ! defined $chainGenerationContextInstance ) {
+    die "chainGenerationContextInstance cannot be undefined";
+  }
+  
+  my $transactionId = $chainGenerationContextInstance->currentTransactionId();
   
   my $statementSelectToUserOfATransaction = $self->_statementSelectToUserOfATransaction();
   $statementSelectToUserOfATransaction->execute($transactionId);
