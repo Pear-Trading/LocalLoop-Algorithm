@@ -19,7 +19,7 @@ has transactionOrder => (
 #  lazy => 1,
 );
 
-has dynamicRestrictionsArray => (
+has chainDynamicRestrictionsArray => (
   is => 'ro',
   default => sub { return []; },
 #  lazy => 1,
@@ -53,8 +53,8 @@ sub init {
   
   $self->transactionOrder()->init();
   
-  foreach my $dynamicRestriction (@{$self->dynamicRestrictionsArray()}) {
-    $dynamicRestriction->init();
+  foreach my $chainDynamicRestriction (@{$self->chainDynamicRestrictionsArray()}) {
+    $chainDynamicRestriction->init();
   }
   
   foreach my $chainHeuristic (@{$self->chainHeuristicArray()}) {
@@ -89,8 +89,8 @@ sub initAfterStaticRestrictions {
 
   $self->transactionOrder()->initAfterStaticRestrictions();
   
-  foreach my $dynamicRestriction (@{$self->dynamicRestrictionsArray()}) {
-    $dynamicRestriction->initAfterStaticRestrictions();
+  foreach my $chainDynamicRestriction (@{$self->chainDynamicRestrictionsArray()}) {
+    $chainDynamicRestriction->initAfterStaticRestrictions();
   }
   
   foreach my $chainHeuristic (@{$self->chainHeuristicArray()}) {
@@ -140,8 +140,8 @@ sub applyChainDynamicRestrictionsAndHeuristics {
   }
   
   my $isFirst = 1;
-  foreach my $dynamicRestriction (@{$self->dynamicRestrictionsArray()}) {
-    $dynamicRestriction->applyChainDynamicRestriction($isFirst, $chainGenerationContextInstance);
+  foreach my $chainDynamicRestriction (@{$self->chainDynamicRestrictionsArray()}) {
+    $chainDynamicRestriction->applyChainDynamicRestriction($isFirst, $chainGenerationContextInstance);
     $self->_dumpTransactionsIncluded();
     $isFirst = 0;
   }

@@ -105,7 +105,7 @@ sub numLoopInfoRows {
 my $matchId = Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyTransactionsWhichFromUserMatchesOurToUser->new();
 my $afterCurrent = Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyAfterCurrentTransaction->new();
 my $extendedOnto = Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyTransactionsNotExtendedOntoYet->new();
-my $dynamicRestrictions = [$matchId, $extendedOnto, $afterCurrent];
+my $chainDynamicRestrictions = [$matchId, $extendedOnto, $afterCurrent];
 
 my $none = Pear::LocalLoop::Algorithm::Heuristic::None->new();
 my $heuristics = [$none];
@@ -116,7 +116,7 @@ my $loopDynamicRestrictions = [$disallowSelectedLoops, $disallowTransactionsInLo
 
 #Static restrictions are not needed for this.
 my $hash = {
-  dynamicRestrictionsArray => $dynamicRestrictions,
+  chainDynamicRestrictionsArray => $chainDynamicRestrictions,
   chainHeuristicArray => $heuristics,
   loopHeuristicArray => $heuristics,
   loopDynamicRestrictionsArray => $loopDynamicRestrictions,

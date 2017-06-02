@@ -45,7 +45,7 @@ sub delete_table_data {
 my $matchId = Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyTransactionsWhichFromUserMatchesOurToUser->new();
 my $afterCurrent = Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyAfterCurrentTransaction->new();
 my $extendedOnto = Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyTransactionsNotExtendedOntoYet->new();
-my $dynamicRestrictions = [$matchId, $extendedOnto, $afterCurrent];
+my $chainDynamicRestrictions = [$matchId, $extendedOnto, $afterCurrent];
 
 my $none = Pear::LocalLoop::Algorithm::Heuristic::None->new();
 my $heuristics = [$none];
@@ -53,7 +53,7 @@ my $heuristics = [$none];
 #Static restrictions are not needed here, but then static restrictions will prevent some of these events from 
 #occuring.
 my $settings = Pear::LocalLoop::Algorithm::ProcessingTypeContainer->new({   
-  dynamicRestrictionsArray => $dynamicRestrictions,
+  chainDynamicRestrictionsArray => $chainDynamicRestrictions,
   chainHeuristicArray => $heuristics, 
 });
 
@@ -216,7 +216,7 @@ say "Test 3 - First transaction with 2 (or more) possible transactions to extend
   #Modify the settings to not include the heuristics as with "None" it results in only one enabled.
   #The dynamic restrictions would maintain the integrity of links
   my $settings = Pear::LocalLoop::Algorithm::ProcessingTypeContainer->new({   
-    dynamicRestrictionsArray => $dynamicRestrictions,
+    chainDynamicRestrictionsArray => $chainDynamicRestrictions,
   });
 
   delete_table_data();
@@ -504,7 +504,7 @@ say "Test 8 - Not first transaction, existing candinate transaction prevents the
   #instead of both 1 -> 3 and 1 -> 4.
   #The dynamic restrictions would maintain the integrity of links
   my $settings = Pear::LocalLoop::Algorithm::ProcessingTypeContainer->new({   
-    dynamicRestrictionsArray => $dynamicRestrictions,
+    chainDynamicRestrictionsArray => $chainDynamicRestrictions,
   });
   
   delete_table_data();
