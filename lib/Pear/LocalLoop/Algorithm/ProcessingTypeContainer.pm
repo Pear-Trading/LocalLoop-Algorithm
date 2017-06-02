@@ -133,7 +133,7 @@ sub applyChainDynamicRestrictionsAndHeuristics {
   }
   
   foreach my $heuristic (@{$self->heuristicArray()}) {
-    $heuristic->applyHeuristic($isFirst, $chainGenerationContextInstance);
+    $heuristic->applyChainHeuristic($isFirst, $chainGenerationContextInstance);
     $self->_dumpTransactionsIncluded();
     $isFirst = 0;
   }    
@@ -156,7 +156,7 @@ has _statementHeuristicsCandinatesReset => (
   lazy => 1,
 );
 
-sub applyHeuristicsCandinates {
+sub applyChainHeuristicsCandinates {
   debugMethodStart();
   my ($self, $loopGenerationContextInstance) = @_;
 

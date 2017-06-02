@@ -10,8 +10,8 @@ sub initAfterStaticRestrictions {
   debugMethodEnd();
 }
 
-sub applyHeuristic {
-  die "applyHeuristic has not been implemented.";
+sub applyChainHeuristic {
+  die "applyChainHeuristic has not been implemented.";
 };
 
 sub applyCandinateTransactionHeuristic {

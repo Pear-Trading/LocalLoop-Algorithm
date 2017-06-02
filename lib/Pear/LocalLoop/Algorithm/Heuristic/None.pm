@@ -53,7 +53,7 @@ has _selectChainNoSelectedTransaction => (
 );
 
 
-sub applyHeuristic {
+sub applyChainHeuristic {
   debugMethodStart();
   
   my ($self, $isFirst, $chainGenerationContextInstance) = @_;

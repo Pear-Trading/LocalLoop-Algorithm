@@ -745,7 +745,7 @@ sub _getNextBestCandinateTransaction {
   }
   else {
   
-    $settings->applyHeuristicsCandinates($loopGenerationContextInstance);
+    $settings->applyChainHeuristicsCandinates($loopGenerationContextInstance);
     
     my $statementSelectRows = $self->_statementSelectCandinateTransactionInformationWhenItsIncluded();
     $statementSelectRows->execute();

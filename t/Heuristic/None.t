@@ -63,7 +63,7 @@ sub testWithMatchIds {
   
   #The first and second param of newChainGenerationContext is not needed so are set to -1.
   $testModuleRestriction->applyChainDynamicRestriction($first, newChainGenerationContext($ignore, $ignore, $id));  
-  $testModule->applyHeuristic(0, newChainGenerationContext($ignore, $ignore, $id));
+  $testModule->applyChainHeuristic(0, newChainGenerationContext($ignore, $ignore, $id));
 }
 
 sub newChainGenerationContext {
@@ -93,7 +93,7 @@ $insertStatementProcessedTransactions->execute(3, 3, 4, 10, 1);
 $insertStatementProcessedTransactions->execute(4, 4, 1, 10, 1);
 
 #The first and second param of newChainGenerationContext is not needed so are set to -1.
-my $exception = exception { $testModule->applyHeuristic(0, newChainGenerationContext($ignore, $ignore, 1)); };
+my $exception = exception { $testModule->applyChainHeuristic(0, newChainGenerationContext($ignore, $ignore, 1)); };
 is ($exception, undef ,"No exception thrown"); #id 1, not first restriction
 
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
@@ -112,7 +112,7 @@ $insertStatementProcessedTransactions->execute(3, 3, 4, 10, 1);
 $insertStatementProcessedTransactions->execute(4, 4, 1, 10, 1);
 
 #The first and second param of newChainGenerationContext is not needed so are set to -1.
-my $exception = exception { $testModule->applyHeuristic(0, newChainGenerationContext($ignore, $ignore, 2)); };
+my $exception = exception { $testModule->applyChainHeuristic(0, newChainGenerationContext($ignore, $ignore, 2)); };
 is ($exception, undef ,"No exception thrown"); #id 2, not first restriction
 
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
@@ -131,7 +131,7 @@ $insertStatementProcessedTransactions->execute(3, 3, 4, 10, 0);
 $insertStatementProcessedTransactions->execute(4, 4, 1, 10, 1);
 
 #The first and second param of newChainGenerationContext is not needed so are set to -1.
-my $exception = exception { $testModule->applyHeuristic(0, newChainGenerationContext($ignore, $ignore, 2)); };
+my $exception = exception { $testModule->applyChainHeuristic(0, newChainGenerationContext($ignore, $ignore, 2)); };
 is ($exception, undef ,"No exception thrown"); #id 2, not first restriction
 
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
@@ -150,7 +150,7 @@ $insertStatementProcessedTransactions->execute(3, 3, 4, 10, 1);
 $insertStatementProcessedTransactions->execute(4, 4, 1, 10, 0);
 
 #The first and second param of newChainGenerationContext is not needed so are set to -1.
-my $exception = exception { $testModule->applyHeuristic(0, newChainGenerationContext($ignore, $ignore, 3)); };
+my $exception = exception { $testModule->applyChainHeuristic(0, newChainGenerationContext($ignore, $ignore, 3)); };
 is ($exception, undef ,"No exception thrown"); #id 3, not first restriction
 
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
@@ -170,7 +170,7 @@ $insertStatementProcessedTransactions->execute(3, 3, 4, 10, 1);
 $insertStatementProcessedTransactions->execute(4, 4, 1, 10, 1);
 
 #The first and second param of newChainGenerationContext is not needed so are set to -1.
-my $exception = exception { $testModule->applyHeuristic(1, newChainGenerationContext($ignore, $ignore, 1)); };
+my $exception = exception { $testModule->applyChainHeuristic(1, newChainGenerationContext($ignore, $ignore, 1)); };
 is ($exception, undef ,"No exception thrown"); #id 1, first restriction
 
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
@@ -190,7 +190,7 @@ $insertStatementProcessedTransactions->execute(4, 4, 1, 10, 1);
 
 #The first and second param of newChainGenerationContext is not needed so are set to -1.
 
-my $exception = exception { $testModule->applyHeuristic(1, newChainGenerationContext($ignore, $ignore, 2)); };
+my $exception = exception { $testModule->applyChainHeuristic(1, newChainGenerationContext($ignore, $ignore, 2)); };
 is ($exception, undef ,"No exception thrown"); #id 2, first restriction
 
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
@@ -210,7 +210,7 @@ $insertStatementProcessedTransactions->execute(4, 4, 1, 10, 1);
 
 #The first and second param of newChainGenerationContext is not needed so are set to -1.
 
-my $exception = exception { $testModule->applyHeuristic(1, newChainGenerationContext($ignore, $ignore, 2)); };
+my $exception = exception { $testModule->applyChainHeuristic(1, newChainGenerationContext($ignore, $ignore, 2)); };
 is ($exception, undef ,"No exception thrown"); #id 2, first restriction
 
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
@@ -230,7 +230,7 @@ $insertStatementProcessedTransactions->execute(4, 4, 1, 10, 0);
 
 #The first and second param of newChainGenerationContext is not needed so are set to -1.
 
-my $exception = exception { $testModule->applyHeuristic(1, newChainGenerationContext($ignore, $ignore, 3)); };
+my $exception = exception { $testModule->applyChainHeuristic(1, newChainGenerationContext($ignore, $ignore, 3)); };
 is ($exception, undef ,"No exception thrown"); #id 3, first restriction
 
 is (transactionIdIncluded(1),0,"Can't link to id 1."); 
