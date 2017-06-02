@@ -175,14 +175,4 @@ sub applyCandinateTransactionHeuristic {
   debugMethodEnd();
 };
 
-
-
-sub applyLoopHeuristic {
-  debugMethodStart();
-  
-  #This does not impact loops.
-
-  debugMethodEnd();
-};
-
 1;
