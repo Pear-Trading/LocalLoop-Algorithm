@@ -115,7 +115,7 @@ has _statementDynamicRestrictionsAndHeuristicsReset => (
 );
   
 
-sub applyDynamicRestrictionsAndHeuristics {
+sub applyChainDynamicRestrictionsAndHeuristics {
   debugMethodStart();
   my ($self, $chainGenerationContextInstance) = @_;
   
@@ -127,7 +127,7 @@ sub applyDynamicRestrictionsAndHeuristics {
   
   my $isFirst = 1;
   foreach my $dynamicRestriction (@{$self->dynamicRestrictionsArray()}) {
-    $dynamicRestriction->applyDynamicRestriction($isFirst, $chainGenerationContextInstance);
+    $dynamicRestriction->applyChainDynamicRestriction($isFirst, $chainGenerationContextInstance);
     $self->_dumpTransactionsIncluded();
     $isFirst = 0;
   }

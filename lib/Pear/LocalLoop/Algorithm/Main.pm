@@ -486,7 +486,7 @@ sub _selectNextBestCandinateTransactions {
       userIdWhichCreatesALoop => $userIdThatFormsALoop,
     });
     
-    $settings->applyDynamicRestrictionsAndHeuristics($chainGenerationContext);
+    $settings->applyChainDynamicRestrictionsAndHeuristics($chainGenerationContext);
 
     debugMethodMiddle("WhileLoop: ForEachLoop. Done heuristics");
     

@@ -42,7 +42,7 @@ has statementAllowOnlyTransactionsWhichFromUserMatchesOurToUserFirst => (
   lazy => 1,
 );
 
-sub applyDynamicRestriction {
+sub applyChainDynamicRestriction {
   debugMethodStart();
   my ($self, $isFirst, $chainGenerationContextInstance) = @_;
   

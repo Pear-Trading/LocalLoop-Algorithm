@@ -67,7 +67,7 @@ sub testWithRestriction {
   my ($first, $userId, $transactionId) = @_;
   
   #The first and second param of newChainGenerationContext is not needed so are set to -1.
-  $testModuleRestriction->applyDynamicRestriction($first, newChainGenerationContext($INGORE_USER_ID, $INGORE_CHAIN_ID, $transactionId));  
+  $testModuleRestriction->applyChainDynamicRestriction($first, newChainGenerationContext($INGORE_USER_ID, $INGORE_CHAIN_ID, $transactionId));  
   $testModule->applyHeuristic($NOT_FIRST, newChainGenerationContext($userId, $INGORE_CHAIN_ID, $transactionId));
 }
 

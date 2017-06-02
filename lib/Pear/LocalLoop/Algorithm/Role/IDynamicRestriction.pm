@@ -16,8 +16,8 @@ sub initAfterStaticRestrictions {
 #2rd param whether this is the first dynamic restriction called, hence 
 #any previous state in the "Included" column of the "ProcessedTransactions" table.
 #3rd param ChainGenerationContext instance.
-sub applyDynamicRestriction {
-  die "applyDynamicRestriction has not been implemented.";
+sub applyChainDynamicRestriction {
+  die "applyChainDynamicRestriction has not been implemented.";
 };
 
 1;

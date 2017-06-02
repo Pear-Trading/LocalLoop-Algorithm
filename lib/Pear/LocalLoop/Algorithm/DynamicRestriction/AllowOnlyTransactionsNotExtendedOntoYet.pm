@@ -61,7 +61,7 @@ has _statementUpdateEndOfChainFirst => (
 );
 
 
-sub applyDynamicRestriction {
+sub applyChainDynamicRestriction {
   debugMethodStart();
 
   #We assume transactionId and chainId are both valid.

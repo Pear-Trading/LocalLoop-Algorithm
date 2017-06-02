@@ -62,7 +62,7 @@ sub testWithMatchIds {
   my ($id, $first) = @_;
   
   #The first and second param of newChainGenerationContext is not needed so are set to -1.
-  $testModuleRestriction->applyDynamicRestriction($first, newChainGenerationContext($ignore, $ignore, $id));  
+  $testModuleRestriction->applyChainDynamicRestriction($first, newChainGenerationContext($ignore, $ignore, $id));  
   $testModule->applyHeuristic(0, newChainGenerationContext($ignore, $ignore, $id));
 }
 

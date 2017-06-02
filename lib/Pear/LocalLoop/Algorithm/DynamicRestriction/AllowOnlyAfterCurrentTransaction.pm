@@ -34,7 +34,7 @@ has _statementAllowOnlyAfterCurrentTransactionFirst => (
 );
 
 
-sub applyDynamicRestriction {
+sub applyChainDynamicRestriction {
   debugMethodStart();
 
   my ($self, $isFirst, $chainGenerationContextInstance) = @_;
