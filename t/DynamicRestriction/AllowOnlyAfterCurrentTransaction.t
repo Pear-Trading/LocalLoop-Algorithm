@@ -4,13 +4,13 @@ use Test::Fatal qw(dies_ok exception);
 use Pear::LocalLoop::Algorithm::Main;
 use Pear::LocalLoop::Algorithm::ProcessingTypeContainer;
 use Pear::LocalLoop::Algorithm::ChainGenerationContext;
-use Pear::LocalLoop::Algorithm::DynamicRestriction::AllowOnlyAfterCurrentTransaction;
+use Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyAfterCurrentTransaction;
 use Path::Class::File;
 use v5.10;
 
 use FindBin;
 
-#This is a test for "Pear::LocalLoop::Algorithm::DynamicRestriction::AllowOnlyAfterCurrentTransaction"
+#This is a test for "Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyAfterCurrentTransaction"
 
 Pear::LocalLoop::Algorithm::Main->setTestingMode();
 
@@ -36,7 +36,7 @@ sub delete_table_data {
 }
 
 
-my $allowedAfterTest = Pear::LocalLoop::Algorithm::DynamicRestriction::AllowOnlyAfterCurrentTransaction->new();
+my $allowedAfterTest = Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyAfterCurrentTransaction->new();
 
 my $insertStatement = $dbh->prepare("INSERT INTO ProcessedTransactions (TransactionId, FromUserId, ToUserId, Value, Included) VALUES (?, ?, ?, ?, ?)");
 

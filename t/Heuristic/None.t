@@ -5,7 +5,7 @@ use Pear::LocalLoop::Algorithm::Main;
 use Pear::LocalLoop::Algorithm::ProcessingTypeContainer;
 use Pear::LocalLoop::Algorithm::ChainGenerationContext;
 use Pear::LocalLoop::Algorithm::Heuristic::None;
-use Pear::LocalLoop::Algorithm::DynamicRestriction::AllowOnlyTransactionsWhichFromUserMatchesOurToUser;
+use Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyTransactionsWhichFromUserMatchesOurToUser;
 use Path::Class::File;
 use v5.10;
 
@@ -41,7 +41,7 @@ sub delete_table_data {
 my $testModule = Pear::LocalLoop::Algorithm::Heuristic::None->new();
 
 #Test to make sure this works the below module.
-my $testModuleRestriction = Pear::LocalLoop::Algorithm::DynamicRestriction::AllowOnlyTransactionsWhichFromUserMatchesOurToUser->new();
+my $testModuleRestriction = Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyTransactionsWhichFromUserMatchesOurToUser->new();
 
 my $insertStatementProcessedTransactions = $dbh->prepare("INSERT INTO ProcessedTransactions (TransactionId, FromUserId, ToUserId, Value, Included) VALUES (?, ?, ?, ?, ?)");
 
