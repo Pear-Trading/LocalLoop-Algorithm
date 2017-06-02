@@ -7,7 +7,7 @@ use DBI;
 use Pear::LocalLoop::Algorithm::Debug;
 
 extends("Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier");
-with ('Pear::LocalLoop::Algorithm::Role::IDynamicRestriction');
+with ('Pear::LocalLoop::Algorithm::Role::IChainDynamicRestriction');
 
 #Maintain a list of all transactions which this chain and transaction pair have extended onto, prevent it from
 #connecting to them again in future. This includes the next transaction in this chain and all branches from 

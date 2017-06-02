@@ -7,7 +7,7 @@ use DBI;
 use Pear::LocalLoop::Algorithm::Debug;
 
 extends("Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier");
-with ('Pear::LocalLoop::Algorithm::Role::IDynamicRestriction');
+with ('Pear::LocalLoop::Algorithm::Role::IChainDynamicRestriction');
 
 #When considering the next transaction the current transactions "to user" must be the same as the next "from user".
 #So set include to 0 if it differs, otherwise it cannot form a chain.

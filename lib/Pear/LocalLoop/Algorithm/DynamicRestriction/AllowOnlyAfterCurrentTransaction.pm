@@ -7,7 +7,7 @@ use DBI;
 use Pear::LocalLoop::Algorithm::Debug;
 
 extends("Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier");
-with ('Pear::LocalLoop::Algorithm::Role::IDynamicRestriction');
+with ('Pear::LocalLoop::Algorithm::Role::IChainDynamicRestriction');
 
 #If it is the first restriction then set included in all of the transactions 
 #before itself and itself to 0, any after itself set to 1.
