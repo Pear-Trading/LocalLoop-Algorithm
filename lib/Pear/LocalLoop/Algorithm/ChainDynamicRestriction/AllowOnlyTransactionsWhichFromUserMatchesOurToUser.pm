@@ -24,7 +24,7 @@ has _statementSelectToUserOfATransaction => (
   lazy => 1,
 );
 
-has statementAllowOnlyTransactionsWhichFromUserMatchesOurToUser => (
+has _statementAllowOnlyTransactionsWhichFromUserMatchesOurToUser => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
@@ -33,7 +33,7 @@ has statementAllowOnlyTransactionsWhichFromUserMatchesOurToUser => (
   lazy => 1,
 );
 
-has statementAllowOnlyTransactionsWhichFromUserMatchesOurToUserFirst => (
+has _statementAllowOnlyTransactionsWhichFromUserMatchesOurToUserFirst => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
@@ -62,11 +62,11 @@ sub applyChainDynamicRestriction {
   my ($fromUserId) = $statementSelectToUserOfATransaction->fetchrow_array();
   
   #Set all after the max transaction id to not be included.
-  $self->statementAllowOnlyTransactionsWhichFromUserMatchesOurToUser()->execute($fromUserId);
+  $self->_statementAllowOnlyTransactionsWhichFromUserMatchesOurToUser()->execute($fromUserId);
   
   if ($isFirst) {
     #Set all transactions before or on the max id to be be included
-    $self->statementAllowOnlyTransactionsWhichFromUserMatchesOurToUserFirst()->execute($fromUserId);
+    $self->_statementAllowOnlyTransactionsWhichFromUserMatchesOurToUserFirst()->execute($fromUserId);
   }
   
   debugMethodEnd();
