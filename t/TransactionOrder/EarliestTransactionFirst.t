@@ -3,13 +3,13 @@ use Test::Exception;
 use Test::Fatal qw(dies_ok exception);
 use Pear::LocalLoop::Algorithm::Main;
 use Pear::LocalLoop::Algorithm::ProcessingTypeContainer;
-use Pear::LocalLoop::Algorithm::TransactionOrder::EarliestFirst;
+use Pear::LocalLoop::Algorithm::TransactionOrder::EarliestTransactionFirst;
 use Path::Class::File;
 use v5.10;
 
 use FindBin;
 
-#This is a test for "Pear::LocalLoop::Algorithm::TransactionOrder::EarliestFirst"
+#This is a test for "Pear::LocalLoop::Algorithm::TransactionOrder::EarliestTransactionFirst"
 
 Pear::LocalLoop::Algorithm::Main->setTestingMode();
 
@@ -35,7 +35,7 @@ sub delete_table_data {
 }
 
 
-my $earliestFirstTest = Pear::LocalLoop::Algorithm::TransactionOrder::EarliestFirst->new();
+my $earliestFirstTest = Pear::LocalLoop::Algorithm::TransactionOrder::EarliestTransactionFirst->new();
 
 my $insertStatement = $dbh->prepare("INSERT INTO ProcessedTransactions (TransactionId, FromUserId, ToUserId, Value) VALUES (?, ?, ?, ?)");
 

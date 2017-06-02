@@ -16,7 +16,7 @@ use Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyTransactionsWh
 use Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyAfterCurrentTransaction;
 use Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyTransactionsNotExtendedOntoYet;
 use Pear::LocalLoop::Algorithm::Heuristic::None;
-use Pear::LocalLoop::Algorithm::TransactionOrder::EarliestFirst;
+use Pear::LocalLoop::Algorithm::TransactionOrder::EarliestTransactionFirst;
 use Pear::LocalLoop::Algorithm::TransactionOrder::LargestTransactionValueFirst;
 use Pear::LocalLoop::Algorithm::LoopDynamicRestriction::DisallowLoopsWhichHaveTransactionsInActiveLoops;
 use Pear::LocalLoop::Algorithm::LoopDynamicRestriction::DisallowSelectionOfAlreadySelectedLoops;

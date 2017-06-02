@@ -9,7 +9,7 @@ use Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyTransactionsNo
 use Pear::LocalLoop::Algorithm::Heuristic::None;
 use Pear::LocalLoop::Algorithm::LoopDynamicRestriction::DisallowSelectionOfAlreadySelectedLoops;
 use Pear::LocalLoop::Algorithm::LoopDynamicRestriction::DisallowLoopsWhichHaveTransactionsInActiveLoops;
-use Pear::LocalLoop::Algorithm::TransactionOrder::EarliestFirst;
+use Pear::LocalLoop::Algorithm::TransactionOrder::EarliestTransactionFirst;
 use Path::Class::File;
 use Data::Dumper;
 use v5.10;
@@ -120,7 +120,7 @@ my $hash = {
   chainHeuristicArray => $heuristics,
   loopHeuristicArray => $heuristics,
   loopDynamicRestrictionsArray => $loopDynamicRestrictions,
-  transactionOrder => Pear::LocalLoop::Algorithm::TransactionOrder::EarliestFirst->new(),
+  transactionOrder => Pear::LocalLoop::Algorithm::TransactionOrder::EarliestTransactionFirst->new(),
 };
 
 my $settings = Pear::LocalLoop::Algorithm::ProcessingTypeContainer->new($hash);

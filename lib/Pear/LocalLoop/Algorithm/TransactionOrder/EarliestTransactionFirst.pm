@@ -1,4 +1,4 @@
-package Pear::LocalLoop::Algorithm::TransactionOrder::EarliestFirst;
+package Pear::LocalLoop::Algorithm::TransactionOrder::EarliestTransactionFirst;
 
 use Moo;
 use v5.10;

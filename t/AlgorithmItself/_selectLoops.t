@@ -9,7 +9,7 @@ use Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyTransactionsNo
 use Pear::LocalLoop::Algorithm::Heuristic::None;
 use Pear::LocalLoop::Algorithm::LoopDynamicRestriction::DisallowSelectionOfAlreadySelectedLoops;
 use Pear::LocalLoop::Algorithm::LoopDynamicRestriction::DisallowLoopsWhichHaveTransactionsInActiveLoops;
-use Pear::LocalLoop::Algorithm::TransactionOrder::EarliestFirst;
+use Pear::LocalLoop::Algorithm::TransactionOrder::EarliestTransactionFirst;
 use Path::Class::File;
 use Data::Dumper;
 use v5.10;

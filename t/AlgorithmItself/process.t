@@ -9,7 +9,7 @@ use Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyTransactionsNo
 use Pear::LocalLoop::Algorithm::Heuristic::None;
 use Pear::LocalLoop::Algorithm::LoopDynamicRestriction::DisallowSelectionOfAlreadySelectedLoops;
 use Pear::LocalLoop::Algorithm::LoopDynamicRestriction::DisallowLoopsWhichHaveTransactionsInActiveLoops;
-use Pear::LocalLoop::Algorithm::TransactionOrder::EarliestFirst;
+use Pear::LocalLoop::Algorithm::TransactionOrder::EarliestTransactionFirst;
 use Pear::LocalLoop::Algorithm::TransactionOrder::LargestTransactionValueFirst;
 use Path::Class::File;
 use Data::Dumper;
@@ -63,7 +63,7 @@ my $settingsEarl = Pear::LocalLoop::Algorithm::ProcessingTypeContainer->new({
   chainHeuristicArray => $heuristics,
   loopHeuristicArray => $heuristics,
   loopDynamicRestrictionsArray => $loopDynamicRestrictions,
-  transactionOrder => Pear::LocalLoop::Algorithm::TransactionOrder::EarliestFirst->new(),
+  transactionOrder => Pear::LocalLoop::Algorithm::TransactionOrder::EarliestTransactionFirst->new(),
 });
 
 my $statementInsertOriginalTransactions = $dbh->prepare("INSERT INTO OriginalTransactions (TransactionId, FromUserId, ToUserId, Value) VALUES (?, ?, ?, ?)");
