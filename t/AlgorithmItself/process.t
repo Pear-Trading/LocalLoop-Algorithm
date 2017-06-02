@@ -60,7 +60,8 @@ my $loopDynamicRestrictions = [$disallowSelectedLoops, $disallowTransactionsInLo
 my $settingsEarl = Pear::LocalLoop::Algorithm::ProcessingTypeContainer->new({
   staticRestrictionsArray => $staticRestrictions,
   dynamicRestrictionsArray => $dynamicRestrictions,
-  heuristicArray => $heuristics,
+  chainHeuristicArray => $heuristics,
+  loopHeuristicArray => $heuristics,
   loopDynamicRestrictionsArray => $loopDynamicRestrictions,
   transactionOrder => Pear::LocalLoop::Algorithm::TransactionOrder::EarliestFirst->new(),
 });

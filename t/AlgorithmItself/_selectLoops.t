@@ -49,7 +49,7 @@ my $loopDynamicRestrictions = [$disallowSelectedLoops, $disallowTransactionsInLo
 
 #Static restrictions, chain dynamic restrictions and transaction ordering are not needed.
 my $hash = {
-  heuristicArray => $heuristics,
+  loopHeuristicArray => $heuristics,
   loopDynamicRestrictionsArray => $loopDynamicRestrictions,
 };
 

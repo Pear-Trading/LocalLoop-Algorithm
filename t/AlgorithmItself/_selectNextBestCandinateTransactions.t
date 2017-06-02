@@ -54,7 +54,7 @@ my $heuristics = [$none];
 #occuring.
 my $settings = Pear::LocalLoop::Algorithm::ProcessingTypeContainer->new({   
   dynamicRestrictionsArray => $dynamicRestrictions,
-  heuristicArray => $heuristics, 
+  chainHeuristicArray => $heuristics, 
 });
 
 my $statementInsertProcessedTransactions = $dbh->prepare("INSERT INTO ProcessedTransactions (TransactionId, FromUserId, ToUserId, Value) VALUES (?, ?, ?, ?)");

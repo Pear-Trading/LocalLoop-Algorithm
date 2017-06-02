@@ -6,7 +6,7 @@ use Pear::LocalLoop::Algorithm::Debug;
 use Data::Dumper;
 
 extends("Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier");
-with ('Pear::LocalLoop::Algorithm::Role::IHeuristic');
+with ('Pear::LocalLoop::Algorithm::Role::IChainHeuristic');
 
 has _selectChainHasFinishUserId => (
   is => 'ro',

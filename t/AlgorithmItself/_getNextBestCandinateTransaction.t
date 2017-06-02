@@ -40,7 +40,7 @@ my $none = Pear::LocalLoop::Algorithm::Heuristic::None->new();
 my $heuristics = [$none];
 
 #Only the heuristics are needed for this.
-my $settings = Pear::LocalLoop::Algorithm::ProcessingTypeContainer->new({ heuristicArray => $heuristics });
+my $settings = Pear::LocalLoop::Algorithm::ProcessingTypeContainer->new({ chainHeuristicArray => $heuristics });
 
 my $statementInsertProcessedTransactions = $dbh->prepare("INSERT INTO ProcessedTransactions (TransactionId, FromUserId, ToUserId, Value) VALUES (?, ?, ?, ?)");
 my $statementInsertCurrentStatsId = $dbh->prepare("INSERT INTO CurrentChainsStats (ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");

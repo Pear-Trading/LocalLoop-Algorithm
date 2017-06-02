@@ -117,7 +117,8 @@ my $loopDynamicRestrictions = [$disallowSelectedLoops, $disallowTransactionsInLo
 #Static restrictions are not needed for this.
 my $hash = {
   dynamicRestrictionsArray => $dynamicRestrictions,
-  heuristicArray => $heuristics,
+  chainHeuristicArray => $heuristics,
+  loopHeuristicArray => $heuristics,
   loopDynamicRestrictionsArray => $loopDynamicRestrictions,
   transactionOrder => Pear::LocalLoop::Algorithm::TransactionOrder::EarliestFirst->new(),
 };

@@ -1,4 +1,4 @@
-package Pear::LocalLoop::Algorithm::Role::IHeuristic;
+package Pear::LocalLoop::Algorithm::Role::IChainHeuristic;
 
 use Moo::Role;
 use v5.10;
@@ -16,10 +16,6 @@ sub applyChainHeuristic {
 
 sub applyCandinateTransactionHeuristic {
   die "applyCandinateTransactionHeuristic has not been implemented.";
-};
-
-sub applyLoopHeuristic {
-  die "applyLoopHeuristic has not been implemented.";
 };
 
 1;

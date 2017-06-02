@@ -31,7 +31,13 @@ has loopDynamicRestrictionsArray => (
 #  lazy => 1,
 );
 
-has heuristicArray => (
+has chainHeuristicArray => (
+  is => 'ro',
+  default => sub { return []; },
+#  lazy => 1,
+);
+
+has loopHeuristicArray => (
   is => 'ro',
   default => sub { return []; },
 #  lazy => 1,
@@ -51,12 +57,16 @@ sub init {
     $dynamicRestriction->init();
   }
   
-  foreach my $heuristic (@{$self->heuristicArray()}) {
-    $heuristic->init();
+  foreach my $chainHeuristic (@{$self->chainHeuristicArray()}) {
+    $chainHeuristic->init();
   }
   
   foreach my $loopDynamicRestriction (@{$self->loopDynamicRestrictionsArray()}) {
     $loopDynamicRestriction->init();
+  }
+  
+  foreach my $loopHeuristic (@{$self->loopHeuristicArray()}) {
+    $loopHeuristic->init();
   }    
   
   debugMethodEnd();
@@ -83,12 +93,16 @@ sub initAfterStaticRestrictions {
     $dynamicRestriction->initAfterStaticRestrictions();
   }
   
-  foreach my $heuristic (@{$self->heuristicArray()}) {
-    $heuristic->initAfterStaticRestrictions();
+  foreach my $chainHeuristic (@{$self->chainHeuristicArray()}) {
+    $chainHeuristic->initAfterStaticRestrictions();
   }
   
   foreach my $loopDynamicRestriction (@{$self->loopDynamicRestrictionsArray()}) {
     $loopDynamicRestriction->initAfterStaticRestrictions();
+  }
+  
+  foreach my $loopHeuristic (@{$self->loopHeuristicArray()}) {
+    $loopHeuristic->initAfterStaticRestrictions();
   }    
   
   debugMethodEnd();
@@ -132,8 +146,8 @@ sub applyChainDynamicRestrictionsAndHeuristics {
     $isFirst = 0;
   }
   
-  foreach my $heuristic (@{$self->heuristicArray()}) {
-    $heuristic->applyChainHeuristic($isFirst, $chainGenerationContextInstance);
+  foreach my $chainHeuristic (@{$self->chainHeuristicArray()}) {
+    $chainHeuristic->applyChainHeuristic($isFirst, $chainGenerationContextInstance);
     $self->_dumpTransactionsIncluded();
     $isFirst = 0;
   }    
@@ -161,8 +175,8 @@ sub applyChainHeuristicsCandinates {
   my ($self, $loopGenerationContextInstance) = @_;
 
   my $isFirst = 1;
-  foreach my $heuristic (@{$self->heuristicArray()}) {
-    $heuristic->applyCandinateTransactionHeuristic($isFirst, $loopGenerationContextInstance);
+  foreach my $chainHeuristic (@{$self->chainHeuristicArray()}) {
+    $chainHeuristic->applyCandinateTransactionHeuristic($isFirst, $loopGenerationContextInstance);
     $self->_dumpCandinateTransactionsIncluded();
     $isFirst = 0;
   }    
@@ -196,8 +210,8 @@ sub applyLoopDynamicRestrictionsAndHeuristics {
     $isFirst = 0;
   }    
   
-  foreach my $heuristic (@{$self->heuristicArray()}) {
-    $heuristic->applyLoopHeuristic($isFirst);
+  foreach my $loopHeuristic (@{$self->loopHeuristicArray()}) {
+    $loopHeuristic->applyLoopHeuristic($isFirst);
     $isFirst = 0;
   }    
   
