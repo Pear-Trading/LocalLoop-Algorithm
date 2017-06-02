@@ -127,7 +127,7 @@ has statementCandinatesNoneFirst => (
   lazy => 1,
 );
 
-sub applyHeuristicCandinates {
+sub applyCandinateTransactionHeuristic {
   debugMethodStart();
   
   my ($self, $isFirst) = @_;

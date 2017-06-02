@@ -677,7 +677,7 @@ say "Test 29 - Empty table - not first applied";
 {
   initialiseCand();
 
-  my $exception = exception { $testModule->applyHeuristicCandinates($NOT_FIRST, newLoopGenerationContext($INGORE_USER_ID)); };
+  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext($INGORE_USER_ID)); };
   is ($exception, undef ,"No exception thrown");
 }
 
@@ -687,7 +687,7 @@ say "Test 30 - Empty table - First applied";
 {
   initialiseCand();
 
-  my $exception = exception { $testModule->applyHeuristicCandinates($FIRST, newLoopGenerationContext($INGORE_USER_ID)); };
+  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($FIRST, newLoopGenerationContext($INGORE_USER_ID)); };
   is ($exception, undef ,"No exception thrown");
 }
 
@@ -697,7 +697,7 @@ say "Test 31 - First missing";
 {
   initialiseCand();
   
-  my $exception = exception { $testModule->applyHeuristicCandinates(undef, newLoopGenerationContext($INGORE_USER_ID)); };
+  my $exception = exception { $testModule->applyCandinateTransactionHeuristic(undef, newLoopGenerationContext($INGORE_USER_ID)); };
   isnt ($exception, undef ,"Exception thrown");
 }
 
@@ -707,7 +707,7 @@ say "Test 32 - First missing";
 {
   initialiseCand();
 
-  my $exception = exception { $testModule->applyHeuristicCandinates($NOT_FIRST, undef); };
+  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($NOT_FIRST, undef); };
   isnt ($exception, undef ,"Exception thrown");
 }
 
@@ -717,7 +717,7 @@ say "Test 33 - First missing";
 {
   initialiseCand();
 
-  my $exception = exception { $testModule->applyHeuristicCandinates($FIRST, undef); };
+  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($FIRST, undef); };
   isnt ($exception, undef ,"Exception thrown");
 }
 
@@ -741,7 +741,7 @@ say "Test 34 - No candinates with the user id that can form a loop, all active -
   initialiseCand1();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyHeuristicCandinates($NOT_FIRST, newLoopGenerationContext(7)); };
+  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(7)); };
   is ($exception, undef ,"No exception thrown");
 
   is (candinateTransactionIdIncluded(1),1,"id 1 remains included."); 
@@ -757,7 +757,7 @@ say "Test 35 - No candinates with the user id that can form a loop, all active -
   initialiseCand1();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyHeuristicCandinates($FIRST, newLoopGenerationContext(7)); };
+  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($FIRST, newLoopGenerationContext(7)); };
   is ($exception, undef ,"No exception thrown");
 
   is (candinateTransactionIdIncluded(1),1,"id 1 remains included."); 
@@ -788,7 +788,7 @@ say "Test 36 - No candinates with the user id that can form a loop, some exclude
   initialiseCand2();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyHeuristicCandinates($NOT_FIRST, newLoopGenerationContext(7)); };
+  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(7)); };
   is ($exception, undef ,"No exception thrown");
 
   is (candinateTransactionIdIncluded(1),0,"id 1 remains excluded."); 
@@ -804,7 +804,7 @@ say "Test 37 - No candinates with the user id that can form a loop, some exclude
   initialiseCand2();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyHeuristicCandinates($FIRST, newLoopGenerationContext(7)); };
+  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($FIRST, newLoopGenerationContext(7)); };
   is ($exception, undef ,"No exception thrown");
 
   is (candinateTransactionIdIncluded(1),1,"id 1 was reset and included again."); 
@@ -834,7 +834,7 @@ say "Test 38 - No candinates with the user id that can form a loop, all excluded
   initialiseCand3();
   
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyHeuristicCandinates($NOT_FIRST, newLoopGenerationContext(7)); };
+  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(7)); };
   is ($exception, undef ,"No exception thrown");
 
   is (candinateTransactionIdIncluded(1),0,"id 1 remains excluded."); 
@@ -850,7 +850,7 @@ say "Test 39 - No candinates with the user id that can form a loop, all excluded
   initialiseCand3();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyHeuristicCandinates($FIRST, newLoopGenerationContext(7)); };
+  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($FIRST, newLoopGenerationContext(7)); };
   is ($exception, undef ,"No exception thrown");
 
   is (candinateTransactionIdIncluded(1),1,"id 1 was reset and included again."); 
@@ -880,7 +880,7 @@ say "Test 40 - One candinate with the user id that can form a loop, all included
   initialiseCand4();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyHeuristicCandinates($NOT_FIRST, newLoopGenerationContext(5)); };
+  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(5)); };
   is ($exception, undef ,"No exception thrown");
 
   is (candinateTransactionIdIncluded(1),0,"id 1 has been excluded."); 
@@ -896,7 +896,7 @@ say "Test 41 - One candinate with the user id that can form a loop, all included
   initialiseCand4();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyHeuristicCandinates($FIRST, newLoopGenerationContext(5)); };
+  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($FIRST, newLoopGenerationContext(5)); };
   is ($exception, undef ,"No exception thrown");
 
   is (candinateTransactionIdIncluded(1),0,"id 1 has been excluded."); 
@@ -927,7 +927,7 @@ say "Test 42 - One candinate with the user id that can form a loop, some include
   initialiseCand5();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyHeuristicCandinates($NOT_FIRST, newLoopGenerationContext(4)); };
+  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(4)); };
   is ($exception, undef ,"No exception thrown");
 
   is (candinateTransactionIdIncluded(1),0,"id 1 remains excluded."); 
@@ -943,7 +943,7 @@ say "Test 43 - One candinate with the user id that can form a loop, some include
   initialiseCand5();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyHeuristicCandinates($FIRST, newLoopGenerationContext(4)); };
+  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($FIRST, newLoopGenerationContext(4)); };
   is ($exception, undef ,"No exception thrown");
 
   is (candinateTransactionIdIncluded(1),0,"id 1 has been excluded."); 
@@ -973,7 +973,7 @@ say "Test 44 - One candinate with the user id that can form a loop, all excluded
   initialiseCand6();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyHeuristicCandinates($NOT_FIRST, newLoopGenerationContext(4)); };
+  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(4)); };
   is ($exception, undef ,"No exception thrown");
 
   is (candinateTransactionIdIncluded(1),0,"id 1 remains excluded."); 
@@ -989,7 +989,7 @@ say "Test 45 - One candinate with the user id that can form a loop, all excluded
   initialiseCand6();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyHeuristicCandinates($FIRST, newLoopGenerationContext(4)); };
+  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($FIRST, newLoopGenerationContext(4)); };
   is ($exception, undef ,"No exception thrown");
 
   is (candinateTransactionIdIncluded(1),0,"id 1 was reset but then excluded again."); 
@@ -1021,7 +1021,7 @@ say "Test 46 - Two candinates with the user id that can form a loop, all include
   initialiseCand7();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyHeuristicCandinates($NOT_FIRST, newLoopGenerationContext(6)); };
+  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(6)); };
   is ($exception, undef ,"No exception thrown");
 
   is (candinateTransactionIdIncluded(1),0,"id 1 has been excluded."); 
@@ -1038,7 +1038,7 @@ say "Test 47 - Two candinates with the user id that can form a loop, all include
   initialiseCand7();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyHeuristicCandinates($FIRST, newLoopGenerationContext(6)); };
+  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($FIRST, newLoopGenerationContext(6)); };
   is ($exception, undef ,"No exception thrown");
 
   is (candinateTransactionIdIncluded(1),0,"id 1 has been excluded."); 
@@ -1071,7 +1071,7 @@ say "Test 48 - Two candinates with the user id that can form a loop, some includ
   initialiseCand8();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyHeuristicCandinates($NOT_FIRST, newLoopGenerationContext(6)); };
+  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(6)); };
   is ($exception, undef ,"No exception thrown");
 
   is (candinateTransactionIdIncluded(1),0,"id 1 has been excluded."); 
@@ -1088,7 +1088,7 @@ say "Test 49 - Two candinates with the user id that can form a loop, some includ
   initialiseCand8();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyHeuristicCandinates($FIRST, newLoopGenerationContext(6)); };
+  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($FIRST, newLoopGenerationContext(6)); };
   is ($exception, undef ,"No exception thrown");
 
   is (candinateTransactionIdIncluded(1),0,"id 1 has been excluded."); 
@@ -1120,7 +1120,7 @@ say "Test 48 - Two candinates with the user id that can form a loop, all exclude
   initialiseCand9();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyHeuristicCandinates($NOT_FIRST, newLoopGenerationContext(6)); };
+  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(6)); };
   is ($exception, undef ,"No exception thrown");
 
   is (candinateTransactionIdIncluded(1),0,"id 1 remains excluded."); 
@@ -1137,7 +1137,7 @@ say "Test 49 - Two candinates with the user id that can form a loop, all exclude
   initialiseCand9();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyHeuristicCandinates($FIRST, newLoopGenerationContext(6)); };
+  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($FIRST, newLoopGenerationContext(6)); };
   is ($exception, undef ,"No exception thrown");
 
   is (candinateTransactionIdIncluded(1),0,"id 1 was reset but then excluded."); 

@@ -162,7 +162,7 @@ sub applyHeuristicsCandinates {
 
   my $isFirst = 1;
   foreach my $heuristic (@{$self->heuristicArray()}) {
-    $heuristic->applyHeuristicCandinates($isFirst, $loopGenerationContextInstance);
+    $heuristic->applyCandinateTransactionHeuristic($isFirst, $loopGenerationContextInstance);
     $self->_dumpCandinateTransactionsIncluded();
     $isFirst = 0;
   }    

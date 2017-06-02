@@ -139,7 +139,7 @@ has _selectCandinatesReset => (
   lazy => 1,
 );
 
-sub applyHeuristicCandinates {
+sub applyCandinateTransactionHeuristic {
   debugMethodStart();
   
   my ($self, $isFirst, $loopGenerationContextInstance) = @_;

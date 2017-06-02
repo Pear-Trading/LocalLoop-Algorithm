@@ -14,8 +14,8 @@ sub applyHeuristic {
   die "applyHeuristic has not been implemented.";
 };
 
-sub applyHeuristicCandinates {
-  die "applyHeuristicCandinates has not been implemented.";
+sub applyCandinateTransactionHeuristic {
+  die "applyCandinateTransactionHeuristic has not been implemented.";
 };
 
 sub applyLoopHeuristic {
