@@ -12,9 +12,9 @@ use Pear::LocalLoop::Algorithm::Main;
 use Pear::LocalLoop::Algorithm::Debug;
 use Pear::LocalLoop::Algorithm::ProcessingTypeContainer;
 use Pear::LocalLoop::Algorithm::StaticRestriction::RemoveTransactionsThatCannotFormALoop;
-use Pear::LocalLoop::Algorithm::DynamicRestriction::AllowOnlyTransactionsWhichFromUserMatchesOurToUser;
-use Pear::LocalLoop::Algorithm::DynamicRestriction::AllowOnlyAfterCurrentTransaction;
-use Pear::LocalLoop::Algorithm::DynamicRestriction::AllowOnlyTransactionsNotExtendedOntoYet;
+use Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyTransactionsWhichFromUserMatchesOurToUser;
+use Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyAfterCurrentTransaction;
+use Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyTransactionsNotExtendedOntoYet;
 use Pear::LocalLoop::Algorithm::Heuristic::None;
 use Pear::LocalLoop::Algorithm::TransactionOrder::EarliestFirst;
 use Pear::LocalLoop::Algorithm::TransactionOrder::LargestTransactionValueFirst;
@@ -45,25 +45,27 @@ $dbh->prepare("DELETE FROM LoopInfo")->execute();
 my $rst = Pear::LocalLoop::Algorithm::StaticRestriction::RemoveTransactionsThatCannotFormALoop->new();
 my $staticRestrictions = [$rst];
 
-my $matchId = Pear::LocalLoop::Algorithm::DynamicRestriction::AllowOnlyTransactionsWhichFromUserMatchesOurToUser->new();
-my $afterCurrent = Pear::LocalLoop::Algorithm::DynamicRestriction::AllowOnlyAfterCurrentTransaction->new();
-my $extendedOnto = Pear::LocalLoop::Algorithm::DynamicRestriction::AllowOnlyTransactionsNotExtendedOntoYet->new();
-my $dynamicRestrictions = [$matchId, $extendedOnto, $afterCurrent];
+my $matchId = Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyTransactionsWhichFromUserMatchesOurToUser->new();
+my $afterCurrent = Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyAfterCurrentTransaction->new();
+my $extendedOnto = Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyTransactionsNotExtendedOntoYet->new();
+my $chainDynamicRestrictions = [$matchId, $extendedOnto, $afterCurrent];
 
 my $none = Pear::LocalLoop::Algorithm::Heuristic::None->new();
 my $findFirstFinish = Pear::LocalLoop::Algorithm::Heuristic::PrioritiseFindingLoops->new();
-my $heuristics = [$findFirstFinish, $none];
+my $chainHeuristics = [$findFirstFinish, $none];
+my $loopHeuristics = [$none];
 
 my $disallowSelectedLoops = Pear::LocalLoop::Algorithm::LoopDynamicRestriction::DisallowSelectionOfAlreadySelectedLoops->new();
 my $disallowTransactionsInLoops = Pear::LocalLoop::Algorithm::LoopDynamicRestriction::DisallowLoopsWhichHaveTransactionsInActiveLoops->new();
 my $loopDynamicRestrictions = [$disallowSelectedLoops, $disallowTransactionsInLoops];
 
 my $hash = {
+  transactionOrder => Pear::LocalLoop::Algorithm::TransactionOrder::LargestTransactionValueFirst->new(),
   staticRestrictionsArray => $staticRestrictions,
-  dynamicRestrictionsArray => $dynamicRestrictions,
-  heuristicArray => $heuristics,
+  chainDynamicRestrictionsArray => $chainDynamicRestrictions,
+  chainHeuristicArray => $chainHeuristics,
   loopDynamicRestrictionsArray => $loopDynamicRestrictions,
-  transactionOrder => Pear::LocalLoop::Algorithm::TransactionOrder::EarliestFirst->new(),
+  loopHeuristicArray => $loopHeuristics,
 };
 
 my $proc = Pear::LocalLoop::Algorithm::ProcessingTypeContainer->new($hash);
