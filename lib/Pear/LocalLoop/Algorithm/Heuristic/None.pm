@@ -188,7 +188,7 @@ has statementLoopsNoneFirst => (
   lazy => 1,
 );
 
-sub applyHeuristicLoops {
+sub applyLoopHeuristic {
   debugMethodStart();
   
   my ($self, $isFirst) = @_;

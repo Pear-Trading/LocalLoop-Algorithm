@@ -177,7 +177,7 @@ sub applyHeuristicCandinates {
 
 
 
-sub applyHeuristicLoops {
+sub applyLoopHeuristic {
   debugMethodStart();
   
   #This does not impact loops.

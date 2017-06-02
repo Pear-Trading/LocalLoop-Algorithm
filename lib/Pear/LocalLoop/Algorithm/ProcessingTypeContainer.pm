@@ -197,7 +197,7 @@ sub applyLoopDynamicRestrictionsAndHeuristics {
   }    
   
   foreach my $heuristic (@{$self->heuristicArray()}) {
-    $heuristic->applyHeuristicLoops($isFirst);
+    $heuristic->applyLoopHeuristic($isFirst);
     $isFirst = 0;
   }    
   

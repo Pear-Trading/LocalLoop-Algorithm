@@ -698,7 +698,7 @@ say "Test 27 - Empty table - not first transaction";
 {
   delete_table_data();
 
-  my $exception = exception { $testModule->applyHeuristicLoops(0); };
+  my $exception = exception { $testModule->applyLoopHeuristic(0); };
   is ($exception, undef ,"No exception thrown"); #not first restriction
 }
 
@@ -708,7 +708,7 @@ say "Test 28 - Empty table - first transaction";
 {
   delete_table_data();
 
-  my $exception = exception { $testModule->applyHeuristicLoops(1); };
+  my $exception = exception { $testModule->applyLoopHeuristic(1); };
   is ($exception, undef ,"No exception thrown"); #first restriction
 }
 
@@ -755,7 +755,7 @@ say "Test 29 - None included - not first";
 {
   initialise1();
   
-  my $exception = exception { $testModule->applyHeuristicLoops(0); };
+  my $exception = exception { $testModule->applyLoopHeuristic(0); };
   is ($exception, undef ,"No exception thrown"); #not first restriction
   
   is (loopIdIncluded(1),0,"loop 1 is not included."); 
@@ -769,7 +769,7 @@ say "Test 30 - None included - first";
 {
   initialise1();
   
-  my $exception = exception { $testModule->applyHeuristicLoops(1); };
+  my $exception = exception { $testModule->applyLoopHeuristic(1); };
   is ($exception, undef ,"No exception thrown"); #first restriction
   
   is (loopIdIncluded(1),1,"loop 1 is not included, but was reset."); 
@@ -820,7 +820,7 @@ say "Test 31 - All included - not first";
 {
   initialise2();
 
-  my $exception = exception { $testModule->applyHeuristicLoops(0); };
+  my $exception = exception { $testModule->applyLoopHeuristic(0); };
   is ($exception, undef ,"No exception thrown"); #not first restriction
   
   is (loopIdIncluded(1),0,"loop 1 was included but was discounted."); 
@@ -833,7 +833,7 @@ say "Test 32 - All included - first";
 {
   initialise2();
 
-  my $exception = exception { $testModule->applyHeuristicLoops(1); };
+  my $exception = exception { $testModule->applyLoopHeuristic(1); };
   is ($exception, undef ,"No exception thrown"); #first restriction
   
   is (loopIdIncluded(1),0,"loop 1 was included but was discounted."); 
@@ -886,7 +886,7 @@ say "Test 33 - Best loop not included - not first";
 {
   initialise3();
   
-  my $exception = exception { $testModule->applyHeuristicLoops(0); };
+  my $exception = exception { $testModule->applyLoopHeuristic(0); };
   is ($exception, undef ,"No exception thrown"); #not first restriction
   
   is (loopIdIncluded(1),0,"loop 1 was included but was discounted."); 
@@ -900,7 +900,7 @@ say "Test 34 - Best loop not included - first";
 {
   initialise3();
   
-  my $exception = exception { $testModule->applyHeuristicLoops(1); };
+  my $exception = exception { $testModule->applyLoopHeuristic(1); };
   is ($exception, undef ,"No exception thrown"); # first restriction
   
   is (loopIdIncluded(1),0,"loop 1 was included but was discounted."); 
@@ -962,7 +962,7 @@ say "Test 35 - Best loops with same start transaction but different end transact
 {
   initialise4();
   
-  my $exception = exception { $testModule->applyHeuristicLoops(0); };
+  my $exception = exception { $testModule->applyLoopHeuristic(0); };
   is ($exception, undef ,"No exception thrown"); #not first restriction
   
   is (loopIdIncluded(1),0,"loop 1 not included and remained that way."); 
@@ -976,7 +976,7 @@ say "Test 36 - Best loops with same start transaction but different end transact
 {
   initialise4();
   
-  my $exception = exception { $testModule->applyHeuristicLoops(1); };
+  my $exception = exception { $testModule->applyLoopHeuristic(1); };
   is ($exception, undef ,"No exception thrown"); #first restriction
   
   is (loopIdIncluded(1),1,"loop 1 not included but was reset and selected."); 
@@ -1039,7 +1039,7 @@ say "Test 37 - Best loops with different start transaction and same end transact
 {
   initialise5();
   
-  my $exception = exception { $testModule->applyHeuristicLoops(0); };
+  my $exception = exception { $testModule->applyLoopHeuristic(0); };
   is ($exception, undef ,"No exception thrown"); #not first restriction
   
   is (loopIdIncluded(1),0,"loop 1 not included and remained that way."); 
@@ -1054,7 +1054,7 @@ say "Test 38 - Best loops with different start transaction and same end transact
 {
   initialise5();
   
-  my $exception = exception { $testModule->applyHeuristicLoops(1); };
+  my $exception = exception { $testModule->applyLoopHeuristic(1); };
   is ($exception, undef ,"No exception thrown"); #first restriction
   
   is (loopIdIncluded(1),1,"loop 1 not included but was reset and selected."); 

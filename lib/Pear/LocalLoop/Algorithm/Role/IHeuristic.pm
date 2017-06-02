@@ -18,8 +18,8 @@ sub applyHeuristicCandinates {
   die "applyHeuristicCandinates has not been implemented.";
 };
 
-sub applyHeuristicLoops {
-  die "applyHeuristicLoops has not been implemented.";
+sub applyLoopHeuristic {
+  die "applyLoopHeuristic has not been implemented.";
 };
 
 1;
