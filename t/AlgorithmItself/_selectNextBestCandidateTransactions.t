@@ -58,16 +58,16 @@ my $settings = Pear::LocalLoop::Algorithm::ProcessingTypeContainer->new({
 });
 
 my $statementInsertProcessedTransactions = $dbh->prepare("INSERT INTO ProcessedTransactions (TransactionId, FromUserId, ToUserId, Value) VALUES (?, ?, ?, ?)");
-my $statementInsertCurrentStatsId = $dbh->prepare("INSERT INTO CurrentChainsStats (ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
-my $statementInsertCurrentChains = $dbh->prepare("INSERT INTO CurrentChains (ChainId, TransactionId_FK, ChainStatsId_FK) VALUES (?, ?, ?)");
+my $statementInsertCurrentStatsId = $dbh->prepare("INSERT INTO ChainInfo (ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
+my $statementInsertChains = $dbh->prepare("INSERT INTO Chains (ChainId, TransactionId_FK, ChainInfoId_FK) VALUES (?, ?, ?)");
 my $statementInsertCandidateTransactions = $dbh->prepare("INSERT INTO CandidateTransactions (CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
 my $selectCandidateTransactionsId = $dbh->prepare("SELECT MinimumValue, Length, TotalValue, NumberOfMinimumValues FROM CandidateTransactions WHERE TransactionFrom_FK = ? AND TransactionTo_FK = ?");
 
 
 my $selectCandidateTransactionCountAll = $dbh->prepare("SELECT COUNT(*) FROM CandidateTransactions");
-my $selectCurrentChainsCountAll = $dbh->prepare("SELECT COUNT(*) FROM CurrentChains");
-my $selectCurrentChainsStatsCountAll = $dbh->prepare("SELECT COUNT(*) FROM CurrentChainsStats");
+my $selectChainsCountAll = $dbh->prepare("SELECT COUNT(*) FROM Chains");
+my $selectChainInfoCountAll = $dbh->prepare("SELECT COUNT(*) FROM ChainInfo");
 my $selectBranchedTransactionsCountAll = $dbh->prepare("SELECT COUNT(*) FROM BranchedTransactions");
 
 
@@ -92,16 +92,16 @@ sub numCandidateTransactionRows {
   return $num;
 }
 
-sub numCurrentChainsRows {
-  $selectCurrentChainsCountAll->execute();
-  my ($num) = $selectCurrentChainsCountAll->fetchrow_array();
+sub numChainsRows {
+  $selectChainsCountAll->execute();
+  my ($num) = $selectChainsCountAll->fetchrow_array();
   
   return $num;
 }
 
-sub numCurrentChainsStatsRows {
-  $selectCurrentChainsStatsCountAll->execute();
-  my ($num) = $selectCurrentChainsStatsCountAll->fetchrow_array();
+sub numChainInfoRows {
+  $selectChainInfoCountAll->execute();
+  my ($num) = $selectChainInfoCountAll->fetchrow_array();
   
   return $num;
 }
@@ -125,11 +125,11 @@ say "Test 1 - First transaction with no possible transactions to extend onto.";
   $statementInsertProcessedTransactions->execute(3, 3, 4, 10);
   $statementInsertProcessedTransactions->execute(4, 4, 1, 10);
   
-  #ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCurrentStatsId->execute(1, 10, 1, 10, 1);
   
-  #ChainId, TransactionId_FK, ChainStatsId_FK
-  $statementInsertCurrentChains->execute(1, 1, 1);
+  #ChainId, TransactionId_FK, ChainInfoId_FK
+  $statementInsertChains->execute(1, 1, 1);
   
   my $inputTransactionState = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
     firstTransaction => 1,
@@ -145,16 +145,16 @@ say "Test 1 - First transaction with no possible transactions to extend onto.";
   });
 
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows before invocation.");
-  is (numCurrentChainsRows(), 1, "There is 1 current chains row before invocation.");
-  is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row before invocation.");
+  is (numChainsRows(), 1, "There is 1 current chains row before invocation.");
+  is (numChainInfoRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
   my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
   is (numCandidateTransactionRows(), 0,"There is no candidate transaction rows before invocation.");
-  is (numCurrentChainsRows(), 1, "There is 1 current chains row before invocation.");
-  is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row before invocation.");
+  is (numChainsRows(), 1, "There is 1 current chains row before invocation.");
+  is (numChainInfoRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 }
 
@@ -170,11 +170,11 @@ say "Test 2 - First transaction with 1 possible transactions to extend onto.";
   $statementInsertProcessedTransactions->execute(3, 3, 4, 10);
   $statementInsertProcessedTransactions->execute(4, 4, 1, 10);
   
-  #ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCurrentStatsId->execute(1, 10, 1, 10, 1);
   
-  #ChainId, TransactionId_FK, ChainStatsId_FK
-  $statementInsertCurrentChains->execute(1, 1, 1);
+  #ChainId, TransactionId_FK, ChainInfoId_FK
+  $statementInsertChains->execute(1, 1, 1);
   
   my $inputTransactionState = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
     firstTransaction => 1,
@@ -190,8 +190,8 @@ say "Test 2 - First transaction with 1 possible transactions to extend onto.";
   });
 
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows before invocation.");
-  is (numCurrentChainsRows(), 1, "There is 1 current chains row before invocation.");
-  is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row before invocation.");
+  is (numChainsRows(), 1, "There is 1 current chains row before invocation.");
+  is (numChainInfoRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
   my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
@@ -205,8 +205,8 @@ say "Test 2 - First transaction with 1 possible transactions to extend onto.";
   is ($totalValue, 20, "totalValue has been updated to account for the new transaction.");
   is ($numberOfMinimumValues, 2, "numberOfMinimumValues has been updated to account for the new transaction.");
       
-  is (numCurrentChainsRows(), 1, "There is 1 current chains row after invocation.");
-  is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row after invocation.");
+  is (numChainsRows(), 1, "There is 1 current chains row after invocation.");
+  is (numChainInfoRows(), 1, "There is 1 current chains stats row after invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows after` invocation.");
 }
 
@@ -228,11 +228,11 @@ say "Test 3 - First transaction with 2 (or more) possible transactions to extend
   $statementInsertProcessedTransactions->execute(3, 2, 4, 20); #Change it to produce different results.
   $statementInsertProcessedTransactions->execute(4, 4, 1, 10);
   
-  #ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCurrentStatsId->execute(1, 10, 1, 10, 1);
   
-  #ChainId, TransactionId_FK, ChainStatsId_FK
-  $statementInsertCurrentChains->execute(1, 1, 1);
+  #ChainId, TransactionId_FK, ChainInfoId_FK
+  $statementInsertChains->execute(1, 1, 1);
   
   my $inputTransactionState = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
     firstTransaction => 1,
@@ -248,8 +248,8 @@ say "Test 3 - First transaction with 2 (or more) possible transactions to extend
   });
 
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows before invocation.");
-  is (numCurrentChainsRows(), 1, "There is 1 current chains row before invocation.");
-  is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row before invocation.");
+  is (numChainsRows(), 1, "There is 1 current chains row before invocation.");
+  is (numChainInfoRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
   my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
@@ -269,8 +269,8 @@ say "Test 3 - First transaction with 2 (or more) possible transactions to extend
   is ($totalValue, 30, "totalValue has been updated to account for the new transaction.");
   is ($numberOfMinimumValues, 1, "numberOfMinimumValues has been updated to account for the new transaction.");
       
-  is (numCurrentChainsRows(), 1, "There is 1 current chains row after invocation.");
-  is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row after invocation.");
+  is (numChainsRows(), 1, "There is 1 current chains row after invocation.");
+  is (numChainInfoRows(), 1, "There is 1 current chains stats row after invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows after` invocation.");
 }
 
@@ -286,11 +286,11 @@ say "Test 4 - First transaction with 1 possible transactions to extend onto, nex
   $statementInsertProcessedTransactions->execute(3, 3, 4, 10);
   $statementInsertProcessedTransactions->execute(4, 4, 1, 10);
   
-  #ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCurrentStatsId->execute(1, 10, 1, 10, 1);
   
-  #ChainId, TransactionId_FK, ChainStatsId_FK
-  $statementInsertCurrentChains->execute(1, 1, 1);
+  #ChainId, TransactionId_FK, ChainInfoId_FK
+  $statementInsertChains->execute(1, 1, 1);
   
   my $inputTransactionState = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
     firstTransaction => 1,
@@ -306,8 +306,8 @@ say "Test 4 - First transaction with 1 possible transactions to extend onto, nex
   });
 
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows before invocation.");
-  is (numCurrentChainsRows(), 1, "There is 1 current chains row before invocation.");
-  is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row before invocation.");
+  is (numChainsRows(), 1, "There is 1 current chains row before invocation.");
+  is (numChainInfoRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
   my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
@@ -321,8 +321,8 @@ say "Test 4 - First transaction with 1 possible transactions to extend onto, nex
   is ($totalValue, 18, "totalValue has been updated to account for the new transaction.");
   is ($numberOfMinimumValues, 1, "numberOfMinimumValues remains the same.");
       
-  is (numCurrentChainsRows(), 1, "There is 1 current chains row after invocation.");
-  is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row after invocation.");
+  is (numChainsRows(), 1, "There is 1 current chains row after invocation.");
+  is (numChainInfoRows(), 1, "There is 1 current chains stats row after invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows after` invocation.");
 }
 
@@ -339,11 +339,11 @@ say "Test 5 - First transaction with 1 possible transactions to extend onto, nex
   $statementInsertProcessedTransactions->execute(3, 3, 4, 10);
   $statementInsertProcessedTransactions->execute(4, 4, 1, 10);
   
-  #ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCurrentStatsId->execute(1, 10, 1, 10, 1);
   
-  #ChainId, TransactionId_FK, ChainStatsId_FK
-  $statementInsertCurrentChains->execute(1, 1, 1);
+  #ChainId, TransactionId_FK, ChainInfoId_FK
+  $statementInsertChains->execute(1, 1, 1);
   
   my $inputTransactionState = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
     firstTransaction => 1,
@@ -359,8 +359,8 @@ say "Test 5 - First transaction with 1 possible transactions to extend onto, nex
   });
 
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows before invocation.");
-  is (numCurrentChainsRows(), 1, "There is 1 current chains row before invocation.");
-  is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row before invocation.");
+  is (numChainsRows(), 1, "There is 1 current chains row before invocation.");
+  is (numChainInfoRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
   my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
@@ -374,8 +374,8 @@ say "Test 5 - First transaction with 1 possible transactions to extend onto, nex
   is ($totalValue, 20, "totalValue has been updated to account for the new transaction.");
   is ($numberOfMinimumValues, 2, "numberOfMinimumValues has been updated to account for the new transaction.");
       
-  is (numCurrentChainsRows(), 1, "There is 1 current chains row after invocation.");
-  is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row after invocation.");
+  is (numChainsRows(), 1, "There is 1 current chains row after invocation.");
+  is (numChainInfoRows(), 1, "There is 1 current chains stats row after invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows after` invocation.");
 }
 
@@ -391,11 +391,11 @@ say "Test 6 - First transaction with 1 possible transactions to extend onto, nex
   $statementInsertProcessedTransactions->execute(3, 3, 4, 10);
   $statementInsertProcessedTransactions->execute(4, 4, 1, 10);
   
-  #ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCurrentStatsId->execute(1, 10, 1, 10, 1);
   
-  #ChainId, TransactionId_FK, ChainStatsId_FK
-  $statementInsertCurrentChains->execute(1, 1, 1);
+  #ChainId, TransactionId_FK, ChainInfoId_FK
+  $statementInsertChains->execute(1, 1, 1);
   
   my $inputTransactionState = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
     firstTransaction => 1,
@@ -411,8 +411,8 @@ say "Test 6 - First transaction with 1 possible transactions to extend onto, nex
   });
 
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows before invocation.");
-  is (numCurrentChainsRows(), 1, "There is 1 current chains row before invocation.");
-  is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row before invocation.");
+  is (numChainsRows(), 1, "There is 1 current chains row before invocation.");
+  is (numChainInfoRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
   my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
@@ -426,8 +426,8 @@ say "Test 6 - First transaction with 1 possible transactions to extend onto, nex
   is ($totalValue, 22, "totalValue has been updated to account for the new transaction.");
   is ($numberOfMinimumValues, 1, "numberOfMinimumValues remains the same.");
       
-  is (numCurrentChainsRows(), 1, "There is 1 current chains row after invocation.");
-  is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row after invocation.");
+  is (numChainsRows(), 1, "There is 1 current chains row after invocation.");
+  is (numChainInfoRows(), 1, "There is 1 current chains stats row after invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows after` invocation.");
 }
 
@@ -445,13 +445,13 @@ say "Test 7 - Not first transaction with 2 possible transactions to extend onto 
   $statementInsertProcessedTransactions->execute(5, 4, 5, 10);
   $statementInsertProcessedTransactions->execute(6, 5, 1, 10);
   
-  #ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCurrentStatsId->execute(1, 10, 1, 10, 1);
   $statementInsertCurrentStatsId->execute(2, 10, 2, 22, 1);
   
-  #ChainId, TransactionId_FK, ChainStatsId_FK
-  $statementInsertCurrentChains->execute(1, 1, 1);
-  $statementInsertCurrentChains->execute(1, 2, 2);
+  #ChainId, TransactionId_FK, ChainInfoId_FK
+  $statementInsertChains->execute(1, 1, 1);
+  $statementInsertChains->execute(1, 2, 2);
   
   my $inputTransactionState = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
     extendedTransaction => Pear::LocalLoop::Algorithm::ChainTransaction->new({
@@ -471,8 +471,8 @@ say "Test 7 - Not first transaction with 2 possible transactions to extend onto 
   });
 
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows before invocation.");
-  is (numCurrentChainsRows(), 2, "There is 1 current chains row before invocation.");
-  is (numCurrentChainsStatsRows(), 2, "There is 1 current chains stats row before invocation.");
+  is (numChainsRows(), 2, "There is 1 current chains row before invocation.");
+  is (numChainInfoRows(), 2, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
   my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
@@ -492,8 +492,8 @@ say "Test 7 - Not first transaction with 2 possible transactions to extend onto 
   is ($totalValue, 30, "totalValue has been updated to account for the new transaction.");
   is ($numberOfMinimumValues, 1, "numberOfMinimumValues remains the same.");
       
-  is (numCurrentChainsRows(), 2, "There is 1 current chains row after invocation.");
-  is (numCurrentChainsStatsRows(), 2, "There is 1 current chains stats row after invocation.");
+  is (numChainsRows(), 2, "There is 1 current chains row after invocation.");
+  is (numChainInfoRows(), 2, "There is 1 current chains stats row after invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows after` invocation.");
 }
 
@@ -518,13 +518,13 @@ say "Test 8 - Not first transaction, existing candidate transaction prevents the
   $statementInsertProcessedTransactions->execute(5, 3, 6, 13); #Above minimum value
 
   
-  #ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCurrentStatsId->execute(1, 10, 1, 10, 1);
   $statementInsertCurrentStatsId->execute(2, 10, 2, 20, 2);
   
-  #ChainId, TransactionId_FK, ChainStatsId_FK
-  $statementInsertCurrentChains->execute(1, 1, 1);
-  $statementInsertCurrentChains->execute(1, 2, 2);
+  #ChainId, TransactionId_FK, ChainInfoId_FK
+  $statementInsertChains->execute(1, 1, 1);
+  $statementInsertChains->execute(1, 2, 2);
   
   #Purposefully don't add to transaction 1 -> 4, as we want to make sure this not included. 
   #It's already connected tx. 1 -> 2.
@@ -549,8 +549,8 @@ say "Test 8 - Not first transaction, existing candidate transaction prevents the
   });
 
   is (numCandidateTransactionRows(), 1, "There is 1 candidate transaction row before invocation.");
-  is (numCurrentChainsRows(), 2, "There is 2 current chains rows before invocation.");
-  is (numCurrentChainsStatsRows(), 2, "There is 2 current chains stats rows before invocation.");
+  is (numChainsRows(), 2, "There is 2 current chains rows before invocation.");
+  is (numChainInfoRows(), 2, "There is 2 current chains stats rows before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
   my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
@@ -571,8 +571,8 @@ say "Test 8 - Not first transaction, existing candidate transaction prevents the
   is ($totalValue, 33, "totalValue has been updated to account for the new transaction.");
   is ($numberOfMinimumValues, 2, "numberOfMinimumValues remains the same.");
       
-  is (numCurrentChainsRows(), 2, "There is 1 current chains row after invocation.");
-  is (numCurrentChainsStatsRows(), 2, "There is 1 current chains stats row after invocation.");
+  is (numChainsRows(), 2, "There is 1 current chains row after invocation.");
+  is (numChainInfoRows(), 2, "There is 1 current chains stats row after invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows after` invocation.");
 }
 

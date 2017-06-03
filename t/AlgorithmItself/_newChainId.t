@@ -35,8 +35,8 @@ sub delete_table_data {
 
 
 my $statementInsertProcessedTransactions = $dbh->prepare("INSERT INTO ProcessedTransactions (TransactionId, FromUserId, ToUserId, Value) VALUES (?, ?, ?, ?)");
-my $statementInsertCurrentStatsId = $dbh->prepare("INSERT INTO CurrentChainsStats (ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
-my $statementInsertCurrentChains = $dbh->prepare("INSERT INTO CurrentChains (ChainId, TransactionId_FK, ChainStatsId_FK) VALUES (?, ?, ?)");
+my $statementInsertCurrentStatsId = $dbh->prepare("INSERT INTO ChainInfo (ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
+my $statementInsertChains = $dbh->prepare("INSERT INTO Chains (ChainId, TransactionId_FK, ChainInfoId_FK) VALUES (?, ?, ?)");
 
 sub initialise { 
   delete_table_data();
@@ -49,7 +49,7 @@ sub initialise {
   $statementInsertProcessedTransactions->execute(6, 6, 1, 10);
   
   #It does not matter what these values are.
-  #ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCurrentStatsId->execute(1, 10, 1, 10, 1);
   $statementInsertCurrentStatsId->execute(2, 10, 1, 10, 1);
   $statementInsertCurrentStatsId->execute(3, 10, 1, 10, 1);
@@ -60,9 +60,9 @@ sub initialise {
 }
 
 
-my $selectChainId = $dbh->prepare("SELECT COUNT(ChainId) FROM CurrentChains WHERE ChainId = ?");
+my $selectChainId = $dbh->prepare("SELECT COUNT(ChainId) FROM Chains WHERE ChainId = ?");
 
-my $selectAllIdsCount = $dbh->prepare("SELECT COUNT(ChainId) FROM CurrentChains");
+my $selectAllIdsCount = $dbh->prepare("SELECT COUNT(ChainId) FROM Chains");
 
 sub chainIdDoesntExists {
   my ($id) = @_;
@@ -107,10 +107,10 @@ is (numRows(),0,"There still is no rows"); #Make sure nothing is added.
 say "Test 2 - 1 Chain in the table";
 initialise();
 #3rd param does not matter.
-#ChainId, TransactionId_FK, ChainStatsId_FK
-$statementInsertCurrentChains->execute(1, 1, 1);
-$statementInsertCurrentChains->execute(1, 2, 1);
-$statementInsertCurrentChains->execute(1, 3, 1);
+#ChainId, TransactionId_FK, ChainInfoId_FK
+$statementInsertChains->execute(1, 1, 1);
+$statementInsertChains->execute(1, 2, 1);
+$statementInsertChains->execute(1, 3, 1);
 is (numRows(),3,"There is only 3 rows");
 
 my $integer = undef;
@@ -126,16 +126,16 @@ is (numRows(),3,"There is still is only 3 rows"); #Make sure nothing is added.
 say "Test 3 - 2 Chains in the table";
 initialise();
 #3rd param does not matter.
-#ChainId, TransactionId_FK, ChainStatsId_FK
-$statementInsertCurrentChains->execute(1, 1, 1);
-$statementInsertCurrentChains->execute(1, 2, 1);
-$statementInsertCurrentChains->execute(1, 3, 1);
-$statementInsertCurrentChains->execute(1, 4, 1);
-$statementInsertCurrentChains->execute(1, 5, 1);
-$statementInsertCurrentChains->execute(1, 6, 1);
-$statementInsertCurrentChains->execute(2, 4, 1);
-$statementInsertCurrentChains->execute(2, 5, 1);
-$statementInsertCurrentChains->execute(2, 6, 1);
+#ChainId, TransactionId_FK, ChainInfoId_FK
+$statementInsertChains->execute(1, 1, 1);
+$statementInsertChains->execute(1, 2, 1);
+$statementInsertChains->execute(1, 3, 1);
+$statementInsertChains->execute(1, 4, 1);
+$statementInsertChains->execute(1, 5, 1);
+$statementInsertChains->execute(1, 6, 1);
+$statementInsertChains->execute(2, 4, 1);
+$statementInsertChains->execute(2, 5, 1);
+$statementInsertChains->execute(2, 6, 1);
 is (numRows(),9,"There is only 9 rows");
 
 my $integer = undef;

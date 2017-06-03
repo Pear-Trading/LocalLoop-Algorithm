@@ -40,13 +40,13 @@ sub delete_table_data {
 }
 
 my $statementInsertProcessedTransactions = $dbh->prepare("INSERT INTO ProcessedTransactions (TransactionId, FromUserId, ToUserId, Value) VALUES (?, ?, ?, ?)");
-my $statementInsertCurrentStatsId = $dbh->prepare("INSERT INTO CurrentChainsStats (ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
-my $statementInsertCurrentChains = $dbh->prepare("INSERT INTO CurrentChains (ChainId, TransactionId_FK, ChainStatsId_FK) VALUES (?, ?, ?)");
+my $statementInsertCurrentStatsId = $dbh->prepare("INSERT INTO ChainInfo (ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
+my $statementInsertChains = $dbh->prepare("INSERT INTO Chains (ChainId, TransactionId_FK, ChainInfoId_FK) VALUES (?, ?, ?)");
 my $statementInsertCandidateTransactions = $dbh->prepare("INSERT INTO CandidateTransactions (CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 my $statementInsertBranchedTransactions = $dbh->prepare("INSERT INTO BranchedTransactions (ChainId_FK, FromTransactionId_FK, ToTransactionId_FK) VALUES (?, ?, ?)");
 
-my $selectCurrentChainsId = $dbh->prepare("SELECT ChainStatsId_FK FROM CurrentChains WHERE ChainId = ? AND TransactionId_FK = ?");
-my $selectCurrentChainsStatsId = $dbh->prepare("SELECT MinimumValue, Length, TotalValue, NumberOfMinimumValues FROM CurrentChainsStats WHERE ChainStatsId = ?");
+my $selectChainsId = $dbh->prepare("SELECT ChainInfoId_FK FROM Chains WHERE ChainId = ? AND TransactionId_FK = ?");
+my $selectChainInfoId = $dbh->prepare("SELECT MinimumValue, Length, TotalValue, NumberOfMinimumValues FROM ChainInfo WHERE ChainInfoId = ?");
 
 my $selectLoopInfoFromStartEndTransaction = $dbh->prepare("SELECT LoopId, MinimumValue, Length, TotalValue, NumberOfMinimumValues FROM LoopInfo WHERE FirstTransactionId_FK = ? AND LastTransactionId_FK = ?");
 
@@ -125,7 +125,7 @@ my $hash = {
 
 my $settings = Pear::LocalLoop::Algorithm::ProcessingTypeContainer->new($hash);
 
-say "Test 1 - Generates no loops, with deletion test of tables CurrentChains and CurrentChainsStats";
+say "Test 1 - Generates no loops, with deletion test of tables Chains and ChainInfo";
 {
   delete_table_data();
   
@@ -137,15 +137,15 @@ say "Test 1 - Generates no loops, with deletion test of tables CurrentChains and
   
   #Simulate a previous pass in an attempt to maliciously break the algorithm.
   #This is to attempt to trick the algorithm into thinking a loop does exist as this data is present
-  #Hence why it should clear the tables before processing. test of CurrentChains and CurrentChainsStats deletion.
-  #ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #Hence why it should clear the tables before processing. test of Chains and ChainInfo deletion.
+  #ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCurrentStatsId->execute(1, 10, 1, 10, 1);
   $statementInsertCurrentStatsId->execute(2, 10, 2, 20, 2);
   $statementInsertCurrentStatsId->execute(3, 10, 3, 30, 3);
-  #ChainId, TransactionId_FK, ChainStatsId_FK
-  $statementInsertCurrentChains->execute(1, 1, 1);
-  $statementInsertCurrentChains->execute(1, 2, 2);
-  $statementInsertCurrentChains->execute(1, 3, 3);
+  #ChainId, TransactionId_FK, ChainInfoId_FK
+  $statementInsertChains->execute(1, 1, 1);
+  $statementInsertChains->execute(1, 2, 2);
+  $statementInsertChains->execute(1, 3, 3);
 
 
   is(numLoopInfoRows(), 0, "There is no loop info rows before execution.");
@@ -164,7 +164,7 @@ say "Test 1 - Generates no loops, with deletion test of tables CurrentChains and
 
 
 
-say "Test 2 - Generate 1 loop, with deletion test of tables CurrentChains, CurrentChainsStats and BranchedTransactions";
+say "Test 2 - Generate 1 loop, with deletion test of tables Chains, ChainInfo and BranchedTransactions";
 {
   delete_table_data();
   
@@ -176,16 +176,16 @@ say "Test 2 - Generate 1 loop, with deletion test of tables CurrentChains, Curre
   
   #More malicious attempts to break the algorithm.
   #This is to attempt to trick the algorithm into thinking a loop does exist as this data is present
-  #hence why it should clear the tables before processing. Test of CurrentChains, CurrentChainsStats and 
+  #hence why it should clear the tables before processing. Test of Chains, ChainInfo and 
   #BranchedTransactions deletion.
-  #ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCurrentStatsId->execute(1, 10, 1, 100, 1);
   $statementInsertCurrentStatsId->execute(2, 10, 2, 200, 2);
   $statementInsertCurrentStatsId->execute(3, 10, 3, 300, 3); #Random total value to again notice if we break it.
-  #ChainId, TransactionId_FK, ChainStatsId_FK
-  $statementInsertCurrentChains->execute(1, 1, 1);
-  $statementInsertCurrentChains->execute(1, 2, 2);
-  $statementInsertCurrentChains->execute(1, 3, 3);
+  #ChainId, TransactionId_FK, ChainInfoId_FK
+  $statementInsertChains->execute(1, 1, 1);
+  $statementInsertChains->execute(1, 2, 2);
+  $statementInsertChains->execute(1, 3, 3);
   #In a real life senario as this would not be added as it does not branch. However in this testing we
   #can use the branched transactions table to potentially prevent a chain from linking to the finish,
   #as it blocks the extension of the from transaction to the to transaction on the specified chain.

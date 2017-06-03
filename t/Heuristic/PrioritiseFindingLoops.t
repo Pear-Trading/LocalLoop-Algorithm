@@ -625,8 +625,8 @@ say "Test 28 - Two transactions with the end from user id, both excluded - First
 
 my $insertStatementCandidateTransactions = $dbh->prepare("INSERT INTO CandidateTransactions (CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 my $statementInsertProcessedTransactions = $dbh->prepare("INSERT INTO ProcessedTransactions (TransactionId, FromUserId, ToUserId, Value) VALUES (?, ?, ?, ?)");
-my $statementInsertCurrentStatsId = $dbh->prepare("INSERT INTO CurrentChainsStats (ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
-my $statementInsertCurrentChains = $dbh->prepare("INSERT INTO CurrentChains (ChainId, TransactionId_FK, ChainStatsId_FK) VALUES (?, ?, ?)");
+my $statementInsertCurrentStatsId = $dbh->prepare("INSERT INTO ChainInfo (ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
+my $statementInsertChains = $dbh->prepare("INSERT INTO Chains (ChainId, TransactionId_FK, ChainInfoId_FK) VALUES (?, ?, ?)");
 
 sub initialiseCand {
   delete_table_data();
@@ -640,16 +640,16 @@ sub initialiseCand {
   $statementInsertProcessedTransactions->execute(6, 4, 6, 10);
   
   #It does not matter what these values are.
-  #ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCurrentStatsId->execute(1, 10, 1, 10, 1);
   
-  #ChainId, TransactionId_FK, ChainStatsId_FK
-  $statementInsertCurrentChains->execute(1, 1, 1);
-  $statementInsertCurrentChains->execute(1, 2, 1);
-  $statementInsertCurrentChains->execute(1, 3, 1);
-  $statementInsertCurrentChains->execute(1, 4, 1);
-  $statementInsertCurrentChains->execute(1, 5, 1);
-  $statementInsertCurrentChains->execute(1, 6, 1);
+  #ChainId, TransactionId_FK, ChainInfoId_FK
+  $statementInsertChains->execute(1, 1, 1);
+  $statementInsertChains->execute(1, 2, 1);
+  $statementInsertChains->execute(1, 3, 1);
+  $statementInsertChains->execute(1, 4, 1);
+  $statementInsertChains->execute(1, 5, 1);
+  $statementInsertChains->execute(1, 6, 1);
 }
 
 sub newLoopGenerationContext {

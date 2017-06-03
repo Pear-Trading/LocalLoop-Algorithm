@@ -43,8 +43,8 @@ my $heuristics = [$none];
 my $settings = Pear::LocalLoop::Algorithm::ProcessingTypeContainer->new({ chainHeuristicArray => $heuristics });
 
 my $statementInsertProcessedTransactions = $dbh->prepare("INSERT INTO ProcessedTransactions (TransactionId, FromUserId, ToUserId, Value) VALUES (?, ?, ?, ?)");
-my $statementInsertCurrentStatsId = $dbh->prepare("INSERT INTO CurrentChainsStats (ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
-my $statementInsertCurrentChains = $dbh->prepare("INSERT INTO CurrentChains (ChainId, TransactionId_FK, ChainStatsId_FK) VALUES (?, ?, ?)");
+my $statementInsertCurrentStatsId = $dbh->prepare("INSERT INTO ChainInfo (ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
+my $statementInsertChains = $dbh->prepare("INSERT INTO Chains (ChainId, TransactionId_FK, ChainInfoId_FK) VALUES (?, ?, ?)");
 my $statementInsertCandidateTransactions = $dbh->prepare("INSERT INTO CandidateTransactions (CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
 my $selectCandidateTransactionsId = $dbh->prepare("SELECT COUNT(CandidateTransactionsId) FROM CandidateTransactions WHERE CandidateTransactionsId = ?");
@@ -76,10 +76,10 @@ sub numCandidateTransactionRows {
 #The only things that matter are:
 #ProcessedTransactions:
 #- TransactionId (Unique)
-#CurrentChains:
+#Chains:
 #- ChainId and TransactionId_FK (Unique)
-#CurrentChainsStats:
-#- ChainStatsId (Unique for the above)
+#ChainInfo:
+#- ChainInfoId (Unique for the above)
 #CandidateTransactions:
 #- CandidateTransactionsId (Unique)
 #- ChainId_FK (Null or not null).
@@ -232,11 +232,11 @@ say "Test 4- 1 Null and one not null candidate transaction, null returns first."
   $statementInsertProcessedTransactions->execute(4, 3, 4, 10);
   $statementInsertProcessedTransactions->execute(5, 4, 1, 10);
   
-  #ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCurrentStatsId->execute(1, 10, 1, 10, 1);
   
-  #ChainId, TransactionId_FK, ChainStatsId_FK
-  $statementInsertCurrentChains->execute(1, 1, 1);
+  #ChainId, TransactionId_FK, ChainInfoId_FK
+  $statementInsertChains->execute(1, 1, 1);
   
   #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   #Only params 1 - 4 matter.
@@ -283,11 +283,11 @@ say "Test 5 - 1 not null candidate transaction.";
   $statementInsertProcessedTransactions->execute(4, 3, 4, 10);
   $statementInsertProcessedTransactions->execute(5, 4, 1, 10);
   
-  #ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCurrentStatsId->execute(1, 10, 1, 10, 1);
   
-  #ChainId, TransactionId_FK, ChainStatsId_FK
-  $statementInsertCurrentChains->execute(1, 1, 1);
+  #ChainId, TransactionId_FK, ChainInfoId_FK
+  $statementInsertChains->execute(1, 1, 1);
   
   #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   #Only params 1 - 4 matter.
@@ -328,13 +328,13 @@ say "Test 6 - 2 not null candidate transactions, selection be by heuristic.";
   $statementInsertProcessedTransactions->execute(4, 3, 4, 10);
   $statementInsertProcessedTransactions->execute(5, 4, 1, 10);
   
-  #ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCurrentStatsId->execute(1, 10, 1, 10, 1);
   $statementInsertCurrentStatsId->execute(2, 20, 1, 20, 1);
   
-  #ChainId, TransactionId_FK, ChainStatsId_FK
-  $statementInsertCurrentChains->execute(1, 1, 1);
-  $statementInsertCurrentChains->execute(2, 2, 2);
+  #ChainId, TransactionId_FK, ChainInfoId_FK
+  $statementInsertChains->execute(1, 1, 1);
+  $statementInsertChains->execute(2, 2, 2);
   
   #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   #Only params 1 - 4 matter.

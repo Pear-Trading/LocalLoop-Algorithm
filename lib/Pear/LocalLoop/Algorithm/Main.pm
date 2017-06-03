@@ -211,20 +211,20 @@ has _statementDeleteTuplesBranchedTransactions => (
   lazy => 1,
 );
 
-has _statementDeleteTuplesCurrentChains => (
+has _statementDeleteTuplesChains => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("DELETE FROM CurrentChains");
+    return $self->dbh()->prepare("DELETE FROM Chains");
   },
   lazy => 1,
 );
 
-has _statementDeleteTuplesCurrentChainsStats => (
+has _statementDeleteTuplesChainInfo => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("DELETE FROM CurrentChainsStats");
+    return $self->dbh()->prepare("DELETE FROM ChainInfo");
   },
   lazy => 1,
 );
@@ -251,7 +251,7 @@ has _statementSelectTheChainIdWhichCouldFormALoop => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("SELECT Result.ChainId FROM ProcessedTransactions, (SELECT CurrentChains.ChainId AS ChainId, MAX(CurrentChains.TransactionId_FK) AS MaxTransactionId FROM CurrentChains GROUP BY CurrentChains.ChainId) AS Result WHERE Result.MaxTransactionId = ProcessedTransactions.TransactionId AND ProcessedTransactions.ToUserId = ?");
+    return $self->dbh()->prepare("SELECT Result.ChainId FROM ProcessedTransactions, (SELECT Chains.ChainId AS ChainId, MAX(Chains.TransactionId_FK) AS MaxTransactionId FROM Chains GROUP BY Chains.ChainId) AS Result WHERE Result.MaxTransactionId = ProcessedTransactions.TransactionId AND ProcessedTransactions.ToUserId = ?");
   },
   lazy => 1,
 );
@@ -261,25 +261,25 @@ has _statementSelectFirstAndLastTransactionsInASpecfiedChain => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("SELECT MIN(TransactionId_FK), MAX(TransactionId_FK) FROM CurrentChains WHERE ChainId = ? GROUP BY ChainId");
+    return $self->dbh()->prepare("SELECT MIN(TransactionId_FK), MAX(TransactionId_FK) FROM Chains WHERE ChainId = ? GROUP BY ChainId");
   },
   lazy => 1,
 );
 
-has _statementSelectChainStatsIdFromCurrentChainsGivenSpecifiedChainIdAndTransactionId => (
+has _statementSelectChainInfoIdFromChainsGivenSpecifiedChainIdAndTransactionId => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("SELECT ChainStatsId_FK FROM CurrentChains WHERE ChainId = ? AND TransactionId_FK = ?");
+    return $self->dbh()->prepare("SELECT ChainInfoId_FK FROM Chains WHERE ChainId = ? AND TransactionId_FK = ?");
   },
   lazy => 1,
 );
 
-has _statementSelectChainStatsGivenAChainStatsId => (
+has _statementSelectChainStatsGivenAChainInfoId => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("SELECT MinimumValue, Length, TotalValue, NumberOfMinimumValues FROM CurrentChainsStats WHERE ChainStatsId = ?");
+    return $self->dbh()->prepare("SELECT MinimumValue, Length, TotalValue, NumberOfMinimumValues FROM ChainInfo WHERE ChainInfoId = ?");
   },
   lazy => 1,
 );
@@ -297,7 +297,7 @@ has _statementInsertIntoLoopsSpecifiedLoopIdWithAllOfTheTransactionsInAChain => 
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("INSERT INTO Loops (LoopId_FK, TransactionId_FK) SELECT ?, TransactionId_FK FROM CurrentChains WHERE ChainId = ?");
+    return $self->dbh()->prepare("INSERT INTO Loops (LoopId_FK, TransactionId_FK) SELECT ?, TransactionId_FK FROM Chains WHERE ChainId = ?");
   },
   lazy => 1,
 );
@@ -313,8 +313,8 @@ sub _loopGeneration {
 
   $self->_statementDeleteTuplesCandidateTransactions()->execute();  
   $self->_statementDeleteTuplesBranchedTransactions()->execute();
-  $self->_statementDeleteTuplesCurrentChains()->execute();
-  $self->_statementDeleteTuplesCurrentChainsStats()->execute();
+  $self->_statementDeleteTuplesChains()->execute();
+  $self->_statementDeleteTuplesChainInfo()->execute();
   
   my $statementTransactionValue = $self->_statementSelectFromUserIdAndValueOfATransaction();
 
@@ -367,8 +367,8 @@ sub _loopGeneration {
   #say Dumper($chainIdsWhichAreLoops);
   
   my $statementGetChainMinMax = $self->_statementSelectFirstAndLastTransactionsInASpecfiedChain();
-  my $statementGetChainStatsId = $self->_statementSelectChainStatsIdFromCurrentChainsGivenSpecifiedChainIdAndTransactionId();
-  my $statementGetChainStats = $self->_statementSelectChainStatsGivenAChainStatsId();
+  my $statementGetChainInfoId = $self->_statementSelectChainInfoIdFromChainsGivenSpecifiedChainIdAndTransactionId();
+  my $statementGetChainStats = $self->_statementSelectChainStatsGivenAChainInfoId();
 
   
   my $statementInsertStats = $self->_statementInsertIntoLoopInfoNewTupleExcludingActiveIncludedAndHeuristic();
@@ -384,8 +384,8 @@ sub _loopGeneration {
     $statementGetChainMinMax->execute($chainId);
     my ($minTransactionId, $maxTransactionId) = $statementGetChainMinMax->fetchrow_array();
     
-    $statementGetChainStatsId->execute($chainId, $maxTransactionId);
-    my ($chainStatsId) = $statementGetChainStatsId->fetchrow_array();
+    $statementGetChainInfoId->execute($chainId, $maxTransactionId);
+    my ($chainStatsId) = $statementGetChainInfoId->fetchrow_array();
     
     $statementGetChainStats->execute($chainStatsId);
     my ($minimumValue, $length, $totalValue, $numberOfMinimumValues) = $statementGetChainStats->fetchrow_array();
@@ -490,11 +490,11 @@ sub _selectNextBestCandidateTransactions {
 
     debugMethodMiddle("WhileLoop: ForEachLoop. Done heuristics");
     
-    my $statementChainStatsId = $self->_statementSelectChainStatsIdFromCurrentChainsGivenSpecifiedChainIdAndTransactionId();
-    $statementChainStatsId->execute($chainId, $transactionId);
-    my ($chainStatsId) = $statementChainStatsId->fetchrow_array();
+    my $statementChainInfoId = $self->_statementSelectChainInfoIdFromChainsGivenSpecifiedChainIdAndTransactionId();
+    $statementChainInfoId->execute($chainId, $transactionId);
+    my ($chainStatsId) = $statementChainInfoId->fetchrow_array();
     
-    my $statementChainStats = $self->_statementSelectChainStatsGivenAChainStatsId();
+    my $statementChainStats = $self->_statementSelectChainStatsGivenAChainInfoId();
     $statementChainStats->execute($chainStatsId);    
     my ($minimumValue, $length, $totalValue, $numberOfMinimumValues) = $statementChainStats->fetchrow_array();
 
@@ -534,20 +534,20 @@ sub _selectNextBestCandidateTransactions {
 
 
 
-has _statementInsertIntoCurrentChainChainIdTransactionIdAndChainStatsId => (
+has _statementInsertIntoCurrentChainChainIdTransactionIdAndChainInfoId => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("INSERT INTO CurrentChains (ChainId, TransactionId_FK, ChainStatsId_FK) VALUES (?, ?, ?)");
+    return $self->dbh()->prepare("INSERT INTO Chains (ChainId, TransactionId_FK, ChainInfoId_FK) VALUES (?, ?, ?)");
   },
   lazy => 1,
 );
 
-has _statementInsertIntoChainStatsIdMinValueLengthTotalValueAndNumMinValues => (
+has _statementInsertIntoChainInfoIdMinValueLengthTotalValueAndNumMinValues => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("INSERT INTO CurrentChainsStats (ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
+    return $self->dbh()->prepare("INSERT INTO ChainInfo (ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
   },
   lazy => 1,
 );
@@ -556,7 +556,7 @@ has _statementSelectLastTransactionIdInAChain => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("SELECT MAX(TransactionId_FK) FROM CurrentChains WHERE ChainId = ? GROUP BY ChainId");
+    return $self->dbh()->prepare("SELECT MAX(TransactionId_FK) FROM Chains WHERE ChainId = ? GROUP BY ChainId");
   },
   lazy => 1,
 );
@@ -570,11 +570,11 @@ has _statementInserIntoBranchedTransactionChainIdFromTransactionIdAndToTransacti
   lazy => 1,
 );
 
-has _statementSelectTransactionIdAndChainStatsIdFromTheSpecifiedChainIdAndOnOrBeforeTheSpecifiedTrasactionId => (
+has _statementSelectTransactionIdAndChainInfoIdFromTheSpecifiedChainIdAndOnOrBeforeTheSpecifiedTrasactionId => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("SELECT TransactionId_FK, ChainStatsId_FK FROM CurrentChains WHERE ChainId = ? AND TransactionId_FK <= ?");
+    return $self->dbh()->prepare("SELECT TransactionId_FK, ChainInfoId_FK FROM Chains WHERE ChainId = ? AND TransactionId_FK <= ?");
   },
   lazy => 1,
 );
@@ -584,8 +584,8 @@ sub _getNextBestCandidateTransactionAnalysis {
   debugMethodStart();  
   my ($self, $settings, $loopGenerationContextInstance) = @_;
   
-  my $statementInsertChains = $self->_statementInsertIntoCurrentChainChainIdTransactionIdAndChainStatsId();
-  my $statementInsertChainStats = $self->_statementInsertIntoChainStatsIdMinValueLengthTotalValueAndNumMinValues();
+  my $statementInsertChains = $self->_statementInsertIntoCurrentChainChainIdTransactionIdAndChainInfoId();
+  my $statementInsertChainStats = $self->_statementInsertIntoChainInfoIdMinValueLengthTotalValueAndNumMinValues();
 
   my ($hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues) = @{$self->_getNextBestCandidateTransaction($settings, $loopGenerationContextInstance)};
   
@@ -606,12 +606,12 @@ sub _getNextBestCandidateTransactionAnalysis {
   debugMethodMiddle("ReturnVals(Non-null): hasRow:$hasRow chainId:".(defined $chainId ? $chainId : "")." transFrom:".(defined $transactionFrom ? $transactionFrom : "")." transTo:$transactionTo miniValue:$minimumValue Length:$length TotalValue:$totalValue numMinVals:$numberOfMinimumValues");
 
   
-  my $newChainStatsId = $self->_newChainStatsId();  
+  my $newChainInfoId = $self->_newChainInfoId();  
   
   if (! defined $transactionFrom) {
     $chainId = $self->_newChainId();
-    $statementInsertChainStats->execute($newChainStatsId, $minimumValue, $length, $totalValue, $numberOfMinimumValues);
-    $statementInsertChains->execute($chainId, $transactionTo, $newChainStatsId);
+    $statementInsertChainStats->execute($newChainInfoId, $minimumValue, $length, $totalValue, $numberOfMinimumValues);
+    $statementInsertChains->execute($chainId, $transactionTo, $newChainInfoId);
     
     debugMethodMiddle("FirstTransaction: ChainId:$chainId TransactionTo:$transactionTo MinVal:$minimumValue Length:$length TotalValue:$totalValue NumMinValues:$numberOfMinimumValues");
     
@@ -654,7 +654,7 @@ sub _getNextBestCandidateTransactionAnalysis {
       $statementInsertBranch->execute($chainId, $transactionFrom, $transactionTo);
       
       #TODO add test.
-      my $statementChainsSelect = $self->_statementSelectTransactionIdAndChainStatsIdFromTheSpecifiedChainIdAndOnOrBeforeTheSpecifiedTrasactionId();
+      my $statementChainsSelect = $self->_statementSelectTransactionIdAndChainInfoIdFromTheSpecifiedChainIdAndOnOrBeforeTheSpecifiedTrasactionId();
       $statementChainsSelect->execute($chainId, $transactionFrom);
       
       while (my ($transactionId, $chainStatsId) = $statementChainsSelect->fetchrow_array()) {
@@ -674,8 +674,8 @@ sub _getNextBestCandidateTransactionAnalysis {
     });
     
     #Adds the non branched transaction or final branched transaction.
-    $statementInsertChainStats->execute($newChainStatsId, $minimumValue, $length, $totalValue, $numberOfMinimumValues);
-    $statementInsertChains->execute($chainId, $transactionTo, $newChainStatsId);
+    $statementInsertChainStats->execute($newChainInfoId, $minimumValue, $length, $totalValue, $numberOfMinimumValues);
+    $statementInsertChains->execute($chainId, $transactionTo, $newChainInfoId);
     
     debugMethodMiddle("AnotherTransactionVals: ChainId:$chainId TransactionTo:$transactionTo MinVal:$minimumValue Length:$length TotalValue:$totalValue NumMinValues:$numberOfMinimumValues");
     
@@ -775,7 +775,7 @@ has _statementSelectMaxChainId => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("SELECT MAX(ChainId) FROM CurrentChains");
+    return $self->dbh()->prepare("SELECT MAX(ChainId) FROM Chains");
   },
   lazy => 1,
 );
@@ -808,35 +808,35 @@ sub _newChainId {
 
 
 
-has _statementSelectMaxChainStatsId => (
+has _statementSelectMaxChainInfoId => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("SELECT MAX(ChainStatsId) FROM CurrentChainsStats");
+    return $self->dbh()->prepare("SELECT MAX(ChainInfoId) FROM ChainInfo");
   },
   lazy => 1,
 );
 
-sub _newChainStatsId {
+sub _newChainInfoId {
   debugMethodStart();
   
   my ($self) = @_;
   my $dbh = $self->dbh;
 
-  my $statementMaxChainStatsId = $self->_statementSelectMaxChainStatsId();
-  $statementMaxChainStatsId->execute();
+  my $statementMaxChainInfoId = $self->_statementSelectMaxChainInfoId();
+  $statementMaxChainInfoId->execute();
   
-  my ($maxId) = $statementMaxChainStatsId->fetchrow_array();
+  my ($maxId) = $statementMaxChainInfoId->fetchrow_array();
   
   my $id = undef;
   if (defined $maxId) {
     $id = $maxId + 1;
-    debugMethodMiddle("ChainStatsIdExists = $id");
+    debugMethodMiddle("ChainInfoIdExists = $id");
   }
   #No chains so there is no value
   else {
     $id = 1;
-    debugMethodMiddle("ChainStatsIdDoesn'tExist = $id");
+    debugMethodMiddle("ChainInfoIdDoesn'tExist = $id");
   }
   
   debugMethodEnd();
@@ -860,10 +860,10 @@ sub _newCandidateTransactionsId {
   my ($self) = @_;
   my $dbh = $self->dbh;
 
-  my $statementMaxChainStatsId = $self->_statementSelectMaxCandidateTransactionsId();
-  $statementMaxChainStatsId->execute();
+  my $statementMaxChainInfoId = $self->_statementSelectMaxCandidateTransactionsId();
+  $statementMaxChainInfoId->execute();
   
-  my ($maxId) = $statementMaxChainStatsId->fetchrow_array();
+  my ($maxId) = $statementMaxChainInfoId->fetchrow_array();
   
   my $id = undef;
   if (defined $maxId) {
@@ -897,10 +897,10 @@ sub _newLoopId {
   my ($self) = @_;
   my $dbh = $self->dbh;
 
-  my $statementMaxChainStatsId = $self->_statementSelectMaxLoopId();
-  $statementMaxChainStatsId->execute();
+  my $statementMaxChainInfoId = $self->_statementSelectMaxLoopId();
+  $statementMaxChainInfoId->execute();
   
-  my ($maxId) = $statementMaxChainStatsId->fetchrow_array();
+  my ($maxId) = $statementMaxChainInfoId->fetchrow_array();
   
   my $id = undef;
   if (defined $maxId) {

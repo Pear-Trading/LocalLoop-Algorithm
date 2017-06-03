@@ -7,7 +7,7 @@ use v5.10;
 
 use FindBin;
 
-#This is a test for "Pear::LocalLoop::Algorithm::AlgorithmItself::_newChainStatsId"
+#This is a test for "Pear::LocalLoop::Algorithm::AlgorithmItself::_newChainInfoId"
 
 Pear::LocalLoop::Algorithm::Main->setTestingMode();
 
@@ -33,11 +33,11 @@ sub delete_table_data {
 }
 
 
-my $statementInsertCurrentStatsId = $dbh->prepare("INSERT INTO CurrentChainsStats (ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
+my $statementInsertCurrentStatsId = $dbh->prepare("INSERT INTO ChainInfo (ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
 
 
-my $selectCandidateTransactionsId = $dbh->prepare("SELECT COUNT(ChainStatsId) FROM CurrentChainsStats WHERE ChainStatsId = ?");
-my $selectAllIdsCount = $dbh->prepare("SELECT COUNT(ChainStatsId) FROM CurrentChainsStats");
+my $selectCandidateTransactionsId = $dbh->prepare("SELECT COUNT(ChainInfoId) FROM ChainInfo WHERE ChainInfoId = ?");
+my $selectAllIdsCount = $dbh->prepare("SELECT COUNT(ChainInfoId) FROM ChainInfo");
 
 sub candidateTransactionIdDoesntExists {
   my ($id) = @_;
@@ -69,7 +69,7 @@ delete_table_data();
 is (numRows(),0,"There is no tuples");
 
 my $integer = undef;
-my $exception = exception { $integer = $main->_newChainStatsId(); };
+my $exception = exception { $integer = $main->_newChainInfoId(); };
 is ($exception, undef ,"No exception thrown");
 
 isnt ($integer, undef, "Empty table returns not undef id."); 
@@ -82,12 +82,12 @@ is (numRows(),0,"There still is no tuples"); #Make sure nothing is added.
 say "Test 2 - 1 Tuple";
 delete_table_data();
 #Only the first param matters.
-#ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+#ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
 $statementInsertCurrentStatsId->execute(1, 10, 1, 10, 1); 
 is (numRows(),1,"There is only 1 tuple");
 
 my $integer = undef;
-my $exception = exception { $integer = $main->_newChainStatsId(); };
+my $exception = exception { $integer = $main->_newChainInfoId(); };
 is ($exception, undef ,"No exception thrown");
 
 isnt ($integer, undef, "Non-empty table returns not undef id."); 
@@ -99,13 +99,13 @@ is (numRows(),1,"There is still is only 1 tuple"); #Make sure nothing is added.
 say "Test 3 - Transactions exist - 2 Transaction";
 delete_table_data();
 #Only the first param matters.
-#ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+#ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
 $statementInsertCurrentStatsId->execute(2, 10,  1,  10,  1);   
 $statementInsertCurrentStatsId->execute(5, 100, 11, 101, 11);  
 is (numRows(),2,"There is only 2 tuples");
 
 my $integer = undef;
-my $exception = exception { $integer = $main->_newChainStatsId(); };
+my $exception = exception { $integer = $main->_newChainInfoId(); };
 is ($exception, undef ,"No exception thrown");
 
 isnt ($integer, undef, "Non-empty table returns not undef id."); 

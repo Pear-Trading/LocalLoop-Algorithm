@@ -47,21 +47,21 @@ CREATE TABLE LastUserTransaction (
   FOREIGN KEY (LastTransactionId_FK) REFERENCES ProcessedTransactions (TransactionId) 
 );
 
-CREATE TABLE CurrentChainsStats (
-  ChainStatsId INTEGER PRIMARY KEY NOT NULL,
+CREATE TABLE ChainInfo (
+  ChainInfoId INTEGER PRIMARY KEY NOT NULL,
   MinimumValue INTEGER NOT NULL,
   Length INTEGER NOT NULL,
   TotalValue INTEGER NOT NULL,
   NumberOfMinimumValues INTEGER NOT NULL
 );
 
-CREATE TABLE CurrentChains (
+CREATE TABLE Chains (
   ChainId INTEGER NOT NULL,
   TransactionId_FK INTEGER NOT NULL,
-  ChainStatsId_FK INTEGER NOT NULL,
+  ChainInfoId_FK INTEGER NOT NULL,
   PRIMARY KEY (ChainId, TransactionId_FK),
   FOREIGN KEY (TransactionId_FK) REFERENCES ProcessedTransactions (TransactionId),
-  FOREIGN KEY (ChainStatsId_FK) REFERENCES CurrentChainsStats (ChainStatsId) 
+  FOREIGN KEY (ChainInfoId_FK) REFERENCES ChainInfo (ChainInfoId) 
 );
 
 CREATE TABLE BranchedTransactions (
@@ -69,7 +69,7 @@ CREATE TABLE BranchedTransactions (
   FromTransactionId_FK INTEGER NOT NULL,
   ToTransactionId_FK INTEGER NOT NULL,
   PRIMARY KEY (ChainId_FK, FromTransactionId_FK, ToTransactionId_FK),
-  FOREIGN KEY (ChainId_FK) REFERENCES CurrentChains (ChainId),
+  FOREIGN KEY (ChainId_FK) REFERENCES Chains (ChainId),
   FOREIGN KEY (FromTransactionId_FK) REFERENCES ProcessedTransactions (TransactionId),
   FOREIGN KEY (ToTransactionId_FK) REFERENCES ProcessedTransactions (TransactionId)
 );
@@ -86,7 +86,7 @@ CREATE TABLE CandidateTransactions (
   Included INTEGER NOT NULL DEFAULT 1,
   HeuristicValue INTEGER,
   PRIMARY KEY (ChainId_FK, TransactionFrom_FK, TransactionTo_FK),
-  FOREIGN KEY (ChainId_FK) REFERENCES CurrentChains (ChainId), 
+  FOREIGN KEY (ChainId_FK) REFERENCES Chains (ChainId), 
   FOREIGN KEY (TransactionFrom_FK) REFERENCES ProcessedTransactions (TransactionId), 
   FOREIGN KEY (TransactionTo_FK) REFERENCES ProcessedTransactions (TransactionId), 
   CHECK ((ChainId_FK ISNULL AND TransactionFrom_FK ISNULL) OR (ChainId_FK NOTNULL AND TransactionFrom_FK NOTNULL))

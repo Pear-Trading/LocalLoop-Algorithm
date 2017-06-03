@@ -18,9 +18,9 @@ DROP TABLE IF EXISTS BranchedTransactions;
 DROP VIEW IF EXISTS CandidateTransactions_ViewIncludedHerusticDesc;
 DROP VIEW IF EXISTS CandidateTransactions_ViewIncludedHerusticAsc;
 DROP VIEW IF EXISTS CandidateTransactions_ViewIncluded;
-DROP TABLE IF EXISTS CurrentChains;
+DROP TABLE IF EXISTS Chains;
 
-DROP TABLE IF EXISTS CurrentChainsStats;
+DROP TABLE IF EXISTS ChainInfo;
 
 DROP TABLE IF EXISTS LastUserTransaction;
 

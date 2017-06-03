@@ -46,21 +46,21 @@ my $heuristics = [$none];
 my $settings = Pear::LocalLoop::Algorithm::ProcessingTypeContainer->new({ chainHeuristicArray => $heuristics });
 
 my $statementInsertProcessedTransactions = $dbh->prepare("INSERT INTO ProcessedTransactions (TransactionId, FromUserId, ToUserId, Value) VALUES (?, ?, ?, ?)");
-my $statementInsertCurrentStatsId = $dbh->prepare("INSERT INTO CurrentChainsStats (ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
-my $statementInsertCurrentChains = $dbh->prepare("INSERT INTO CurrentChains (ChainId, TransactionId_FK, ChainStatsId_FK) VALUES (?, ?, ?)");
+my $statementInsertCurrentStatsId = $dbh->prepare("INSERT INTO ChainInfo (ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
+my $statementInsertChains = $dbh->prepare("INSERT INTO Chains (ChainId, TransactionId_FK, ChainInfoId_FK) VALUES (?, ?, ?)");
 my $statementInsertCandidateTransactions = $dbh->prepare("INSERT INTO CandidateTransactions (CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
-my $selectCurrentChainsId = $dbh->prepare("SELECT ChainStatsId_FK FROM CurrentChains WHERE ChainId = ? AND TransactionId_FK = ?");
-my $selectCurrentChainsStatsId = $dbh->prepare("SELECT MinimumValue, Length, TotalValue, NumberOfMinimumValues FROM CurrentChainsStats WHERE ChainStatsId = ?");
+my $selectChainsId = $dbh->prepare("SELECT ChainInfoId_FK FROM Chains WHERE ChainId = ? AND TransactionId_FK = ?");
+my $selectChainInfoId = $dbh->prepare("SELECT MinimumValue, Length, TotalValue, NumberOfMinimumValues FROM ChainInfo WHERE ChainInfoId = ?");
 
 my $selectCandidateTransactionsIdCountSingle = $dbh->prepare("SELECT COUNT(*) FROM CandidateTransactions WHERE CandidateTransactionsId = ?");
-my $selectCurrentChainsIdCountSingle = $dbh->prepare("SELECT COUNT(*) FROM CurrentChains WHERE ChainId = ? AND TransactionId_FK = ?");
-my $selectCurrentChainsStatsIdCountSingle = $dbh->prepare("SELECT COUNT(*) FROM CurrentChainsStats WHERE ChainStatsId = ?");
+my $selectChainsIdCountSingle = $dbh->prepare("SELECT COUNT(*) FROM Chains WHERE ChainId = ? AND TransactionId_FK = ?");
+my $selectChainInfoIdCountSingle = $dbh->prepare("SELECT COUNT(*) FROM ChainInfo WHERE ChainInfoId = ?");
 my $selectBranchedTransactionsIdCountSingle = $dbh->prepare("SELECT COUNT(*) FROM BranchedTransactions WHERE ChainId_FK = ? AND FromTransactionId_FK = ? AND ToTransactionId_FK = ?");
 
 my $selectCandidateTransactionCountAll = $dbh->prepare("SELECT COUNT(*) FROM CandidateTransactions");
-my $selectCurrentChainsCountAll = $dbh->prepare("SELECT COUNT(*) FROM CurrentChains");
-my $selectCurrentChainsStatsCountAll = $dbh->prepare("SELECT COUNT(*) FROM CurrentChainsStats");
+my $selectChainsCountAll = $dbh->prepare("SELECT COUNT(*) FROM Chains");
+my $selectChainInfoCountAll = $dbh->prepare("SELECT COUNT(*) FROM ChainInfo");
 my $selectBranchedTransactionsCountAll = $dbh->prepare("SELECT COUNT(*) FROM BranchedTransactions");
 
 sub candidateTransactionIdExists {
@@ -88,10 +88,10 @@ sub currentChainsIdExists {
     die "transactionId cannot be undefined";
   }
   
-  $selectCurrentChainsIdCountSingle->execute($chainId, $transactionId);
+  $selectChainsIdCountSingle->execute($chainId, $transactionId);
   
   #1 == exists, 0 == doesn't exist.
-  my ($returnedVal) = $selectCurrentChainsIdCountSingle->fetchrow_array();
+  my ($returnedVal) = $selectChainsIdCountSingle->fetchrow_array();
   
   return $returnedVal;
 }
@@ -103,10 +103,10 @@ sub chainStatsIdExists {
     die "chainStatsId cannot be undefined";
   }
   
-  $selectCurrentChainsStatsIdCountSingle->execute($chainStatsId);
+  $selectChainInfoIdCountSingle->execute($chainStatsId);
   
   #1 == exists, 0 == doesn't exist.
-  my ($returnedVal) = $selectCurrentChainsStatsIdCountSingle->fetchrow_array();
+  my ($returnedVal) = $selectChainInfoIdCountSingle->fetchrow_array();
   
   return $returnedVal;
 }
@@ -132,7 +132,7 @@ sub branchedTransactionsExists {
   return $returnedVal;
 }
 
-sub selectCurrentChains {
+sub selectChains {
   my ($chainId, $transactionId) = @_;
   
   if ( ! defined $chainId) {
@@ -142,8 +142,8 @@ sub selectCurrentChains {
     die "transactionId cannot be undefined";
   }
   
-  $selectCurrentChainsId->execute($chainId, $transactionId);
-  return $selectCurrentChainsId->fetchrow_array();
+  $selectChainsId->execute($chainId, $transactionId);
+  return $selectChainsId->fetchrow_array();
 }
 
 sub selectCurrentChainStats {
@@ -153,8 +153,8 @@ sub selectCurrentChainStats {
     die "chainStatsId cannot be undefined";
   }
   
-  $selectCurrentChainsStatsId->execute($chainStatsId);
-  return $selectCurrentChainsStatsId->fetchrow_array();
+  $selectChainInfoId->execute($chainStatsId);
+  return $selectChainInfoId->fetchrow_array();
 }
 
 
@@ -165,16 +165,16 @@ sub numCandidateTransactionRows {
   return $num;
 }
 
-sub numCurrentChainsRows {
-  $selectCurrentChainsCountAll->execute();
-  my ($num) = $selectCurrentChainsCountAll->fetchrow_array();
+sub numChainsRows {
+  $selectChainsCountAll->execute();
+  my ($num) = $selectChainsCountAll->fetchrow_array();
   
   return $num;
 }
 
-sub numCurrentChainsStatsRows {
-  $selectCurrentChainsStatsCountAll->execute();
-  my ($num) = $selectCurrentChainsStatsCountAll->fetchrow_array();
+sub numChainInfoRows {
+  $selectChainInfoCountAll->execute();
+  my ($num) = $selectChainInfoCountAll->fetchrow_array();
   
   return $num;
 }
@@ -190,10 +190,10 @@ sub numBranchedTransactionsRows {
 #The only things that matter are:
 #ProcessedTransactions:
 #- TransactionId (Unique)
-#CurrentChains:
+#Chains:
 #- ChainId and TransactionId_FK (Unique)
-#CurrentChainsStats:
-#- ChainStatsId (Unique for the above)
+#ChainInfo:
+#- ChainInfoId (Unique for the above)
 #CandidateTransactions:
 #- CandidateTransactionsId (Unique)
 #- ChainId_FK (Null or not null).
@@ -233,8 +233,8 @@ say "Test 1 - Empty table";
   $statementInsertProcessedTransactions->execute(5, 4, 1, 10);
   
   is (numCandidateTransactionRows(),0,"There is no candidate transaction rows before invocation.");
-  is (numCurrentChainsRows(),0,"There is no current chains rows before invocation.");
-  is (numCurrentChainsStatsRows(),0,"There is no current chains stats rows before invocation.");
+  is (numChainsRows(),0,"There is no current chains rows before invocation.");
+  is (numChainInfoRows(),0,"There is no current chains stats rows before invocation.");
   is (numBranchedTransactionsRows(),0,"There is no branched transaction rows before invocation.");
 
   my $returnVal = undef;
@@ -247,8 +247,8 @@ say "Test 1 - Empty table";
   });
 
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows after invocation.");
-  is (numCurrentChainsRows(),0,"There is no current chains rows after invocation.");
-  is (numCurrentChainsStatsRows(),0,"There is no current chains stats rows after invocation.");
+  is (numChainsRows(),0,"There is no current chains rows after invocation.");
+  is (numChainInfoRows(),0,"There is no current chains stats rows after invocation.");
   is (numBranchedTransactionsRows(),0,"There is no branched transaction rows after invocation.");
   
   compareExtendedTransactionWithTest($returnVal, $expectedReturnVal);
@@ -272,8 +272,8 @@ say "Test 2 - First transaction selected (with nulls)";
   $statementInsertCandidateTransactions->execute(1, undef, undef, 1, 10, 1, 10, 1);
  
   is (numCandidateTransactionRows(),1,"There is one candidate transaction row before invocation.");
-  is (numCurrentChainsRows(),0,"There is no current chains rows before invocation.");
-  is (numCurrentChainsStatsRows(),0,"There is no current chains stats rows before invocation.");
+  is (numChainsRows(),0,"There is no current chains rows before invocation.");
+  is (numChainInfoRows(),0,"There is no current chains stats rows before invocation.");
   is (numBranchedTransactionsRows(),0,"There is no branched transaction rows before invocation.");
   
 
@@ -294,11 +294,11 @@ say "Test 2 - First transaction selected (with nulls)";
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows after invocation.");
   is (candidateTransactionIdExists(1), 0,"Candidate transaction id 1 has been removed.");
     
-  is (numCurrentChainsRows(),1,"There is one current chains row after invocation.");
+  is (numChainsRows(),1,"There is one current chains row after invocation.");
   is (currentChainsIdExists(1, 1), 1,"Chain has been added."); #ChainId, TransactionId
   
-  is (numCurrentChainsStatsRows(),1,"One chains stats row has been added after invocation.");
-  my ($chainStatsId) = selectCurrentChains(1, 1); #It exists above so is fine.
+  is (numChainInfoRows(),1,"One chains stats row has been added after invocation.");
+  my ($chainStatsId) = selectChains(1, 1); #It exists above so is fine.
   is ($chainStatsId, 1, "A new chain stats row has been created.");
   my ($minimumValue, $length, $totalValue, $numOfMinValues) = selectCurrentChainStats($chainStatsId);
   is ($minimumValue, 10, "minimumValue is the same value we passed in.");
@@ -324,19 +324,19 @@ say "Test 3 - Not first transaction selected (non-null), selection of transactio
   $statementInsertProcessedTransactions->execute(4, 3, 4, 10);
   $statementInsertProcessedTransactions->execute(5, 4, 1, 10);
   
-  #ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCurrentStatsId->execute(1, 10, 1, 10, 1);
   
-  #ChainId, TransactionId_FK, ChainStatsId_FK
-  $statementInsertCurrentChains->execute(1, 1, 1);
+  #ChainId, TransactionId_FK, ChainInfoId_FK
+  $statementInsertChains->execute(1, 1, 1);
   
   #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   #Only params 1 - 4 matter.
   $statementInsertCandidateTransactions->execute(2, 1, 1, 3, 10, 2, 20, 2);
  
   is (numCandidateTransactionRows(),1,"There is 1 candidate transaction row before invocation.");
-  is (numCurrentChainsRows(),1,"There is 1 current chains row before invocation.");
-  is (numCurrentChainsStatsRows(),1,"There is 1 current chains stats row before invocation.");
+  is (numChainsRows(),1,"There is 1 current chains row before invocation.");
+  is (numChainInfoRows(),1,"There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(),0,"There is no branched transaction rows before invocation.");
   
 
@@ -361,12 +361,12 @@ say "Test 3 - Not first transaction selected (non-null), selection of transactio
 
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows after invocation.");
     
-  is (numCurrentChainsRows(),2,"There is 2 current chains rows after invocation.");
+  is (numChainsRows(),2,"There is 2 current chains rows after invocation.");
   is (currentChainsIdExists(1, 1), 1,"Chain remains."); #ChainId, TransactionId. Already existed.
   is (currentChainsIdExists(1, 3), 1,"Chain has been added."); #ChainId, TransactionId
   
-  is (numCurrentChainsStatsRows(),2,"One chains stats row has been added after invocation.");
-  my ($chainStatsId) = selectCurrentChains(1, 3); #It exists above so is fine.
+  is (numChainInfoRows(),2,"One chains stats row has been added after invocation.");
+  my ($chainStatsId) = selectChains(1, 3); #It exists above so is fine.
   is ($chainStatsId, 2, "A new chain stats row has been created.");
   my ($minimumValue, $length, $totalValue, $numOfMinValues) = selectCurrentChainStats($chainStatsId);
   is ($minimumValue, 10, "minimumValue is the same value we passed in.");
@@ -392,21 +392,21 @@ say "Test 4 - Not first transaction selected (non-null), selection of transactio
   $statementInsertProcessedTransactions->execute(4, 3, 4, 10);
   $statementInsertProcessedTransactions->execute(5, 4, 1, 10);
   
-  #ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCurrentStatsId->execute(1, 10, 1, 10, 1);
   $statementInsertCurrentStatsId->execute(2, 10, 2, 20, 2);
   
-  #ChainId, TransactionId_FK, ChainStatsId_FK
-  $statementInsertCurrentChains->execute(1, 1, 1);
-  $statementInsertCurrentChains->execute(1, 3, 2);
+  #ChainId, TransactionId_FK, ChainInfoId_FK
+  $statementInsertChains->execute(1, 1, 1);
+  $statementInsertChains->execute(1, 3, 2);
   
   #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   #Only params 1 - 4 matter.
   $statementInsertCandidateTransactions->execute(3, 1, 3, 4, 10, 3, 30, 3);
  
   is (numCandidateTransactionRows(),1,"There is one candidate transaction row before invocation.");
-  is (numCurrentChainsRows(),2,"There is 2 current chains rows before invocation.");
-  is (numCurrentChainsStatsRows(),2,"There is 2 current chains stats rows before invocation.");
+  is (numChainsRows(),2,"There is 2 current chains rows before invocation.");
+  is (numChainInfoRows(),2,"There is 2 current chains stats rows before invocation.");
   is (numBranchedTransactionsRows(),0,"There is no branched transaction rows before invocation.");
   
 
@@ -431,13 +431,13 @@ say "Test 4 - Not first transaction selected (non-null), selection of transactio
 
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows after invocation.");
     
-  is (numCurrentChainsRows(), 3, "There is 2 current chains rows after invocation.");
+  is (numChainsRows(), 3, "There is 2 current chains rows after invocation.");
   is (currentChainsIdExists(1, 1), 1, "Chain remains."); #ChainId, TransactionId. Already existed.
   is (currentChainsIdExists(1, 3), 1, "Chain remains."); #ChainId, TransactionId. Already existed.
   is (currentChainsIdExists(1, 4), 1, "Chain has been added."); #ChainId, TransactionId
   
-  is (numCurrentChainsStatsRows(),3,"One chains stats row has been added after invocation.");
-  my ($chainStatsId) = selectCurrentChains(1, 4); #It exists above so is fine.
+  is (numChainInfoRows(),3,"One chains stats row has been added after invocation.");
+  my ($chainStatsId) = selectChains(1, 4); #It exists above so is fine.
   is ($chainStatsId, 3, "A new chain stats row has been created.");
   my ($minimumValue, $length, $totalValue, $numOfMinValues) = selectCurrentChainStats($chainStatsId);
   is ($minimumValue, 10, "minimumValue is the same value we passed in.");
@@ -464,13 +464,13 @@ say "Test 5 - Not first transaction selected (non-null), selection of transactio
   $statementInsertProcessedTransactions->execute(5, 3, 4, 10);
   $statementInsertProcessedTransactions->execute(6, 4, 1, 10);
   
-  #ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCurrentStatsId->execute(1, 10, 1, 10, 1);
   $statementInsertCurrentStatsId->execute(2, 10, 2, 20, 2);
   
-  #ChainId, TransactionId_FK, ChainStatsId_FK
-  $statementInsertCurrentChains->execute(1, 1, 1);
-  $statementInsertCurrentChains->execute(1, 3, 2);
+  #ChainId, TransactionId_FK, ChainInfoId_FK
+  $statementInsertChains->execute(1, 1, 1);
+  $statementInsertChains->execute(1, 3, 2);
   
   #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   #Only params 1 - 4 matter.
@@ -479,8 +479,8 @@ say "Test 5 - Not first transaction selected (non-null), selection of transactio
   $statementInsertCandidateTransactions->execute(4, 1, 1, 4, 10, 2, 30, 1);
  
   is (numCandidateTransactionRows(),1,"There is one candidate transaction row before invocation.");
-  is (numCurrentChainsRows(),2,"There is 2 current chains rows before invocation.");
-  is (numCurrentChainsStatsRows(),2,"There is 2 current chains stats rows before invocation.");
+  is (numChainsRows(),2,"There is 2 current chains rows before invocation.");
+  is (numChainInfoRows(),2,"There is 2 current chains stats rows before invocation.");
   is (numBranchedTransactionsRows(),0,"There is no branched transaction rows before invocation.");
   
 
@@ -505,16 +505,16 @@ say "Test 5 - Not first transaction selected (non-null), selection of transactio
 
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows after invocation.");
     
-  is (numCurrentChainsRows(), 4, "There is 4 current chains rows after invocation.");
+  is (numChainsRows(), 4, "There is 4 current chains rows after invocation.");
   is (currentChainsIdExists(1, 1), 1, "Chain remains."); #ChainId, TransactionId. Already existed.
   is (currentChainsIdExists(1, 3), 1, "Chain remains."); #ChainId, TransactionId. Already existed.
   is (currentChainsIdExists(2, 1), 1, "Chain has been added."); #ChainId, TransactionId
   is (currentChainsIdExists(2, 4), 1, "Chain has been added."); #ChainId, TransactionId
   
-  is (numCurrentChainsStatsRows(),3,"One chains stats row has been added after invocation.");
-  my ($chainStatsIdTx1) = selectCurrentChains(2, 1); #It exists above so is fine.
+  is (numChainInfoRows(),3,"One chains stats row has been added after invocation.");
+  my ($chainStatsIdTx1) = selectChains(2, 1); #It exists above so is fine.
   is ($chainStatsIdTx1, 1, "The new branch reuses the old chainStatsId from the other chain.");
-  my ($chainStatsIdTx4) = selectCurrentChains(2, 4); #It exists above so is fine, This will be 3
+  my ($chainStatsIdTx4) = selectChains(2, 4); #It exists above so is fine, This will be 3
   is ($chainStatsIdTx4, 3, "A new chain stats row has been created.");
   my ($minimumValue, $length, $totalValue, $numOfMinValues) = selectCurrentChainStats($chainStatsIdTx4);
   is ($minimumValue, 10, "minimumValue is the same value we passed in.");
@@ -544,15 +544,15 @@ say "Test 6 - Not first transaction selected (non-null), select transaction at t
   $statementInsertProcessedTransactions->execute(5, 3, 4, 10);
   $statementInsertProcessedTransactions->execute(6, 4, 1, 10);
   
-  #ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCurrentStatsId->execute(1, 10, 1, 10, 1);
   $statementInsertCurrentStatsId->execute(2, 10, 2, 20, 2);
   $statementInsertCurrentStatsId->execute(3, 10, 3, 30, 3);
   
-  #ChainId, TransactionId_FK, ChainStatsId_FK
-  $statementInsertCurrentChains->execute(1, 1, 1);
-  $statementInsertCurrentChains->execute(1, 3, 2);
-  $statementInsertCurrentChains->execute(1, 5, 3);
+  #ChainId, TransactionId_FK, ChainInfoId_FK
+  $statementInsertChains->execute(1, 1, 1);
+  $statementInsertChains->execute(1, 3, 2);
+  $statementInsertChains->execute(1, 5, 3);
   
   #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   #Only params 1 - 4 matter.
@@ -560,8 +560,8 @@ say "Test 6 - Not first transaction selected (non-null), select transaction at t
   $statementInsertCandidateTransactions->execute(4, 1, 1, 4, 10, 2, 30, 1);
  
   is (numCandidateTransactionRows(),1,"There is one candidate transaction row before invocation.");
-  is (numCurrentChainsRows(),3,"There is 3 current chains rows before invocation.");
-  is (numCurrentChainsStatsRows(),3,"There is 3 current chains stats rows before invocation.");
+  is (numChainsRows(),3,"There is 3 current chains rows before invocation.");
+  is (numChainInfoRows(),3,"There is 3 current chains stats rows before invocation.");
   is (numBranchedTransactionsRows(),0,"There is no branched transaction rows before invocation.");
   
 
@@ -586,17 +586,17 @@ say "Test 6 - Not first transaction selected (non-null), select transaction at t
 
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows after invocation.");
     
-  is (numCurrentChainsRows(), 5, "There is 5 current chains rows after invocation.");
+  is (numChainsRows(), 5, "There is 5 current chains rows after invocation.");
   is (currentChainsIdExists(1, 1), 1, "Chain remains."); #ChainId, TransactionId. Already existed.
   is (currentChainsIdExists(1, 3), 1, "Chain remains."); #ChainId, TransactionId. Already existed.
   is (currentChainsIdExists(1, 5), 1, "Chain remains."); #ChainId, TransactionId. Already existed.
   is (currentChainsIdExists(2, 1), 1, "Chain has been added."); #ChainId, TransactionId
   is (currentChainsIdExists(2, 4), 1, "Chain has been added."); #ChainId, TransactionId
   
-  is (numCurrentChainsStatsRows(),4,"One chains stats row has been added after invocation.");
-  my ($chainStatsIdTx1) = selectCurrentChains(2, 1); #It exists above so is fine.
+  is (numChainInfoRows(),4,"One chains stats row has been added after invocation.");
+  my ($chainStatsIdTx1) = selectChains(2, 1); #It exists above so is fine.
   is ($chainStatsIdTx1, 1, "The new branch reuses the old chainStatsId from the other chain.");
-  my ($chainStatsIdTx4) = selectCurrentChains(2, 4); #It exists above so is fine, This will be 4
+  my ($chainStatsIdTx4) = selectChains(2, 4); #It exists above so is fine, This will be 4
   is ($chainStatsIdTx4, 4, "A new chain stats row has been created.");
   my ($minimumValue, $length, $totalValue, $numOfMinValues) = selectCurrentChainStats($chainStatsIdTx4);
   is ($minimumValue, 10, "minimumValue is the same value we passed in.");
@@ -626,15 +626,15 @@ say "Test 7 - Not first transaction selected (non-null), select transaction in t
   $statementInsertProcessedTransactions->execute(6, 3, 1, 20);
   $statementInsertProcessedTransactions->execute(7, 4, 1, 10);
   
-  #ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCurrentStatsId->execute(1, 10, 1, 10, 1);
   $statementInsertCurrentStatsId->execute(2, 10, 2, 20, 2);
   $statementInsertCurrentStatsId->execute(3, 10, 3, 30, 3);
   
-  #ChainId, TransactionId_FK, ChainStatsId_FK
-  $statementInsertCurrentChains->execute(1, 1, 1);
-  $statementInsertCurrentChains->execute(1, 3, 2);
-  $statementInsertCurrentChains->execute(1, 5, 3);
+  #ChainId, TransactionId_FK, ChainInfoId_FK
+  $statementInsertChains->execute(1, 1, 1);
+  $statementInsertChains->execute(1, 3, 2);
+  $statementInsertChains->execute(1, 5, 3);
   
   #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   #Only params 1 - 4 matter.
@@ -642,8 +642,8 @@ say "Test 7 - Not first transaction selected (non-null), select transaction in t
   $statementInsertCandidateTransactions->execute(4, 1, 3, 6, 10, 3, 40, 2);
  
   is (numCandidateTransactionRows(),1,"There is one candidate transaction row before invocation.");
-  is (numCurrentChainsRows(),3,"There is 3 current chains rows before invocation.");
-  is (numCurrentChainsStatsRows(),3,"There is 3 current chains stats rows before invocation.");
+  is (numChainsRows(),3,"There is 3 current chains rows before invocation.");
+  is (numChainInfoRows(),3,"There is 3 current chains stats rows before invocation.");
   is (numBranchedTransactionsRows(),0,"There is no branched transaction rows before invocation.");
   
 
@@ -668,7 +668,7 @@ say "Test 7 - Not first transaction selected (non-null), select transaction in t
 
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows after invocation.");
     
-  is (numCurrentChainsRows(), 6, "There is 6 current chains rows after invocation.");
+  is (numChainsRows(), 6, "There is 6 current chains rows after invocation.");
   is (currentChainsIdExists(1, 1), 1, "Chain remains."); #ChainId, TransactionId. Already existed.
   is (currentChainsIdExists(1, 3), 1, "Chain remains."); #ChainId, TransactionId. Already existed.
   is (currentChainsIdExists(1, 5), 1, "Chain remains."); #ChainId, TransactionId. Already existed.
@@ -676,12 +676,12 @@ say "Test 7 - Not first transaction selected (non-null), select transaction in t
   is (currentChainsIdExists(2, 3), 1, "Chain has been added."); #ChainId, TransactionId
   is (currentChainsIdExists(2, 6), 1, "Chain has been added."); #ChainId, TransactionId
   
-  is (numCurrentChainsStatsRows(),4,"One chains stats row has been added after invocation.");
-  my ($chainStatsIdTx1) = selectCurrentChains(2, 1); #It exists above so is fine.
+  is (numChainInfoRows(),4,"One chains stats row has been added after invocation.");
+  my ($chainStatsIdTx1) = selectChains(2, 1); #It exists above so is fine.
   is ($chainStatsIdTx1, 1, "The new branch reuses the old chainStatsId from the other chain (Transaction 1).");
-  my ($chainStatsIdTx3) = selectCurrentChains(2, 3); #It exists above so is fine.
+  my ($chainStatsIdTx3) = selectChains(2, 3); #It exists above so is fine.
   is ($chainStatsIdTx3, 2, "The new branch reuses the old chainStatsId from the other chain (Transaction 3).");
-  my ($chainStatsIdTx4) = selectCurrentChains(2, 6); #It exists above so is fine, This will be 4
+  my ($chainStatsIdTx4) = selectChains(2, 6); #It exists above so is fine, This will be 4
   is ($chainStatsIdTx4, 4, "A new chain stats row has been created.");
   my ($minimumValue, $length, $totalValue, $numOfMinValues) = selectCurrentChainStats($chainStatsIdTx4);
   is ($minimumValue, 10, "minimumValue is the same value we passed in.");

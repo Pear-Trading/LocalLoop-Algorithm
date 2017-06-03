@@ -19,7 +19,7 @@ has _statementSelectNextTransactionInChain => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("SELECT MIN(TransactionId_FK) FROM CurrentChains WHERE ChainId = ? AND ? < TransactionId_FK GROUP BY ChainId");
+    return $self->dbh()->prepare("SELECT MIN(TransactionId_FK) FROM Chains WHERE ChainId = ? AND ? < TransactionId_FK GROUP BY ChainId");
   },
   lazy => 1,
 );
@@ -82,9 +82,9 @@ sub applyChainDynamicRestriction {
 
   #Select next transaction in the chain, if undefined that means the inputted transaction id is the last in the chain.  
   #FIXME BUG IN SQLite DBI? Does the the aggregate functions require group by. In the "None" heuristic they don't...
-  #my $statementNextTransactionInChain = $dbh->prepare("SELECT MIN(TransactionId_FK) FROM CurrentChains WHERE ChainId = ? AND ? < TransactionId_FK ");
-  #my $statementNextTransactionInChain = $dbh->prepare("SELECT ChainStatsId_FK, MIN(TransactionId_FK) FROM CurrentChains WHERE ChainId = ? AND ? < TransactionId_FK ");
-  #my $minTransactionId = @{$dbh->selectrow_arrayref("SELECT ChainStatsId_FK, MIN(TransactionId_FK) FROM CurrentChains WHERE ChainId = ? AND ? < TransactionId_FK ", undef, ($chainId, $transactionId))}[0];
+  #my $statementNextTransactionInChain = $dbh->prepare("SELECT MIN(TransactionId_FK) FROM Chains WHERE ChainId = ? AND ? < TransactionId_FK ");
+  #my $statementNextTransactionInChain = $dbh->prepare("SELECT ChainInfoId_FK, MIN(TransactionId_FK) FROM Chains WHERE ChainId = ? AND ? < TransactionId_FK ");
+  #my $minTransactionId = @{$dbh->selectrow_arrayref("SELECT ChainInfoId_FK, MIN(TransactionId_FK) FROM Chains WHERE ChainId = ? AND ? < TransactionId_FK ", undef, ($chainId, $transactionId))}[0];
   
   my $statementNextTransactionInChain = $self->_statementSelectNextTransactionInChain();
   $statementNextTransactionInChain->execute($chainId, $transactionId);

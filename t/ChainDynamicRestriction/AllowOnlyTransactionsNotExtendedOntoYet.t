@@ -40,8 +40,8 @@ sub delete_table_data {
 my $testModule = Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyTransactionsNotExtendedOntoYet->new();
 
 my $statementInsertProcessedTransactions = $dbh->prepare("INSERT INTO ProcessedTransactions (TransactionId, FromUserId, ToUserId, Value, Included) VALUES (?, ?, ?, ?, ?)");
-my $statementInsertCurrentChainStats = $dbh->prepare("INSERT INTO CurrentChainsStats (ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
-my $statementInsertCurrentChains = $dbh->prepare("INSERT INTO CurrentChains (ChainId, TransactionId_FK, ChainStatsId_FK) VALUES (?, ?, ?)");
+my $statementInsertCurrentChainStats = $dbh->prepare("INSERT INTO ChainInfo (ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
+my $statementInsertChains = $dbh->prepare("INSERT INTO Chains (ChainId, TransactionId_FK, ChainInfoId_FK) VALUES (?, ?, ?)");
 my $statementInsertBranchedTransactions = $dbh->prepare("INSERT INTO BranchedTransactions (ChainId_FK, FromTransactionId_FK, ToTransactionId_FK) VALUES (?, ?, ?)");
 
 sub transactionIdIncluded {
@@ -56,8 +56,8 @@ sub initialise {
   delete_table_data();
   
   #It does not matter what values are in here as they are ignored, this is only needed for referential integrity
-  #in CurrentChains.
-  #ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #in Chains.
+  #ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCurrentChainStats->execute(1, 10, 1, 10, 1);
 }
 
@@ -131,10 +131,10 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 1);
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 1);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
-#ChainId, TransactionId_FK, ChainStatsId_FK
-$statementInsertCurrentChains->execute(1, 1, 1);
-$statementInsertCurrentChains->execute(1, 2, 1);
-$statementInsertCurrentChains->execute(1, 3, 1);
+#ChainId, TransactionId_FK, ChainInfoId_FK
+$statementInsertChains->execute(1, 1, 1);
+$statementInsertChains->execute(1, 2, 1);
+$statementInsertChains->execute(1, 3, 1);
 
 #use first restriction, chainId and transactionId, 
 my $exception = exception { $testModule->applyChainDynamicRestriction(0, newChainGenerationContext(1, 1)); };
@@ -160,10 +160,10 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 0); # Disable this to see if it gets re-enabled (not in chain)
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 1);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
-#ChainId, TransactionId_FK, ChainStatsId_FK
-$statementInsertCurrentChains->execute(1, 1, 1);
-$statementInsertCurrentChains->execute(1, 2, 1);
-$statementInsertCurrentChains->execute(1, 3, 1);
+#ChainId, TransactionId_FK, ChainInfoId_FK
+$statementInsertChains->execute(1, 1, 1);
+$statementInsertChains->execute(1, 2, 1);
+$statementInsertChains->execute(1, 3, 1);
 
 #use first restriction, chainId and transactionId, 
 my $exception = exception { $testModule->applyChainDynamicRestriction(0, newChainGenerationContext(1, 1)); };
@@ -189,10 +189,10 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 0);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 0);
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 0);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
-#ChainId, TransactionId_FK, ChainStatsId_FK
-$statementInsertCurrentChains->execute(1, 1, 1);
-$statementInsertCurrentChains->execute(1, 2, 1);
-$statementInsertCurrentChains->execute(1, 3, 1);
+#ChainId, TransactionId_FK, ChainInfoId_FK
+$statementInsertChains->execute(1, 1, 1);
+$statementInsertChains->execute(1, 2, 1);
+$statementInsertChains->execute(1, 3, 1);
 
 #use first restriction, chainId and transactionId, 
 my $exception = exception { $testModule->applyChainDynamicRestriction(0, newChainGenerationContext(1, 1)); };
@@ -218,10 +218,10 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 1); 
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 1);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
-#ChainId, TransactionId_FK, ChainStatsId_FK
-$statementInsertCurrentChains->execute(1, 1, 1);
-$statementInsertCurrentChains->execute(1, 2, 1);
-$statementInsertCurrentChains->execute(1, 3, 1);
+#ChainId, TransactionId_FK, ChainInfoId_FK
+$statementInsertChains->execute(1, 1, 1);
+$statementInsertChains->execute(1, 2, 1);
+$statementInsertChains->execute(1, 3, 1);
 
 #use first restriction, chainId and transactionId, 
 my $exception = exception { $testModule->applyChainDynamicRestriction(0, newChainGenerationContext(1, 3)); };
@@ -248,10 +248,10 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 1); 
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 0);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
-#ChainId, TransactionId_FK, ChainStatsId_FK
-$statementInsertCurrentChains->execute(1, 1, 1);
-$statementInsertCurrentChains->execute(1, 2, 1);
-$statementInsertCurrentChains->execute(1, 3, 1);
+#ChainId, TransactionId_FK, ChainInfoId_FK
+$statementInsertChains->execute(1, 1, 1);
+$statementInsertChains->execute(1, 2, 1);
+$statementInsertChains->execute(1, 3, 1);
 
 #use first restriction, chainId and transactionId, 
 my $exception = exception { $testModule->applyChainDynamicRestriction(0, newChainGenerationContext(1, 3)); };
@@ -278,10 +278,10 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 0);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 0); 
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 0);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
-#ChainId, TransactionId_FK, ChainStatsId_FK
-$statementInsertCurrentChains->execute(1, 1, 1);
-$statementInsertCurrentChains->execute(1, 2, 1);
-$statementInsertCurrentChains->execute(1, 3, 1);
+#ChainId, TransactionId_FK, ChainInfoId_FK
+$statementInsertChains->execute(1, 1, 1);
+$statementInsertChains->execute(1, 2, 1);
+$statementInsertChains->execute(1, 3, 1);
 
 #use first restriction, chainId and transactionId, 
 my $exception = exception { $testModule->applyChainDynamicRestriction(0, newChainGenerationContext(1, 3)); };
@@ -308,14 +308,14 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 1); 
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 1);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
-#ChainId, TransactionId_FK, ChainStatsId_FK
-$statementInsertCurrentChains->execute(1, 2, 1);
-$statementInsertCurrentChains->execute(1, 3, 1); #Branch at 3 
-$statementInsertCurrentChains->execute(1, 4, 1);
-$statementInsertCurrentChains->execute(1, 5, 1);
-$statementInsertCurrentChains->execute(2, 2, 1); 
-$statementInsertCurrentChains->execute(2, 3, 1); #Branch at 3 
-$statementInsertCurrentChains->execute(2, 6, 1);
+#ChainId, TransactionId_FK, ChainInfoId_FK
+$statementInsertChains->execute(1, 2, 1);
+$statementInsertChains->execute(1, 3, 1); #Branch at 3 
+$statementInsertChains->execute(1, 4, 1);
+$statementInsertChains->execute(1, 5, 1);
+$statementInsertChains->execute(2, 2, 1); 
+$statementInsertChains->execute(2, 3, 1); #Branch at 3 
+$statementInsertChains->execute(2, 6, 1);
 #It started off as chain 1 but branched at transaction id 3 to transaction id 6.
 #ChainId_FK, FromTransactionId_FK, ToTransactionId_FK
 $statementInsertBranchedTransactions->execute(1, 3, 6);
@@ -345,14 +345,14 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 0); # Disabled for testing, should remain disabled
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 0);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
-#ChainId, TransactionId_FK, ChainStatsId_FK
-$statementInsertCurrentChains->execute(1, 2, 1);
-$statementInsertCurrentChains->execute(1, 3, 1); #Branch at 3 
-$statementInsertCurrentChains->execute(1, 4, 1);
-$statementInsertCurrentChains->execute(1, 5, 1);
-$statementInsertCurrentChains->execute(2, 2, 1); 
-$statementInsertCurrentChains->execute(2, 3, 1); #Branch at 3 
-$statementInsertCurrentChains->execute(2, 6, 1);
+#ChainId, TransactionId_FK, ChainInfoId_FK
+$statementInsertChains->execute(1, 2, 1);
+$statementInsertChains->execute(1, 3, 1); #Branch at 3 
+$statementInsertChains->execute(1, 4, 1);
+$statementInsertChains->execute(1, 5, 1);
+$statementInsertChains->execute(2, 2, 1); 
+$statementInsertChains->execute(2, 3, 1); #Branch at 3 
+$statementInsertChains->execute(2, 6, 1);
 #It started off as chain 1 but branched at transaction id 3 to transaction id 6.
 #ChainId_FK, FromTransactionId_FK, ToTransactionId_FK
 $statementInsertBranchedTransactions->execute(1, 3, 6);
@@ -382,14 +382,14 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 0);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 0); 
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 0);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
-#ChainId, TransactionId_FK, ChainStatsId_FK
-$statementInsertCurrentChains->execute(1, 2, 1);
-$statementInsertCurrentChains->execute(1, 3, 1); #Branch at 3 
-$statementInsertCurrentChains->execute(1, 4, 1);
-$statementInsertCurrentChains->execute(1, 5, 1);
-$statementInsertCurrentChains->execute(2, 2, 1); 
-$statementInsertCurrentChains->execute(2, 3, 1); #Branch at 3 
-$statementInsertCurrentChains->execute(2, 6, 1);
+#ChainId, TransactionId_FK, ChainInfoId_FK
+$statementInsertChains->execute(1, 2, 1);
+$statementInsertChains->execute(1, 3, 1); #Branch at 3 
+$statementInsertChains->execute(1, 4, 1);
+$statementInsertChains->execute(1, 5, 1);
+$statementInsertChains->execute(2, 2, 1); 
+$statementInsertChains->execute(2, 3, 1); #Branch at 3 
+$statementInsertChains->execute(2, 6, 1);
 #It started off as chain 1 but branched at transaction id 3 to transaction id 6.
 #ChainId_FK, FromTransactionId_FK, ToTransactionId_FK
 $statementInsertBranchedTransactions->execute(1, 3, 6);
@@ -420,10 +420,10 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 1);
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 1);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
-#ChainId, TransactionId_FK, ChainStatsId_FK
-$statementInsertCurrentChains->execute(1, 1, 1);
-$statementInsertCurrentChains->execute(1, 2, 1);
-$statementInsertCurrentChains->execute(1, 3, 1);
+#ChainId, TransactionId_FK, ChainInfoId_FK
+$statementInsertChains->execute(1, 1, 1);
+$statementInsertChains->execute(1, 2, 1);
+$statementInsertChains->execute(1, 3, 1);
 
 #use first restriction, chainId and transactionId, 
 my $exception = exception { $testModule->applyChainDynamicRestriction(1, newChainGenerationContext(1, 1)); };
@@ -449,10 +449,10 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 1); 
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 0);# Disable this to see if it gets re-enabled (not in chain)
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
-#ChainId, TransactionId_FK, ChainStatsId_FK
-$statementInsertCurrentChains->execute(1, 1, 1);
-$statementInsertCurrentChains->execute(1, 2, 1);
-$statementInsertCurrentChains->execute(1, 3, 1);
+#ChainId, TransactionId_FK, ChainInfoId_FK
+$statementInsertChains->execute(1, 1, 1);
+$statementInsertChains->execute(1, 2, 1);
+$statementInsertChains->execute(1, 3, 1);
 
 #use first restriction, chainId and transactionId, 
 my $exception = exception { $testModule->applyChainDynamicRestriction(1, newChainGenerationContext(1, 1)); };
@@ -478,10 +478,10 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 0);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 0);
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 0);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
-#ChainId, TransactionId_FK, ChainStatsId_FK
-$statementInsertCurrentChains->execute(1, 1, 1);
-$statementInsertCurrentChains->execute(1, 2, 1);
-$statementInsertCurrentChains->execute(1, 3, 1);
+#ChainId, TransactionId_FK, ChainInfoId_FK
+$statementInsertChains->execute(1, 1, 1);
+$statementInsertChains->execute(1, 2, 1);
+$statementInsertChains->execute(1, 3, 1);
 
 #use first restriction, chainId and transactionId, 
 my $exception = exception { $testModule->applyChainDynamicRestriction(1, newChainGenerationContext(1, 1)); };
@@ -507,10 +507,10 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 1); 
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 1);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
-#ChainId, TransactionId_FK, ChainStatsId_FK
-$statementInsertCurrentChains->execute(1, 1, 1);
-$statementInsertCurrentChains->execute(1, 2, 1);
-$statementInsertCurrentChains->execute(1, 3, 1);
+#ChainId, TransactionId_FK, ChainInfoId_FK
+$statementInsertChains->execute(1, 1, 1);
+$statementInsertChains->execute(1, 2, 1);
+$statementInsertChains->execute(1, 3, 1);
 
 #use first restriction, chainId and transactionId, 
 my $exception = exception { $testModule->applyChainDynamicRestriction(1, newChainGenerationContext(1, 3)); };
@@ -537,10 +537,10 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 1); 
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 0);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
-#ChainId, TransactionId_FK, ChainStatsId_FK
-$statementInsertCurrentChains->execute(1, 1, 1);
-$statementInsertCurrentChains->execute(1, 2, 1);
-$statementInsertCurrentChains->execute(1, 3, 1);
+#ChainId, TransactionId_FK, ChainInfoId_FK
+$statementInsertChains->execute(1, 1, 1);
+$statementInsertChains->execute(1, 2, 1);
+$statementInsertChains->execute(1, 3, 1);
 
 #use first restriction, chainId and transactionId, 
 my $exception = exception { $testModule->applyChainDynamicRestriction(1, newChainGenerationContext(1, 3)); };
@@ -567,10 +567,10 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 0);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 0); 
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 0);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
-#ChainId, TransactionId_FK, ChainStatsId_FK
-$statementInsertCurrentChains->execute(1, 1, 1);
-$statementInsertCurrentChains->execute(1, 2, 1);
-$statementInsertCurrentChains->execute(1, 3, 1);
+#ChainId, TransactionId_FK, ChainInfoId_FK
+$statementInsertChains->execute(1, 1, 1);
+$statementInsertChains->execute(1, 2, 1);
+$statementInsertChains->execute(1, 3, 1);
 
 #use first restriction, chainId and transactionId, 
 my $exception = exception { $testModule->applyChainDynamicRestriction(1, newChainGenerationContext(1, 3)); };
@@ -597,14 +597,14 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 1); 
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 1);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
-#ChainId, TransactionId_FK, ChainStatsId_FK
-$statementInsertCurrentChains->execute(1, 2, 1);
-$statementInsertCurrentChains->execute(1, 3, 1); #Branch at 3 
-$statementInsertCurrentChains->execute(1, 4, 1);
-$statementInsertCurrentChains->execute(1, 5, 1);
-$statementInsertCurrentChains->execute(2, 2, 1); 
-$statementInsertCurrentChains->execute(2, 3, 1); #Branch at 3 
-$statementInsertCurrentChains->execute(2, 6, 1);
+#ChainId, TransactionId_FK, ChainInfoId_FK
+$statementInsertChains->execute(1, 2, 1);
+$statementInsertChains->execute(1, 3, 1); #Branch at 3 
+$statementInsertChains->execute(1, 4, 1);
+$statementInsertChains->execute(1, 5, 1);
+$statementInsertChains->execute(2, 2, 1); 
+$statementInsertChains->execute(2, 3, 1); #Branch at 3 
+$statementInsertChains->execute(2, 6, 1);
 #It started off as chain 1 but branched at transaction id 3 to transaction id 6.
 #ChainId_FK, FromTransactionId_FK, ToTransactionId_FK
 $statementInsertBranchedTransactions->execute(1, 3, 6);
@@ -634,14 +634,14 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 1);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 0); # Disabled for testing, should remain disabled
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 0);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
-#ChainId, TransactionId_FK, ChainStatsId_FK
-$statementInsertCurrentChains->execute(1, 2, 1);
-$statementInsertCurrentChains->execute(1, 3, 1); #Branch at 3 
-$statementInsertCurrentChains->execute(1, 4, 1);
-$statementInsertCurrentChains->execute(1, 5, 1);
-$statementInsertCurrentChains->execute(2, 2, 1); 
-$statementInsertCurrentChains->execute(2, 3, 1); #Branch at 3 
-$statementInsertCurrentChains->execute(2, 6, 1);
+#ChainId, TransactionId_FK, ChainInfoId_FK
+$statementInsertChains->execute(1, 2, 1);
+$statementInsertChains->execute(1, 3, 1); #Branch at 3 
+$statementInsertChains->execute(1, 4, 1);
+$statementInsertChains->execute(1, 5, 1);
+$statementInsertChains->execute(2, 2, 1); 
+$statementInsertChains->execute(2, 3, 1); #Branch at 3 
+$statementInsertChains->execute(2, 6, 1);
 #It started off as chain 1 but branched at transaction id 3 to transaction id 6.
 #ChainId_FK, FromTransactionId_FK, ToTransactionId_FK
 $statementInsertBranchedTransactions->execute(1, 3, 6);
@@ -671,14 +671,14 @@ $statementInsertProcessedTransactions->execute(4, 4, 5, 10, 0);
 $statementInsertProcessedTransactions->execute(5, 5, 6, 10, 0); 
 $statementInsertProcessedTransactions->execute(6, 6, 1, 10, 0);
 #Only the 1st (chain id) and 2nd (transaction id) params matter.
-#ChainId, TransactionId_FK, ChainStatsId_FK
-$statementInsertCurrentChains->execute(1, 2, 1);
-$statementInsertCurrentChains->execute(1, 3, 1); #Branch at 3 
-$statementInsertCurrentChains->execute(1, 4, 1);
-$statementInsertCurrentChains->execute(1, 5, 1);
-$statementInsertCurrentChains->execute(2, 2, 1); 
-$statementInsertCurrentChains->execute(2, 3, 1); #Branch at 3 
-$statementInsertCurrentChains->execute(2, 6, 1);
+#ChainId, TransactionId_FK, ChainInfoId_FK
+$statementInsertChains->execute(1, 2, 1);
+$statementInsertChains->execute(1, 3, 1); #Branch at 3 
+$statementInsertChains->execute(1, 4, 1);
+$statementInsertChains->execute(1, 5, 1);
+$statementInsertChains->execute(2, 2, 1); 
+$statementInsertChains->execute(2, 3, 1); #Branch at 3 
+$statementInsertChains->execute(2, 6, 1);
 #It started off as chain 1 but branched at transaction id 3 to transaction id 6.
 #ChainId_FK, FromTransactionId_FK, ToTransactionId_FK
 $statementInsertBranchedTransactions->execute(1, 3, 6);

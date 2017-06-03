@@ -44,8 +44,8 @@ my $insertLoops = $dbh->prepare("INSERT INTO Loops (LoopId_FK, TransactionId_FK)
 my $selectLoopInfo = $dbh->prepare("SELECT Active, Included FROM LoopInfo WHERE LoopId = ?");
 
 my $selectCandidateTransactionCountAll = $dbh->prepare("SELECT COUNT(*) FROM CandidateTransactions");
-my $selectCurrentChainsCountAll = $dbh->prepare("SELECT COUNT(*) FROM CurrentChains");
-my $selectCurrentChainsStatsCountAll = $dbh->prepare("SELECT COUNT(*) FROM CurrentChainsStats");
+my $selectChainsCountAll = $dbh->prepare("SELECT COUNT(*) FROM Chains");
+my $selectChainInfoCountAll = $dbh->prepare("SELECT COUNT(*) FROM ChainInfo");
 my $selectBranchedTransactionsCountAll = $dbh->prepare("SELECT COUNT(*) FROM BranchedTransactions");
 my $selectLoopsCountAll = $dbh->prepare("SELECT COUNT(*) FROM Loops");
 my $selectLoopInfoCountAll = $dbh->prepare("SELECT COUNT(*) FROM LoopInfo");
@@ -142,16 +142,16 @@ sub numCandidateTransactionRows {
   return $num;
 }
 
-sub numCurrentChainsRows {
-  $selectCurrentChainsCountAll->execute();
-  my ($num) = $selectCurrentChainsCountAll->fetchrow_array();
+sub numChainsRows {
+  $selectChainsCountAll->execute();
+  my ($num) = $selectChainsCountAll->fetchrow_array();
   
   return $num;
 }
 
-sub numCurrentChainsStatsRows {
-  $selectCurrentChainsStatsCountAll->execute();
-  my ($num) = $selectCurrentChainsStatsCountAll->fetchrow_array();
+sub numChainInfoRows {
+  $selectChainInfoCountAll->execute();
+  my ($num) = $selectChainInfoCountAll->fetchrow_array();
   
   return $num;
 }
@@ -233,8 +233,8 @@ say "Test 4 - Not first dynamic restriction";
   insertLoops();
 
   is (numCandidateTransactionRows(), 0, "There was 0 candidate transaction rows before execution.");
-  is (numCurrentChainsRows(), 0, "There was 0 current chains rows before execution.");
-  is (numCurrentChainsStatsRows(), 0, "There was 0 current chains stats rows before execution.");
+  is (numChainsRows(), 0, "There was 0 current chains rows before execution.");
+  is (numChainInfoRows(), 0, "There was 0 current chains stats rows before execution.");
   is (numBranchedTransactionsRows(), 0, "There was 0 branched transaction rows before execution.");
   is (numLoopsRows(), 20, "There was 20 loop rows before execution.");
   is (numLoopInfoRows(), 8, "There was 8 loop info rows before execution.");
@@ -243,8 +243,8 @@ say "Test 4 - Not first dynamic restriction";
   is ($exception, undef ,"No exception thrown"); 
 
   is (numCandidateTransactionRows(), 0, "There was 0 candidate transaction rows after execution.");
-  is (numCurrentChainsRows(), 0, "There was 0 current chains rows after execution.");
-  is (numCurrentChainsStatsRows(), 0, "There was 0 current chains stats rows after execution.");
+  is (numChainsRows(), 0, "There was 0 current chains rows after execution.");
+  is (numChainInfoRows(), 0, "There was 0 current chains stats rows after execution.");
   is (numBranchedTransactionsRows(), 0, "There was 0 branched transaction rows after execution.");
   is (numLoopsRows(), 20, "There was 20 loop rows after execution.");
   is (numLoopInfoRows(), 8, "There was 8 loop info rows after execution.");
@@ -313,8 +313,8 @@ say "Test 5 - First dynamic restriction";
   insertLoops();
 
   is (numCandidateTransactionRows(), 0, "There was 0 candidate transaction rows before execution.");
-  is (numCurrentChainsRows(), 0, "There was 0 current chains rows before execution.");
-  is (numCurrentChainsStatsRows(), 0, "There was 0 current chains stats rows before execution.");
+  is (numChainsRows(), 0, "There was 0 current chains rows before execution.");
+  is (numChainInfoRows(), 0, "There was 0 current chains stats rows before execution.");
   is (numBranchedTransactionsRows(), 0, "There was 0 branched transaction rows before execution.");
   is (numLoopsRows(), 20, "There was 20 loop rows before execution.");
   is (numLoopInfoRows(), 8, "There was 8 loop info rows before execution.");
@@ -323,8 +323,8 @@ say "Test 5 - First dynamic restriction";
   is ($exception, undef ,"No exception thrown"); 
 
   is (numCandidateTransactionRows(), 0, "There was 0 candidate transaction rows after execution.");
-  is (numCurrentChainsRows(), 0, "There was 0 current chains rows after execution.");
-  is (numCurrentChainsStatsRows(), 0, "There was 0 current chains stats rows after execution.");
+  is (numChainsRows(), 0, "There was 0 current chains rows after execution.");
+  is (numChainInfoRows(), 0, "There was 0 current chains stats rows after execution.");
   is (numBranchedTransactionsRows(), 0, "There was 0 branched transaction rows after execution.");
   is (numLoopsRows(), 20, "There was 20 loop rows after execution.");
   is (numLoopInfoRows(), 8, "There was 8 loop info rows after execution.");
