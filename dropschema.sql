@@ -11,13 +11,13 @@ DROP VIEW IF EXISTS LoopInfo_ViewActive;
 DROP INDEX IF EXISTS LoopInfo_IndexActive;
 DROP TABLE IF EXISTS LoopInfo;
 
-DROP TABLE IF EXISTS CandinateTransactions;
+DROP TABLE IF EXISTS CandidateTransactions;
 
 DROP TABLE IF EXISTS BranchedTransactions;
 
-DROP VIEW IF EXISTS CandinateTransactions_ViewIncludedHerusticDesc;
-DROP VIEW IF EXISTS CandinateTransactions_ViewIncludedHerusticAsc;
-DROP VIEW IF EXISTS CandinateTransactions_ViewIncluded;
+DROP VIEW IF EXISTS CandidateTransactions_ViewIncludedHerusticDesc;
+DROP VIEW IF EXISTS CandidateTransactions_ViewIncludedHerusticAsc;
+DROP VIEW IF EXISTS CandidateTransactions_ViewIncluded;
 DROP TABLE IF EXISTS CurrentChains;
 
 DROP TABLE IF EXISTS CurrentChainsStats;

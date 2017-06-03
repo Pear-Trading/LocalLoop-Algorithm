@@ -193,11 +193,11 @@ sub _selectLoops {
 
 
 
-has _statementDeleteTuplesCandinateTransactions => (
+has _statementDeleteTuplesCandidateTransactions => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("DELETE FROM CandinateTransactions");
+    return $self->dbh()->prepare("DELETE FROM CandidateTransactions");
   },
   lazy => 1,
 );
@@ -238,11 +238,11 @@ has _statementSelectFromUserIdAndValueOfATransaction => (
   lazy => 1,
 );
 
-has _statementInsertIntoCandinateTransactionsAllParamsExceptIncludedAndHeuristic => (
+has _statementInsertIntoCandidateTransactionsAllParamsExceptIncludedAndHeuristic => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("INSERT INTO CandinateTransactions (CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    return $self->dbh()->prepare("INSERT INTO CandidateTransactions (CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
   },
   lazy => 1,
 );
@@ -311,7 +311,7 @@ sub _loopGeneration {
   
   debugMethodMiddle("NextTransactionId:$nextTransactionId");
 
-  $self->_statementDeleteTuplesCandinateTransactions()->execute();  
+  $self->_statementDeleteTuplesCandidateTransactions()->execute();  
   $self->_statementDeleteTuplesBranchedTransactions()->execute();
   $self->_statementDeleteTuplesCurrentChains()->execute();
   $self->_statementDeleteTuplesCurrentChainsStats()->execute();
@@ -325,32 +325,32 @@ sub _loopGeneration {
     userIdWhichCreatesALoop => $fromUserId,
   });
   
-  debugMethodMiddle(" Candinate fromUserId:$fromUserId value:$transactionValue");
+  debugMethodMiddle(" Candidate fromUserId:$fromUserId value:$transactionValue");
   
-  my $candinateId = $self->_newCandinateTransactionsId();
-  my $statementInsertCandinate = $self->_statementInsertIntoCandinateTransactionsAllParamsExceptIncludedAndHeuristic();
+  my $candidateId = $self->_newCandidateTransactionsId();
+  my $statementInsertCandidate = $self->_statementInsertIntoCandidateTransactionsAllParamsExceptIncludedAndHeuristic();
  
 
   #Insert initial transaction.
-  $statementInsertCandinate->execute($candinateId, undef, undef, $nextTransactionId, $transactionValue, 1, $transactionValue, 1);
-  debugMethodMiddle("InsertedInitalCandinate");
+  $statementInsertCandidate->execute($candidateId, undef, undef, $nextTransactionId, $transactionValue, 1, $transactionValue, 1);
+  debugMethodMiddle("InsertedInitalCandidate");
   
   my $extendedTransaction = undef;
   
-  while ( ! ($extendedTransaction = $self->_getNextBestCandinateTransactionAnalysis($settings, $loopGenerationContext))->hasFinished($loopGenerationContext) ) {
+  while ( ! ($extendedTransaction = $self->_getNextBestCandidateTransactionAnalysis($settings, $loopGenerationContext))->hasFinished($loopGenerationContext) ) {
     debugMethodMiddle("1st while loop start");
-    $self->_selectNextBestCandinateTransactions($settings, $extendedTransaction, $loopGenerationContext);
+    $self->_selectNextBestCandidateTransactions($settings, $extendedTransaction, $loopGenerationContext);
     
     #sleep (10);
     debugMethodMiddle("1st while loop end");
   }
   
-  #Insert all of the remaining candinate transactions, so equal candinates can be found.
-  #This also can mean poor candinates can be added, however in the next section the filtering should take
+  #Insert all of the remaining candidate transactions, so equal candidates can be found.
+  #This also can mean poor candidates can be added, however in the next section the filtering should take
   #care of this. Also as we have processed the loops we may as well store them it would a waste of resouces 
   #not to, as some other loop may become inactive which results in these poor loops becoming active.
-  while ( ! $extendedTransaction->noCandinateTransactionsLeft() ) {
-    $extendedTransaction = $self->_getNextBestCandinateTransactionAnalysis($settings, $loopGenerationContext);
+  while ( ! $extendedTransaction->noCandidateTransactionsLeft() ) {
+    $extendedTransaction = $self->_getNextBestCandidateTransactionAnalysis($settings, $loopGenerationContext);
   }
   
 
@@ -422,7 +422,7 @@ has _statementSelectTheNumberOfTransactionsFromTheSamePointInTheChain => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("SELECT COUNT(ChainId_FK) FROM CandinateTransactions WHERE ChainId_FK = ? AND TransactionFrom_FK = ?");
+    return $self->dbh()->prepare("SELECT COUNT(ChainId_FK) FROM CandidateTransactions WHERE ChainId_FK = ? AND TransactionFrom_FK = ?");
   },
   lazy => 1,
 );
@@ -431,14 +431,14 @@ has _statementSelectTheNumberOfTransactionsFromTheSamePointInTheChain => (
 #are tested. We assume if it can execute the same code path with just the one transaction (to) it will work
 #when there is 2.
 #If this function is changed structurally in which the assumption becomes false then update the test too.
-sub _selectNextBestCandinateTransactions {
+sub _selectNextBestCandidateTransactions {
   debugMethodStart();
   my ($self, $settings, $extendedTransaction, $loopGenerationContextInstance) = @_;
   
   my $userIdThatFormsALoop = $loopGenerationContextInstance->userIdWhichCreatesALoop();
  
   my $statementTransactionValue = $self->_statementSelectProcessedTransactionValue();
-  my $statementInsertCandinate = $self->_statementInsertIntoCandinateTransactionsAllParamsExceptIncludedAndHeuristic();
+  my $statementInsertCandidate = $self->_statementInsertIntoCandidateTransactionsAllParamsExceptIncludedAndHeuristic();
   my $statementSelectIncludedTransactions = $self->_statementSelectAllIncludedTransactionsInProcessedTransactions();
   my $statementTransactionsExistFromSameChain = $self->_statementSelectTheNumberOfTransactionsFromTheSamePointInTheChain();
 
@@ -463,7 +463,7 @@ sub _selectNextBestCandinateTransactions {
     debugMethodMiddle("WhileLoop: ForEachLoop. ChainId:$chainId TransactionId:$transactionId From/To:$fromTo");
 
     
-    #This is here to prevent the adding of any transactions to the candinates table if some already exist 
+    #This is here to prevent the adding of any transactions to the candidates table if some already exist 
     #in the table, hence if id is not undefined we must skip this until those transactions are used up.
     #To transactions don't need to be checked as they will not have any previous transactions in the table
     #from this new transsaction.      
@@ -504,26 +504,26 @@ sub _selectNextBestCandinateTransactions {
     $statementSelectIncludedTransactions->execute();
     
     #We assume they connected together.
-    while (my ($candinateTransactionId) = $statementSelectIncludedTransactions->fetchrow_array()) {
+    while (my ($candidateTransactionId) = $statementSelectIncludedTransactions->fetchrow_array()) {
       debugBraceStart("While loop best next trans.");
-      debugMethodMiddle("WhileLoop: ForEachLoop. CandinateTransactionId:$candinateTransactionId");
-      $statementTransactionValue->execute($candinateTransactionId);
-      my ($candinateValue) = $statementTransactionValue->fetchrow_array();
+      debugMethodMiddle("WhileLoop: ForEachLoop. CandidateTransactionId:$candidateTransactionId");
+      $statementTransactionValue->execute($candidateTransactionId);
+      my ($candidateValue) = $statementTransactionValue->fetchrow_array();
       
-      my $isValueLower = ($candinateValue < $minimumValue);
-      my $isValueSame = ($candinateValue == $minimumValue);
+      my $isValueLower = ($candidateValue < $minimumValue);
+      my $isValueSame = ($candidateValue == $minimumValue);
       
-      my $thisMinimumValue = ($isValueLower ? $candinateValue : $minimumValue);
+      my $thisMinimumValue = ($isValueLower ? $candidateValue : $minimumValue);
       my $thisLength = $length + 1;
-      my $thisTotalValue = $totalValue + $candinateValue;
+      my $thisTotalValue = $totalValue + $candidateValue;
       my $thisNumberOfMinimumValues = ($isValueLower ? 1 : ($isValueSame ? ($numberOfMinimumValues + 1) : $numberOfMinimumValues));
       
 
-      my $candinateId = $self->_newCandinateTransactionsId();
+      my $candidateId = $self->_newCandidateTransactionsId();
       
-      debugMethodMiddle("WhileLoop: ForEachLoop. EnteredCandinateValues CandinateId:$candinateId chainId:$chainId fromTransaction:$transactionId toTransaction:$candinateTransactionId MinValue:$thisMinimumValue Length:$thisLength TotalValue:$thisTotalValue NumOfMinValues:$thisNumberOfMinimumValues");
+      debugMethodMiddle("WhileLoop: ForEachLoop. EnteredCandidateValues CandidateId:$candidateId chainId:$chainId fromTransaction:$transactionId toTransaction:$candidateTransactionId MinValue:$thisMinimumValue Length:$thisLength TotalValue:$thisTotalValue NumOfMinValues:$thisNumberOfMinimumValues");
       
-      $statementInsertCandinate->execute($candinateId, $chainId, $transactionId, $candinateTransactionId, $thisMinimumValue, $thisLength, $thisTotalValue, $thisNumberOfMinimumValues);
+      $statementInsertCandidate->execute($candidateId, $chainId, $transactionId, $candidateTransactionId, $thisMinimumValue, $thisLength, $thisTotalValue, $thisNumberOfMinimumValues);
       
       debugBraceEnd("While loop best next trans.");      
     }
@@ -580,21 +580,21 @@ has _statementSelectTransactionIdAndChainStatsIdFromTheSpecifiedChainIdAndOnOrBe
 );
 
 #TODO needs a better name.
-sub _getNextBestCandinateTransactionAnalysis {
+sub _getNextBestCandidateTransactionAnalysis {
   debugMethodStart();  
   my ($self, $settings, $loopGenerationContextInstance) = @_;
   
   my $statementInsertChains = $self->_statementInsertIntoCurrentChainChainIdTransactionIdAndChainStatsId();
   my $statementInsertChainStats = $self->_statementInsertIntoChainStatsIdMinValueLengthTotalValueAndNumMinValues();
 
-  my ($hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues) = @{$self->_getNextBestCandinateTransaction($settings, $loopGenerationContextInstance)};
+  my ($hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues) = @{$self->_getNextBestCandidateTransaction($settings, $loopGenerationContextInstance)};
   
   my $transactionsToAnalyseNext = undef;
   
   if ($hasRow == 0) {
     debugMethodMiddle("No row");
     $transactionsToAnalyseNext = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
-      noCandinateTransactionsLeft => 1,
+      noCandidateTransactionsLeft => 1,
     });
     
     debugMethodMiddle("ReturnVals(Finished): " . Dumper($transactionsToAnalyseNext));
@@ -692,70 +692,70 @@ sub _getNextBestCandinateTransactionAnalysis {
 
 
 
-has _statementSelectCandinateTransactionInformationWhenItsAFirstTransaction => (
+has _statementSelectCandidateTransactionInformationWhenItsAFirstTransaction => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("SELECT CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues FROM CandinateTransactions WHERE TransactionFrom_FK = NULL");
+    return $self->dbh()->prepare("SELECT CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues FROM CandidateTransactions WHERE TransactionFrom_FK = NULL");
   },
   lazy => 1,
 );
 
-has _statementDeleteCandinateTransactionBasedOnItsId => (
+has _statementDeleteCandidateTransactionBasedOnItsId => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("DELETE FROM CandinateTransactions WHERE CandinateTransactionsId = ?");
+    return $self->dbh()->prepare("DELETE FROM CandidateTransactions WHERE CandidateTransactionsId = ?");
   },
   lazy => 1,
 );
 
-has _statementSelectCandinateTransactionInformationWhenItsIncluded => (
+has _statementSelectCandidateTransactionInformationWhenItsIncluded => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("SELECT CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues FROM CandinateTransactions_ViewIncluded");
+    return $self->dbh()->prepare("SELECT CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues FROM CandidateTransactions_ViewIncluded");
   },
   lazy => 1,
 );
 
-sub _getNextBestCandinateTransaction {  
+sub _getNextBestCandidateTransaction {  
   debugMethodStart();  
   my ($self, $settings, $loopGenerationContextInstance) = @_;
   
   my $dbh = $self->dbh;
   
-  my $statementSelectNullFrom = $self->_statementSelectCandinateTransactionInformationWhenItsAFirstTransaction();
+  my $statementSelectNullFrom = $self->_statementSelectCandidateTransactionInformationWhenItsAFirstTransaction();
   $statementSelectNullFrom->execute();
-  my ($candinateTransactionId, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues) = $statementSelectNullFrom->fetchrow_array();
+  my ($candidateTransactionId, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues) = $statementSelectNullFrom->fetchrow_array();
   
-  my $statementDelete = $self->_statementDeleteCandinateTransactionBasedOnItsId();
+  my $statementDelete = $self->_statementDeleteCandidateTransactionBasedOnItsId();
   
   #There is at least one first transaction.
-  if (defined $candinateTransactionId) {
-    my $numberRowsDeleted = $statementDelete->execute($candinateTransactionId);
+  if (defined $candidateTransactionId) {
+    my $numberRowsDeleted = $statementDelete->execute($candidateTransactionId);
     
-    debugMethodMiddle("Deleted CandinateTransactionId:$candinateTransactionId");
+    debugMethodMiddle("Deleted CandidateTransactionId:$candidateTransactionId");
     debugMethodMiddle("ReturnVals(Nulls): hasRow:1 chainId:$chainId transFrom:$transactionFrom transTo:$transactionTo miniValue:$minimumValue Length:$length TotalValue:$totalValue numMinVals:$numberOfMinimumValues");
     
     debugMethodEnd();
     #1 is it has a transaction.
-    #Don't return CandinateTransactionsId as it's not needed and is just used to identify and remove one row.
+    #Don't return CandidateTransactionsId as it's not needed and is just used to identify and remove one row.
     return [1, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues];
   }
   else {
   
-    $settings->applyChainHeuristicsCandinates($loopGenerationContextInstance);
+    $settings->applyChainHeuristicsCandidates($loopGenerationContextInstance);
     
-    my $statementSelectRows = $self->_statementSelectCandinateTransactionInformationWhenItsIncluded();
+    my $statementSelectRows = $self->_statementSelectCandidateTransactionInformationWhenItsIncluded();
     $statementSelectRows->execute();
     
-    my ($candinateTransactionId, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues) = $statementSelectRows->fetchrow_array();
+    my ($candidateTransactionId, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues) = $statementSelectRows->fetchrow_array();
     
     my $hasRow = (defined $transactionTo ? 1 : 0);
     if ($hasRow) {
-      $statementDelete->execute($candinateTransactionId);
-      debugMethodMiddle("Deleted CandinateTransactionId:$candinateTransactionId");
+      $statementDelete->execute($candidateTransactionId);
+      debugMethodMiddle("Deleted CandidateTransactionId:$candidateTransactionId");
       debugMethodMiddle("ReturnVals(Non-null): hasRow:$hasRow chainId:".(defined $chainId ? $chainId : "")." transFrom:".(defined $transactionFrom ? $transactionFrom : "")." transTo:$transactionTo miniValue:$minimumValue Length:$length TotalValue:$totalValue numMinVals:$numberOfMinimumValues");
     }
     else {
@@ -763,7 +763,7 @@ sub _getNextBestCandinateTransaction {
     }
     
 
-    #Don't return CandinateTransactionsId as it's not needed and is just used to identify and remove one row.
+    #Don't return CandidateTransactionsId as it's not needed and is just used to identify and remove one row.
     debugMethodEnd();
     return [$hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues];
   }
@@ -845,22 +845,22 @@ sub _newChainStatsId {
 
 
 
-has _statementSelectMaxCandinateTransactionsId => (
+has _statementSelectMaxCandidateTransactionsId => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("SELECT MAX(CandinateTransactionsId) FROM CandinateTransactions");
+    return $self->dbh()->prepare("SELECT MAX(CandidateTransactionsId) FROM CandidateTransactions");
   },
   lazy => 1,
 );
 
-sub _newCandinateTransactionsId {
+sub _newCandidateTransactionsId {
   debugMethodStart();
   
   my ($self) = @_;
   my $dbh = $self->dbh;
 
-  my $statementMaxChainStatsId = $self->_statementSelectMaxCandinateTransactionsId();
+  my $statementMaxChainStatsId = $self->_statementSelectMaxCandidateTransactionsId();
   $statementMaxChainStatsId->execute();
   
   my ($maxId) = $statementMaxChainStatsId->fetchrow_array();
@@ -868,12 +868,12 @@ sub _newCandinateTransactionsId {
   my $id = undef;
   if (defined $maxId) {
     $id = $maxId + 1;
-    debugMethodMiddle("CandinateTransactionsIdExists = $id");
+    debugMethodMiddle("CandidateTransactionsIdExists = $id");
   }
   #No chains so there is no value
   else {
     $id = 1;
-    debugMethodMiddle("CandinateTransactionsIdDoesn'tExist = $id");
+    debugMethodMiddle("CandidateTransactionsIdDoesn'tExist = $id");
   }
   
   debugMethodEnd();

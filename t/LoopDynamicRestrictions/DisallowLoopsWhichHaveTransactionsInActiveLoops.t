@@ -43,7 +43,7 @@ my $insertLoops = $dbh->prepare("INSERT INTO Loops (LoopId_FK, TransactionId_FK)
 
 my $selectLoopInfo = $dbh->prepare("SELECT Active, Included FROM LoopInfo WHERE LoopId = ?");
 
-my $selectCandinateTransactionCountAll = $dbh->prepare("SELECT COUNT(*) FROM CandinateTransactions");
+my $selectCandidateTransactionCountAll = $dbh->prepare("SELECT COUNT(*) FROM CandidateTransactions");
 my $selectCurrentChainsCountAll = $dbh->prepare("SELECT COUNT(*) FROM CurrentChains");
 my $selectCurrentChainsStatsCountAll = $dbh->prepare("SELECT COUNT(*) FROM CurrentChainsStats");
 my $selectBranchedTransactionsCountAll = $dbh->prepare("SELECT COUNT(*) FROM BranchedTransactions");
@@ -135,9 +135,9 @@ sub getLoopInfoActiveIncluded {
   return $selectLoopInfo->fetchrow_array();
 }
 
-sub numCandinateTransactionRows {
-  $selectCandinateTransactionCountAll->execute();
-  my ($num) = $selectCandinateTransactionCountAll->fetchrow_array();
+sub numCandidateTransactionRows {
+  $selectCandidateTransactionCountAll->execute();
+  my ($num) = $selectCandidateTransactionCountAll->fetchrow_array();
   
   return $num;
 }
@@ -253,7 +253,7 @@ say "Test 4 - No loops active - not first restriction";
 {
   initialiseData1();
 
-  is (numCandinateTransactionRows(), 0, "There was 0 candinate transaction rows before execution.");
+  is (numCandidateTransactionRows(), 0, "There was 0 candidate transaction rows before execution.");
   is (numCurrentChainsRows(), 0, "There was 0 current chains rows before execution.");
   is (numCurrentChainsStatsRows(), 0, "There was 0 current chains stats rows before execution.");
   is (numBranchedTransactionsRows(), 0, "There was 0 branched transaction rows before execution.");
@@ -263,7 +263,7 @@ say "Test 4 - No loops active - not first restriction";
   my $exception = exception { $testModule->applyLoopDynamicRestriction(0); }; #not first restriction
   is ($exception, undef ,"No exception thrown"); 
 
-  is (numCandinateTransactionRows(), 0, "There was 0 candinate transaction rows after execution.");
+  is (numCandidateTransactionRows(), 0, "There was 0 candidate transaction rows after execution.");
   is (numCurrentChainsRows(), 0, "There was 0 current chains rows after execution.");
   is (numCurrentChainsStatsRows(), 0, "There was 0 current chains stats rows after execution.");
   is (numBranchedTransactionsRows(), 0, "There was 0 branched transaction rows after execution.");
@@ -299,7 +299,7 @@ say "Test 5 - No loops active - first restriction";
 {
   initialiseData1();
 
-  is (numCandinateTransactionRows(), 0, "There was 0 candinate transaction rows before execution.");
+  is (numCandidateTransactionRows(), 0, "There was 0 candidate transaction rows before execution.");
   is (numCurrentChainsRows(), 0, "There was 0 current chains rows before execution.");
   is (numCurrentChainsStatsRows(), 0, "There was 0 current chains stats rows before execution.");
   is (numBranchedTransactionsRows(), 0, "There was 0 branched transaction rows before execution.");
@@ -309,7 +309,7 @@ say "Test 5 - No loops active - first restriction";
   my $exception = exception { $testModule->applyLoopDynamicRestriction(1); }; #not first restriction
   is ($exception, undef ,"No exception thrown"); 
 
-  is (numCandinateTransactionRows(), 0, "There was 0 candinate transaction rows after execution.");
+  is (numCandidateTransactionRows(), 0, "There was 0 candidate transaction rows after execution.");
   is (numCurrentChainsRows(), 0, "There was 0 current chains rows after execution.");
   is (numCurrentChainsStatsRows(), 0, "There was 0 current chains stats rows after execution.");
   is (numBranchedTransactionsRows(), 0, "There was 0 branched transaction rows after execution.");
@@ -427,7 +427,7 @@ say "Test 6 - Some loops active - not first restriction";
 {
   initialiseData2();
 
-  is (numCandinateTransactionRows(), 0, "There was 0 candinate transaction rows before execution.");
+  is (numCandidateTransactionRows(), 0, "There was 0 candidate transaction rows before execution.");
   is (numCurrentChainsRows(), 0, "There was 0 current chains rows before execution.");
   is (numCurrentChainsStatsRows(), 0, "There was 0 current chains stats rows before execution.");
   is (numBranchedTransactionsRows(), 0, "There was 0 branched transaction rows before execution.");
@@ -437,7 +437,7 @@ say "Test 6 - Some loops active - not first restriction";
   my $exception = exception { $testModule->applyLoopDynamicRestriction(0); }; #not first restriction
   is ($exception, undef ,"No exception thrown"); 
 
-  is (numCandinateTransactionRows(), 0, "There was 0 candinate transaction rows after execution.");
+  is (numCandidateTransactionRows(), 0, "There was 0 candidate transaction rows after execution.");
   is (numCurrentChainsRows(), 0, "There was 0 current chains rows after execution.");
   is (numCurrentChainsStatsRows(), 0, "There was 0 current chains stats rows after execution.");
   is (numBranchedTransactionsRows(), 0, "There was 0 branched transaction rows after execution.");
@@ -494,7 +494,7 @@ say "Test 7 - Some loops active - first restriction";
 {
   initialiseData2();
 
-  is (numCandinateTransactionRows(), 0, "There was 0 candinate transaction rows before execution.");
+  is (numCandidateTransactionRows(), 0, "There was 0 candidate transaction rows before execution.");
   is (numCurrentChainsRows(), 0, "There was 0 current chains rows before execution.");
   is (numCurrentChainsStatsRows(), 0, "There was 0 current chains stats rows before execution.");
   is (numBranchedTransactionsRows(), 0, "There was 0 branched transaction rows before execution.");
@@ -504,7 +504,7 @@ say "Test 7 - Some loops active - first restriction";
   my $exception = exception { $testModule->applyLoopDynamicRestriction(1); }; #not first restriction
   is ($exception, undef ,"No exception thrown"); 
 
-  is (numCandinateTransactionRows(), 0, "There was 0 candinate transaction rows after execution.");
+  is (numCandidateTransactionRows(), 0, "There was 0 candidate transaction rows after execution.");
   is (numCurrentChainsRows(), 0, "There was 0 current chains rows after execution.");
   is (numCurrentChainsStatsRows(), 0, "There was 0 current chains stats rows after execution.");
   is (numBranchedTransactionsRows(), 0, "There was 0 branched transaction rows after execution.");

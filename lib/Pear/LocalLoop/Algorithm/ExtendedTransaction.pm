@@ -8,13 +8,13 @@ use Pear::LocalLoop::Algorithm::Debug;
 
 extends('Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier');
 
-#This will always be not null, unless there are no more candinate transactions left.
+#This will always be not null, unless there are no more candidate transactions left.
 has extendedTransaction => (
   is => 'ro',
   default => sub { return undef; }
 );
 
-#This will only be null on an initial transaction and when there are no candinate transactions left.
+#This will only be null on an initial transaction and when there are no candidate transactions left.
 has fromTransaction => (
   is => 'ro',
   default => sub { return undef; }
@@ -26,7 +26,7 @@ has firstTransaction => (
   default => sub { return 0; }
 );
 
-has noCandinateTransactionsLeft => (
+has noCandidateTransactionsLeft => (
   is => 'ro', 
   required => 0,
   default => sub { return 0; }
@@ -63,13 +63,13 @@ sub hasLoopFormed {
 sub hasFinished {
   my ($self, $loopGenerationContext) = @_;
   
-  return ($self->noCandinateTransactionsLeft() || $self->hasLoopFormed($loopGenerationContext));
+  return ($self->noCandidateTransactionsLeft() || $self->hasLoopFormed($loopGenerationContext));
 }
 
 sub isStillFormingLoops {
   my ($self, $loopGenerationContext) = @_;  
   
-  return (! $self->noCandinateTransactionsLeft() && $self->hasLoopFormed($loopGenerationContext));
+  return (! $self->noCandidateTransactionsLeft() && $self->hasLoopFormed($loopGenerationContext));
 }
 
 #TODO we assume $compare is the correct class.
@@ -92,7 +92,7 @@ sub equals {
   elsif ($compare1->firstTransaction() != $compare2->firstTransaction()) {
     return 0;
   }
-  elsif ($compare1->noCandinateTransactionsLeft() != $compare2->noCandinateTransactionsLeft()) {
+  elsif ($compare1->noCandidateTransactionsLeft() != $compare2->noCandidateTransactionsLeft()) {
     return 0;
   }
   else {

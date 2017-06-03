@@ -94,52 +94,52 @@ sub applyChainHeuristic {
   debugMethodEnd();
 };
 
-has _statementCandinatesHasTransactionsIncluded => (
+has _statementCandidatesHasTransactionsIncluded => (
   is => 'ro',
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("SELECT CandinateTransactionsId FROM CandinateTransactions_ViewIncluded, ProcessedTransactions WHERE TransactionTo_FK = TransactionId AND ToUserId = ? LIMIT 1");
+    return $self->dbh()->prepare("SELECT CandidateTransactionsId FROM CandidateTransactions_ViewIncluded, ProcessedTransactions WHERE TransactionTo_FK = TransactionId AND ToUserId = ? LIMIT 1");
   },
   lazy => 1,
 );
 
-has _statementCandinatesHasTransactionsFirst => (
+has _statementCandidatesHasTransactionsFirst => (
   is => 'ro',
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("SELECT CandinateTransactionsId FROM CandinateTransactions, ProcessedTransactions WHERE TransactionTo_FK = TransactionId AND ToUserId = ? LIMIT 1");
+    return $self->dbh()->prepare("SELECT CandidateTransactionsId FROM CandidateTransactions, ProcessedTransactions WHERE TransactionTo_FK = TransactionId AND ToUserId = ? LIMIT 1");
   },
   lazy => 1,
 );
 
-has _statementCandinatesPrioritiseFindingLoops => (
+has _statementCandidatesPrioritiseFindingLoops => (
   is => 'ro',
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("UPDATE CandinateTransactions SET Included = 0 WHERE Included != 0 AND TransactionTo_FK NOT IN (SELECT TransactionId FROM ProcessedTransactions WHERE ToUserId = ?)");
+    return $self->dbh()->prepare("UPDATE CandidateTransactions SET Included = 0 WHERE Included != 0 AND TransactionTo_FK NOT IN (SELECT TransactionId FROM ProcessedTransactions WHERE ToUserId = ?)");
   },
   lazy => 1,
 );
 
-has _statementCandinatesPrioritiseFindingLoopsFirst => (
+has _statementCandidatesPrioritiseFindingLoopsFirst => (
   is => 'ro',
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("UPDATE CandinateTransactions SET Included = 1 WHERE Included = 0 AND TransactionTo_FK IN (SELECT TransactionId FROM ProcessedTransactions WHERE ToUserId = ?)");
+    return $self->dbh()->prepare("UPDATE CandidateTransactions SET Included = 1 WHERE Included = 0 AND TransactionTo_FK IN (SELECT TransactionId FROM ProcessedTransactions WHERE ToUserId = ?)");
   },
   lazy => 1,
 );
 
-has _selectCandinatesReset => (
+has _selectCandidatesReset => (
   is => 'ro',
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("UPDATE CandinateTransactions SET Included = 1 WHERE Included = 0");
+    return $self->dbh()->prepare("UPDATE CandidateTransactions SET Included = 1 WHERE Included = 0");
   },
   lazy => 1,
 );
 
-sub applyCandinateTransactionHeuristic {
+sub applyCandidateTransactionHeuristic {
   debugMethodStart();
   
   my ($self, $isFirst, $loopGenerationContextInstance) = @_;
@@ -153,23 +153,23 @@ sub applyCandinateTransactionHeuristic {
   
   my $loopUserId = $loopGenerationContextInstance->userIdWhichCreatesALoop();
 
-  my $statementHasTransactions = ($isFirst ? $self->_statementCandinatesHasTransactionsFirst() : $self->_statementCandinatesHasTransactionsIncluded());
+  my $statementHasTransactions = ($isFirst ? $self->_statementCandidatesHasTransactionsFirst() : $self->_statementCandidatesHasTransactionsIncluded());
   $statementHasTransactions->execute($loopUserId);
-  my ($hasCandinateTransactions) = $statementHasTransactions->fetchrow_array();
+  my ($hasCandidateTransactions) = $statementHasTransactions->fetchrow_array();
  
 
   #If this is undef all are not included anyway.  
-  #There is at least one next transaction id. We only need the candinate transaction id as that identifies one row.
-  if (defined $hasCandinateTransactions) {
-    $self->_statementCandinatesPrioritiseFindingLoops()->execute($loopUserId);
+  #There is at least one next transaction id. We only need the candidate transaction id as that identifies one row.
+  if (defined $hasCandidateTransactions) {
+    $self->_statementCandidatesPrioritiseFindingLoops()->execute($loopUserId);
     
     if ($isFirst) {
-      $self->_statementCandinatesPrioritiseFindingLoopsFirst()->execute($loopUserId);
+      $self->_statementCandidatesPrioritiseFindingLoopsFirst()->execute($loopUserId);
     }
   }
   #No end transaction, but this is the first pass so reset everything.
   elsif ($isFirst) {
-    $self->_selectCandinatesReset()->execute();
+    $self->_selectCandidatesReset()->execute();
   }
   
   debugMethodEnd();

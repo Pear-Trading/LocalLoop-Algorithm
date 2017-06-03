@@ -91,60 +91,60 @@ sub applyChainHeuristic {
   debugMethodEnd();
 };
 
-has statementCandinatesMinimumTransactionId => (
+has statementCandidatesMinimumTransactionId => (
   is => 'ro',
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("SELECT CandinateTransactionsId, MIN(TransactionTo_FK) FROM CandinateTransactions_ViewIncluded");
+    return $self->dbh()->prepare("SELECT CandidateTransactionsId, MIN(TransactionTo_FK) FROM CandidateTransactions_ViewIncluded");
   },
   lazy => 1,
 );
 
-has statementCandinatesMinimumTransactionIdFirst => (
+has statementCandidatesMinimumTransactionIdFirst => (
   is => 'ro',
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("SELECT CandinateTransactionsId, MIN(TransactionTo_FK) FROM CandinateTransactions");
+    return $self->dbh()->prepare("SELECT CandidateTransactionsId, MIN(TransactionTo_FK) FROM CandidateTransactions");
   },
   lazy => 1,
 );
 
-has statementCandinatesNone => (
+has statementCandidatesNone => (
   is => 'ro',
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("UPDATE CandinateTransactions SET Included = 0 WHERE Included != 0 AND CandinateTransactionsId != ?");
+    return $self->dbh()->prepare("UPDATE CandidateTransactions SET Included = 0 WHERE Included != 0 AND CandidateTransactionsId != ?");
   },
   lazy => 1,
 );
 
-has statementCandinatesNoneFirst => (
+has statementCandidatesNoneFirst => (
   is => 'ro',
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("UPDATE CandinateTransactions SET Included = 1 WHERE Included = 0 AND CandinateTransactionsId = ?");
+    return $self->dbh()->prepare("UPDATE CandidateTransactions SET Included = 1 WHERE Included = 0 AND CandidateTransactionsId = ?");
   },
   lazy => 1,
 );
 
-sub applyCandinateTransactionHeuristic {
+sub applyCandidateTransactionHeuristic {
   debugMethodStart();
   
   my ($self, $isFirst) = @_;
   my $dbh = $self->dbh();
 
-  my $statementMinTransaction = ($isFirst ? $self->statementCandinatesMinimumTransactionIdFirst() : $self->statementCandinatesMinimumTransactionId());
+  my $statementMinTransaction = ($isFirst ? $self->statementCandidatesMinimumTransactionIdFirst() : $self->statementCandidatesMinimumTransactionId());
   $statementMinTransaction->execute();
-  my ($candinateTransactionsId, $nextTransactionId) = $statementMinTransaction->fetchrow_array();
+  my ($candidateTransactionsId, $nextTransactionId) = $statementMinTransaction->fetchrow_array();
 
   #If this is undef all are not included anyway.  
-  #There is at least one next transaction id. We only need the candinate transaction id as that identifies one row.
-  if (defined $candinateTransactionsId)
+  #There is at least one next transaction id. We only need the candidate transaction id as that identifies one row.
+  if (defined $candidateTransactionsId)
   {
-    $self->statementCandinatesNone()->execute($candinateTransactionsId);
+    $self->statementCandidatesNone()->execute($candidateTransactionsId);
     
     if ($isFirst) {
-      $self->statementCandinatesNoneFirst()->execute($candinateTransactionsId);
+      $self->statementCandidatesNoneFirst()->execute($candidateTransactionsId);
     }
   }
   

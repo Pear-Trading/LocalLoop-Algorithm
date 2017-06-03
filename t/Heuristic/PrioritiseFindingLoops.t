@@ -498,7 +498,7 @@ sub initialiseData9 {
   #TransactionId, FromUserId, ToUserId, Value, Included
   $insertStatementProcessedTransactions->execute(1, 1, 2, 10, 1);
   $insertStatementProcessedTransactions->execute(2, 2, 3, 10, 1);
-  $insertStatementProcessedTransactions->execute(3, 3, 5, 10, 0); #Both candinates excluded.
+  $insertStatementProcessedTransactions->execute(3, 3, 5, 10, 0); #Both candidates excluded.
   $insertStatementProcessedTransactions->execute(4, 4, 5, 10, 0); 
 }
 
@@ -623,7 +623,7 @@ say "Test 28 - Two transactions with the end from user id, both excluded - First
 
 ########################################################################################################
 
-my $insertStatementCandinateTransactions = $dbh->prepare("INSERT INTO CandinateTransactions (CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+my $insertStatementCandidateTransactions = $dbh->prepare("INSERT INTO CandidateTransactions (CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 my $statementInsertProcessedTransactions = $dbh->prepare("INSERT INTO ProcessedTransactions (TransactionId, FromUserId, ToUserId, Value) VALUES (?, ?, ?, ?)");
 my $statementInsertCurrentStatsId = $dbh->prepare("INSERT INTO CurrentChainsStats (ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
 my $statementInsertCurrentChains = $dbh->prepare("INSERT INTO CurrentChains (ChainId, TransactionId_FK, ChainStatsId_FK) VALUES (?, ?, ?)");
@@ -664,10 +664,10 @@ sub newLoopGenerationContext {
   });
 }
 
-sub candinateTransactionIdIncluded {
+sub candidateTransactionIdIncluded {
   my ($id) = @_;
   
-  my ($hasIncludedId) = $dbh->selectrow_array("SELECT COUNT(*) FROM CandinateTransactions WHERE CandinateTransactionsId = ? AND Included = 1", undef, ($id));
+  my ($hasIncludedId) = $dbh->selectrow_array("SELECT COUNT(*) FROM CandidateTransactions WHERE CandidateTransactionsId = ? AND Included = 1", undef, ($id));
   
   return $hasIncludedId;
 }
@@ -677,7 +677,7 @@ say "Test 29 - Empty table - not first applied";
 {
   initialiseCand();
 
-  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext($INGORE_USER_ID)); };
+  my $exception = exception { $testModule->applyCandidateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext($INGORE_USER_ID)); };
   is ($exception, undef ,"No exception thrown");
 }
 
@@ -687,7 +687,7 @@ say "Test 30 - Empty table - First applied";
 {
   initialiseCand();
 
-  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($FIRST, newLoopGenerationContext($INGORE_USER_ID)); };
+  my $exception = exception { $testModule->applyCandidateTransactionHeuristic($FIRST, newLoopGenerationContext($INGORE_USER_ID)); };
   is ($exception, undef ,"No exception thrown");
 }
 
@@ -697,7 +697,7 @@ say "Test 31 - First missing";
 {
   initialiseCand();
   
-  my $exception = exception { $testModule->applyCandinateTransactionHeuristic(undef, newLoopGenerationContext($INGORE_USER_ID)); };
+  my $exception = exception { $testModule->applyCandidateTransactionHeuristic(undef, newLoopGenerationContext($INGORE_USER_ID)); };
   isnt ($exception, undef ,"Exception thrown");
 }
 
@@ -707,7 +707,7 @@ say "Test 32 - First missing";
 {
   initialiseCand();
 
-  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($NOT_FIRST, undef); };
+  my $exception = exception { $testModule->applyCandidateTransactionHeuristic($NOT_FIRST, undef); };
   isnt ($exception, undef ,"Exception thrown");
 }
 
@@ -717,7 +717,7 @@ say "Test 33 - First missing";
 {
   initialiseCand();
 
-  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($FIRST, undef); };
+  my $exception = exception { $testModule->applyCandidateTransactionHeuristic($FIRST, undef); };
   isnt ($exception, undef ,"Exception thrown");
 }
 
@@ -727,44 +727,44 @@ sub initialiseCand1 {
   
   #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
   #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
-  #CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+  #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
   #                                              #        #              #
-  $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
-  $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
-  $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
-  $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
-  $insertStatementCandinateTransactions->execute(5, 1, 1, 5, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(5, 1, 1, 5, 1, 1, 1, 1, 1);
 }
 
-say "Test 34 - No candinates with the user id that can form a loop, all active - not first applied";
+say "Test 34 - No candidates with the user id that can form a loop, all active - not first applied";
 {
   initialiseCand1();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(7)); };
+  my $exception = exception { $testModule->applyCandidateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(7)); };
   is ($exception, undef ,"No exception thrown");
 
-  is (candinateTransactionIdIncluded(1),1,"id 1 remains included."); 
-  is (candinateTransactionIdIncluded(2),1,"id 2 remains included."); 
-  is (candinateTransactionIdIncluded(3),1,"id 3 remains included."); 
-  is (candinateTransactionIdIncluded(4),1,"id 4 remains included."); 
-  is (candinateTransactionIdIncluded(5),1,"id 5 remains included."); 
+  is (candidateTransactionIdIncluded(1),1,"id 1 remains included."); 
+  is (candidateTransactionIdIncluded(2),1,"id 2 remains included."); 
+  is (candidateTransactionIdIncluded(3),1,"id 3 remains included."); 
+  is (candidateTransactionIdIncluded(4),1,"id 4 remains included."); 
+  is (candidateTransactionIdIncluded(5),1,"id 5 remains included."); 
 }
 
 
-say "Test 35 - No candinates with the user id that can form a loop, all active - first applied";
+say "Test 35 - No candidates with the user id that can form a loop, all active - first applied";
 {
   initialiseCand1();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($FIRST, newLoopGenerationContext(7)); };
+  my $exception = exception { $testModule->applyCandidateTransactionHeuristic($FIRST, newLoopGenerationContext(7)); };
   is ($exception, undef ,"No exception thrown");
 
-  is (candinateTransactionIdIncluded(1),1,"id 1 remains included."); 
-  is (candinateTransactionIdIncluded(2),1,"id 2 remains included."); 
-  is (candinateTransactionIdIncluded(3),1,"id 3 remains included."); 
-  is (candinateTransactionIdIncluded(4),1,"id 4 remains included."); 
-  is (candinateTransactionIdIncluded(5),1,"id 5 remains included."); 
+  is (candidateTransactionIdIncluded(1),1,"id 1 remains included."); 
+  is (candidateTransactionIdIncluded(2),1,"id 2 remains included."); 
+  is (candidateTransactionIdIncluded(3),1,"id 3 remains included."); 
+  is (candidateTransactionIdIncluded(4),1,"id 4 remains included."); 
+  is (candidateTransactionIdIncluded(5),1,"id 5 remains included."); 
 }
 
 
@@ -774,44 +774,44 @@ sub initialiseCand2 {
   
   #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
   #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
-  #CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+  #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
   #                                              #        #              #
-  $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
-  $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
-  $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 0);
-  $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
-  $insertStatementCandinateTransactions->execute(5, 1, 1, 5, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(5, 1, 1, 5, 1, 1, 1, 1, 0);
 }
 
-say "Test 36 - No candinates with the user id that can form a loop, some excluded - not first applied";
+say "Test 36 - No candidates with the user id that can form a loop, some excluded - not first applied";
 {
   initialiseCand2();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(7)); };
+  my $exception = exception { $testModule->applyCandidateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(7)); };
   is ($exception, undef ,"No exception thrown");
 
-  is (candinateTransactionIdIncluded(1),0,"id 1 remains excluded."); 
-  is (candinateTransactionIdIncluded(2),1,"id 2 remains included."); 
-  is (candinateTransactionIdIncluded(3),0,"id 3 remains excluded."); 
-  is (candinateTransactionIdIncluded(4),1,"id 4 remains included."); 
-  is (candinateTransactionIdIncluded(5),0,"id 5 remains excluded."); 
+  is (candidateTransactionIdIncluded(1),0,"id 1 remains excluded."); 
+  is (candidateTransactionIdIncluded(2),1,"id 2 remains included."); 
+  is (candidateTransactionIdIncluded(3),0,"id 3 remains excluded."); 
+  is (candidateTransactionIdIncluded(4),1,"id 4 remains included."); 
+  is (candidateTransactionIdIncluded(5),0,"id 5 remains excluded."); 
 }
 
 
-say "Test 37 - No candinates with the user id that can form a loop, some excluded - first applied";
+say "Test 37 - No candidates with the user id that can form a loop, some excluded - first applied";
 {
   initialiseCand2();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($FIRST, newLoopGenerationContext(7)); };
+  my $exception = exception { $testModule->applyCandidateTransactionHeuristic($FIRST, newLoopGenerationContext(7)); };
   is ($exception, undef ,"No exception thrown");
 
-  is (candinateTransactionIdIncluded(1),1,"id 1 was reset and included again."); 
-  is (candinateTransactionIdIncluded(2),1,"id 2 remains included."); 
-  is (candinateTransactionIdIncluded(3),1,"id 3 was reset and included again."); 
-  is (candinateTransactionIdIncluded(4),1,"id 4 remains included."); 
-  is (candinateTransactionIdIncluded(5),1,"id 5 was reset and included again."); 
+  is (candidateTransactionIdIncluded(1),1,"id 1 was reset and included again."); 
+  is (candidateTransactionIdIncluded(2),1,"id 2 remains included."); 
+  is (candidateTransactionIdIncluded(3),1,"id 3 was reset and included again."); 
+  is (candidateTransactionIdIncluded(4),1,"id 4 remains included."); 
+  is (candidateTransactionIdIncluded(5),1,"id 5 was reset and included again."); 
 }
 
 
@@ -820,44 +820,44 @@ sub initialiseCand3 {
   
   #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
   #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
-  #CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+  #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
   #                                              #        #              #
-  $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
-  $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);
-  $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 0);
-  $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 0);
-  $insertStatementCandinateTransactions->execute(5, 1, 1, 5, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(5, 1, 1, 5, 1, 1, 1, 1, 0);
 }
 
-say "Test 38 - No candinates with the user id that can form a loop, all excluded - not first applied";
+say "Test 38 - No candidates with the user id that can form a loop, all excluded - not first applied";
 {
   initialiseCand3();
   
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(7)); };
+  my $exception = exception { $testModule->applyCandidateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(7)); };
   is ($exception, undef ,"No exception thrown");
 
-  is (candinateTransactionIdIncluded(1),0,"id 1 remains excluded."); 
-  is (candinateTransactionIdIncluded(2),0,"id 2 remains excluded."); 
-  is (candinateTransactionIdIncluded(3),0,"id 3 remains excluded."); 
-  is (candinateTransactionIdIncluded(4),0,"id 4 remains excluded."); 
-  is (candinateTransactionIdIncluded(5),0,"id 5 remains excluded."); 
+  is (candidateTransactionIdIncluded(1),0,"id 1 remains excluded."); 
+  is (candidateTransactionIdIncluded(2),0,"id 2 remains excluded."); 
+  is (candidateTransactionIdIncluded(3),0,"id 3 remains excluded."); 
+  is (candidateTransactionIdIncluded(4),0,"id 4 remains excluded."); 
+  is (candidateTransactionIdIncluded(5),0,"id 5 remains excluded."); 
 }
 
 
-say "Test 39 - No candinates with the user id that can form a loop, all excluded - first applied";
+say "Test 39 - No candidates with the user id that can form a loop, all excluded - first applied";
 {
   initialiseCand3();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($FIRST, newLoopGenerationContext(7)); };
+  my $exception = exception { $testModule->applyCandidateTransactionHeuristic($FIRST, newLoopGenerationContext(7)); };
   is ($exception, undef ,"No exception thrown");
 
-  is (candinateTransactionIdIncluded(1),1,"id 1 was reset and included again."); 
-  is (candinateTransactionIdIncluded(2),1,"id 2 was reset and included again."); 
-  is (candinateTransactionIdIncluded(3),1,"id 3 was reset and included again."); 
-  is (candinateTransactionIdIncluded(4),1,"id 4 was reset and included again."); 
-  is (candinateTransactionIdIncluded(5),1,"id 5 was reset and included again."); 
+  is (candidateTransactionIdIncluded(1),1,"id 1 was reset and included again."); 
+  is (candidateTransactionIdIncluded(2),1,"id 2 was reset and included again."); 
+  is (candidateTransactionIdIncluded(3),1,"id 3 was reset and included again."); 
+  is (candidateTransactionIdIncluded(4),1,"id 4 was reset and included again."); 
+  is (candidateTransactionIdIncluded(5),1,"id 5 was reset and included again."); 
 }
 
 
@@ -866,44 +866,44 @@ sub initialiseCand4 {
   
   #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
   #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
-  #CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+  #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
   #                                              #        #              #
-  $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
-  $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
-  $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
-  $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
-  $insertStatementCandinateTransactions->execute(5, 1, 1, 5, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(5, 1, 1, 5, 1, 1, 1, 1, 1);
 }
 
-say "Test 40 - One candinate with the user id that can form a loop, all included - not first applied";
+say "Test 40 - One candidate with the user id that can form a loop, all included - not first applied";
 {
   initialiseCand4();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(5)); };
+  my $exception = exception { $testModule->applyCandidateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(5)); };
   is ($exception, undef ,"No exception thrown");
 
-  is (candinateTransactionIdIncluded(1),0,"id 1 has been excluded."); 
-  is (candinateTransactionIdIncluded(2),0,"id 2 has been excluded."); 
-  is (candinateTransactionIdIncluded(3),0,"id 3 has been excluded."); 
-  is (candinateTransactionIdIncluded(4),1,"id 4 remains included."); 
-  is (candinateTransactionIdIncluded(5),0,"id 5 has been excluded."); 
+  is (candidateTransactionIdIncluded(1),0,"id 1 has been excluded."); 
+  is (candidateTransactionIdIncluded(2),0,"id 2 has been excluded."); 
+  is (candidateTransactionIdIncluded(3),0,"id 3 has been excluded."); 
+  is (candidateTransactionIdIncluded(4),1,"id 4 remains included."); 
+  is (candidateTransactionIdIncluded(5),0,"id 5 has been excluded."); 
 }
 
 
-say "Test 41 - One candinate with the user id that can form a loop, all included - first applied";
+say "Test 41 - One candidate with the user id that can form a loop, all included - first applied";
 {
   initialiseCand4();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($FIRST, newLoopGenerationContext(5)); };
+  my $exception = exception { $testModule->applyCandidateTransactionHeuristic($FIRST, newLoopGenerationContext(5)); };
   is ($exception, undef ,"No exception thrown");
 
-  is (candinateTransactionIdIncluded(1),0,"id 1 has been excluded."); 
-  is (candinateTransactionIdIncluded(2),0,"id 2 has been excluded."); 
-  is (candinateTransactionIdIncluded(3),0,"id 3 has been excluded."); 
-  is (candinateTransactionIdIncluded(4),1,"id 4 remains included."); 
-  is (candinateTransactionIdIncluded(5),0,"id 5 has been excluded."); 
+  is (candidateTransactionIdIncluded(1),0,"id 1 has been excluded."); 
+  is (candidateTransactionIdIncluded(2),0,"id 2 has been excluded."); 
+  is (candidateTransactionIdIncluded(3),0,"id 3 has been excluded."); 
+  is (candidateTransactionIdIncluded(4),1,"id 4 remains included."); 
+  is (candidateTransactionIdIncluded(5),0,"id 5 has been excluded."); 
 }
 
 
@@ -913,44 +913,44 @@ sub initialiseCand5 {
   
   #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
   #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
-  #CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+  #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
   #                                              #        #              #
-  $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
-  $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
-  $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 0);
-  $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
-  $insertStatementCandinateTransactions->execute(5, 1, 1, 5, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(5, 1, 1, 5, 1, 1, 1, 1, 1);
 }
 
-say "Test 42 - One candinate with the user id that can form a loop, some included (candinate excluded) - not first applied";
+say "Test 42 - One candidate with the user id that can form a loop, some included (candidate excluded) - not first applied";
 {
   initialiseCand5();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(4)); };
+  my $exception = exception { $testModule->applyCandidateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(4)); };
   is ($exception, undef ,"No exception thrown");
 
-  is (candinateTransactionIdIncluded(1),0,"id 1 remains excluded."); 
-  is (candinateTransactionIdIncluded(2),1,"id 2 remains included."); 
-  is (candinateTransactionIdIncluded(3),0,"id 3 remains excluded."); 
-  is (candinateTransactionIdIncluded(4),1,"id 4 remains included."); 
-  is (candinateTransactionIdIncluded(5),1,"id 5 remains included."); 
+  is (candidateTransactionIdIncluded(1),0,"id 1 remains excluded."); 
+  is (candidateTransactionIdIncluded(2),1,"id 2 remains included."); 
+  is (candidateTransactionIdIncluded(3),0,"id 3 remains excluded."); 
+  is (candidateTransactionIdIncluded(4),1,"id 4 remains included."); 
+  is (candidateTransactionIdIncluded(5),1,"id 5 remains included."); 
 }
 
 
-say "Test 43 - One candinate with the user id that can form a loop, some included (candinate excluded) - first applied";
+say "Test 43 - One candidate with the user id that can form a loop, some included (candidate excluded) - first applied";
 {
   initialiseCand5();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($FIRST, newLoopGenerationContext(4)); };
+  my $exception = exception { $testModule->applyCandidateTransactionHeuristic($FIRST, newLoopGenerationContext(4)); };
   is ($exception, undef ,"No exception thrown");
 
-  is (candinateTransactionIdIncluded(1),0,"id 1 has been excluded."); 
-  is (candinateTransactionIdIncluded(2),0,"id 2 has been excluded."); 
-  is (candinateTransactionIdIncluded(3),1,"id 3 was reset and included again."); #Reset
-  is (candinateTransactionIdIncluded(4),0,"id 4 has been excluded."); 
-  is (candinateTransactionIdIncluded(5),0,"id 5 has been excluded."); 
+  is (candidateTransactionIdIncluded(1),0,"id 1 has been excluded."); 
+  is (candidateTransactionIdIncluded(2),0,"id 2 has been excluded."); 
+  is (candidateTransactionIdIncluded(3),1,"id 3 was reset and included again."); #Reset
+  is (candidateTransactionIdIncluded(4),0,"id 4 has been excluded."); 
+  is (candidateTransactionIdIncluded(5),0,"id 5 has been excluded."); 
 }
 
 
@@ -959,44 +959,44 @@ sub initialiseCand6 {
   
   #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
   #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
-  #CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+  #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
   #                                              #        #              #
-  $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
-  $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);
-  $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 0);
-  $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 0);
-  $insertStatementCandinateTransactions->execute(5, 1, 1, 5, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(5, 1, 1, 5, 1, 1, 1, 1, 0);
 }
 
-say "Test 44 - One candinate with the user id that can form a loop, all excluded - not first applied";
+say "Test 44 - One candidate with the user id that can form a loop, all excluded - not first applied";
 {
   initialiseCand6();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(4)); };
+  my $exception = exception { $testModule->applyCandidateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(4)); };
   is ($exception, undef ,"No exception thrown");
 
-  is (candinateTransactionIdIncluded(1),0,"id 1 remains excluded."); 
-  is (candinateTransactionIdIncluded(2),0,"id 2 remains excluded."); 
-  is (candinateTransactionIdIncluded(3),0,"id 3 remains excluded."); 
-  is (candinateTransactionIdIncluded(4),0,"id 4 remains excluded."); 
-  is (candinateTransactionIdIncluded(5),0,"id 5 remains excluded."); 
+  is (candidateTransactionIdIncluded(1),0,"id 1 remains excluded."); 
+  is (candidateTransactionIdIncluded(2),0,"id 2 remains excluded."); 
+  is (candidateTransactionIdIncluded(3),0,"id 3 remains excluded."); 
+  is (candidateTransactionIdIncluded(4),0,"id 4 remains excluded."); 
+  is (candidateTransactionIdIncluded(5),0,"id 5 remains excluded."); 
 }
 
 
-say "Test 45 - One candinate with the user id that can form a loop, all excluded - first applied";
+say "Test 45 - One candidate with the user id that can form a loop, all excluded - first applied";
 {
   initialiseCand6();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($FIRST, newLoopGenerationContext(4)); };
+  my $exception = exception { $testModule->applyCandidateTransactionHeuristic($FIRST, newLoopGenerationContext(4)); };
   is ($exception, undef ,"No exception thrown");
 
-  is (candinateTransactionIdIncluded(1),0,"id 1 was reset but then excluded again."); 
-  is (candinateTransactionIdIncluded(2),0,"id 2 was reset but then excluded again."); 
-  is (candinateTransactionIdIncluded(3),1,"id 3 was reset and included again."); #Reset
-  is (candinateTransactionIdIncluded(4),0,"id 4 was reset but then excluded again."); 
-  is (candinateTransactionIdIncluded(5),0,"id 5 was reset but then excluded again."); 
+  is (candidateTransactionIdIncluded(1),0,"id 1 was reset but then excluded again."); 
+  is (candidateTransactionIdIncluded(2),0,"id 2 was reset but then excluded again."); 
+  is (candidateTransactionIdIncluded(3),1,"id 3 was reset and included again."); #Reset
+  is (candidateTransactionIdIncluded(4),0,"id 4 was reset but then excluded again."); 
+  is (candidateTransactionIdIncluded(5),0,"id 5 was reset but then excluded again."); 
 }
 
 
@@ -1006,47 +1006,47 @@ sub initialiseCand7 {
   
   #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
   #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
-  #CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+  #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
   #                                              #        #              #
-  $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
-  $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
-  $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
-  $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
-  $insertStatementCandinateTransactions->execute(5, 1, 1, 5, 1, 1, 1, 1, 1);
-  $insertStatementCandinateTransactions->execute(6, 1, 1, 6, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(5, 1, 1, 5, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(6, 1, 1, 6, 1, 1, 1, 1, 1);
 }
 
-say "Test 46 - Two candinates with the user id that can form a loop, all included - not first applied";
+say "Test 46 - Two candidates with the user id that can form a loop, all included - not first applied";
 {
   initialiseCand7();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(6)); };
+  my $exception = exception { $testModule->applyCandidateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(6)); };
   is ($exception, undef ,"No exception thrown");
 
-  is (candinateTransactionIdIncluded(1),0,"id 1 has been excluded."); 
-  is (candinateTransactionIdIncluded(2),0,"id 2 has been excluded."); 
-  is (candinateTransactionIdIncluded(3),0,"id 3 has been excluded."); 
-  is (candinateTransactionIdIncluded(4),0,"id 4 has been excluded."); 
-  is (candinateTransactionIdIncluded(5),1,"id 5 remains included."); 
-  is (candinateTransactionIdIncluded(6),1,"id 6 remains included."); 
+  is (candidateTransactionIdIncluded(1),0,"id 1 has been excluded."); 
+  is (candidateTransactionIdIncluded(2),0,"id 2 has been excluded."); 
+  is (candidateTransactionIdIncluded(3),0,"id 3 has been excluded."); 
+  is (candidateTransactionIdIncluded(4),0,"id 4 has been excluded."); 
+  is (candidateTransactionIdIncluded(5),1,"id 5 remains included."); 
+  is (candidateTransactionIdIncluded(6),1,"id 6 remains included."); 
 }
 
 
-say "Test 47 - Two candinates with the user id that can form a loop, all included - first applied";
+say "Test 47 - Two candidates with the user id that can form a loop, all included - first applied";
 {
   initialiseCand7();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($FIRST, newLoopGenerationContext(6)); };
+  my $exception = exception { $testModule->applyCandidateTransactionHeuristic($FIRST, newLoopGenerationContext(6)); };
   is ($exception, undef ,"No exception thrown");
 
-  is (candinateTransactionIdIncluded(1),0,"id 1 has been excluded."); 
-  is (candinateTransactionIdIncluded(2),0,"id 2 has been excluded."); 
-  is (candinateTransactionIdIncluded(3),0,"id 3 has been excluded."); 
-  is (candinateTransactionIdIncluded(4),0,"id 4 has been excluded."); 
-  is (candinateTransactionIdIncluded(5),1,"id 5 remains included."); 
-  is (candinateTransactionIdIncluded(6),1,"id 6 remains included.");  
+  is (candidateTransactionIdIncluded(1),0,"id 1 has been excluded."); 
+  is (candidateTransactionIdIncluded(2),0,"id 2 has been excluded."); 
+  is (candidateTransactionIdIncluded(3),0,"id 3 has been excluded."); 
+  is (candidateTransactionIdIncluded(4),0,"id 4 has been excluded."); 
+  is (candidateTransactionIdIncluded(5),1,"id 5 remains included."); 
+  is (candidateTransactionIdIncluded(6),1,"id 6 remains included.");  
 }
 
 
@@ -1056,47 +1056,47 @@ sub initialiseCand8 {
   
   #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
   #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
-  #CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+  #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
   #                                              #        #              #
-  $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
-  $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);
-  $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 0);
-  $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
-  $insertStatementCandinateTransactions->execute(5, 1, 1, 5, 1, 1, 1, 1, 1);
-  $insertStatementCandinateTransactions->execute(6, 1, 1, 6, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(5, 1, 1, 5, 1, 1, 1, 1, 1);
+  $insertStatementCandidateTransactions->execute(6, 1, 1, 6, 1, 1, 1, 1, 0);
 }
 
-say "Test 48 - Two candinates with the user id that can form a loop, some included (one end excluded) - not first applied";
+say "Test 48 - Two candidates with the user id that can form a loop, some included (one end excluded) - not first applied";
 {
   initialiseCand8();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(6)); };
+  my $exception = exception { $testModule->applyCandidateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(6)); };
   is ($exception, undef ,"No exception thrown");
 
-  is (candinateTransactionIdIncluded(1),0,"id 1 has been excluded."); 
-  is (candinateTransactionIdIncluded(2),0,"id 2 remains excluded."); 
-  is (candinateTransactionIdIncluded(3),0,"id 3 remains excluded."); 
-  is (candinateTransactionIdIncluded(4),0,"id 4 has been excluded."); 
-  is (candinateTransactionIdIncluded(5),1,"id 5 remains included."); 
-  is (candinateTransactionIdIncluded(6),0,"id 6 remains excluded."); 
+  is (candidateTransactionIdIncluded(1),0,"id 1 has been excluded."); 
+  is (candidateTransactionIdIncluded(2),0,"id 2 remains excluded."); 
+  is (candidateTransactionIdIncluded(3),0,"id 3 remains excluded."); 
+  is (candidateTransactionIdIncluded(4),0,"id 4 has been excluded."); 
+  is (candidateTransactionIdIncluded(5),1,"id 5 remains included."); 
+  is (candidateTransactionIdIncluded(6),0,"id 6 remains excluded."); 
 }
 
 
-say "Test 49 - Two candinates with the user id that can form a loop, some included (one end excluded) - first applied";
+say "Test 49 - Two candidates with the user id that can form a loop, some included (one end excluded) - first applied";
 {
   initialiseCand8();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($FIRST, newLoopGenerationContext(6)); };
+  my $exception = exception { $testModule->applyCandidateTransactionHeuristic($FIRST, newLoopGenerationContext(6)); };
   is ($exception, undef ,"No exception thrown");
 
-  is (candinateTransactionIdIncluded(1),0,"id 1 has been excluded."); 
-  is (candinateTransactionIdIncluded(2),0,"id 2 emains excluded."); 
-  is (candinateTransactionIdIncluded(3),0,"id 3 emains excluded."); 
-  is (candinateTransactionIdIncluded(4),0,"id 4 has been excluded."); 
-  is (candinateTransactionIdIncluded(5),1,"id 5 remains included."); 
-  is (candinateTransactionIdIncluded(6),1,"id 6 was reset and is now included.");  
+  is (candidateTransactionIdIncluded(1),0,"id 1 has been excluded."); 
+  is (candidateTransactionIdIncluded(2),0,"id 2 emains excluded."); 
+  is (candidateTransactionIdIncluded(3),0,"id 3 emains excluded."); 
+  is (candidateTransactionIdIncluded(4),0,"id 4 has been excluded."); 
+  is (candidateTransactionIdIncluded(5),1,"id 5 remains included."); 
+  is (candidateTransactionIdIncluded(6),1,"id 6 was reset and is now included.");  
 }
 
 
@@ -1105,47 +1105,47 @@ sub initialiseCand9 {
   
   #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
   #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
-  #CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+  #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
   #                                              #        #              #
-  $insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
-  $insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);
-  $insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 0);
-  $insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 0);
-  $insertStatementCandinateTransactions->execute(5, 1, 1, 5, 1, 1, 1, 1, 0);
-  $insertStatementCandinateTransactions->execute(6, 1, 1, 6, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(5, 1, 1, 5, 1, 1, 1, 1, 0);
+  $insertStatementCandidateTransactions->execute(6, 1, 1, 6, 1, 1, 1, 1, 0);
 }
 
-say "Test 48 - Two candinates with the user id that can form a loop, all excluded - not first applied";
+say "Test 48 - Two candidates with the user id that can form a loop, all excluded - not first applied";
 {
   initialiseCand9();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(6)); };
+  my $exception = exception { $testModule->applyCandidateTransactionHeuristic($NOT_FIRST, newLoopGenerationContext(6)); };
   is ($exception, undef ,"No exception thrown");
 
-  is (candinateTransactionIdIncluded(1),0,"id 1 remains excluded."); 
-  is (candinateTransactionIdIncluded(2),0,"id 2 remains excluded."); 
-  is (candinateTransactionIdIncluded(3),0,"id 3 remains excluded."); 
-  is (candinateTransactionIdIncluded(4),0,"id 4 remains excluded."); 
-  is (candinateTransactionIdIncluded(5),0,"id 5 remains excluded."); 
-  is (candinateTransactionIdIncluded(6),0,"id 6 remains excluded."); 
+  is (candidateTransactionIdIncluded(1),0,"id 1 remains excluded."); 
+  is (candidateTransactionIdIncluded(2),0,"id 2 remains excluded."); 
+  is (candidateTransactionIdIncluded(3),0,"id 3 remains excluded."); 
+  is (candidateTransactionIdIncluded(4),0,"id 4 remains excluded."); 
+  is (candidateTransactionIdIncluded(5),0,"id 5 remains excluded."); 
+  is (candidateTransactionIdIncluded(6),0,"id 6 remains excluded."); 
 }
 
 
-say "Test 49 - Two candinates with the user id that can form a loop, all excluded - first applied";
+say "Test 49 - Two candidates with the user id that can form a loop, all excluded - first applied";
 {
   initialiseCand9();
 
   #First application, user id which forms a loop.
-  my $exception = exception { $testModule->applyCandinateTransactionHeuristic($FIRST, newLoopGenerationContext(6)); };
+  my $exception = exception { $testModule->applyCandidateTransactionHeuristic($FIRST, newLoopGenerationContext(6)); };
   is ($exception, undef ,"No exception thrown");
 
-  is (candinateTransactionIdIncluded(1),0,"id 1 was reset but then excluded."); 
-  is (candinateTransactionIdIncluded(2),0,"id 2 was reset but then excluded."); 
-  is (candinateTransactionIdIncluded(3),0,"id 3 was reset but then excluded."); 
-  is (candinateTransactionIdIncluded(4),0,"id 4 was reset but then excluded."); 
-  is (candinateTransactionIdIncluded(5),1,"id 5 remains included."); 
-  is (candinateTransactionIdIncluded(6),1,"id 6 was reset and is now included.");  
+  is (candidateTransactionIdIncluded(1),0,"id 1 was reset but then excluded."); 
+  is (candidateTransactionIdIncluded(2),0,"id 2 was reset but then excluded."); 
+  is (candidateTransactionIdIncluded(3),0,"id 3 was reset but then excluded."); 
+  is (candidateTransactionIdIncluded(4),0,"id 4 was reset but then excluded."); 
+  is (candidateTransactionIdIncluded(5),1,"id 5 remains included."); 
+  is (candidateTransactionIdIncluded(6),1,"id 6 was reset and is now included.");  
 }
 
 

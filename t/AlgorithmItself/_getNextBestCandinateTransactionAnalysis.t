@@ -12,7 +12,7 @@ use v5.10;
 
 use FindBin;
 
-#This is a test for "Pear::LocalLoop::Algorithm::AlgorithmItself::_getNextBestCandinateTransactionAnalysis"
+#This is a test for "Pear::LocalLoop::Algorithm::AlgorithmItself::_getNextBestCandidateTransactionAnalysis"
 
 Pear::LocalLoop::Algorithm::Main->setTestingMode();
 
@@ -48,32 +48,32 @@ my $settings = Pear::LocalLoop::Algorithm::ProcessingTypeContainer->new({ chainH
 my $statementInsertProcessedTransactions = $dbh->prepare("INSERT INTO ProcessedTransactions (TransactionId, FromUserId, ToUserId, Value) VALUES (?, ?, ?, ?)");
 my $statementInsertCurrentStatsId = $dbh->prepare("INSERT INTO CurrentChainsStats (ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
 my $statementInsertCurrentChains = $dbh->prepare("INSERT INTO CurrentChains (ChainId, TransactionId_FK, ChainStatsId_FK) VALUES (?, ?, ?)");
-my $statementInsertCandinateTransactions = $dbh->prepare("INSERT INTO CandinateTransactions (CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+my $statementInsertCandidateTransactions = $dbh->prepare("INSERT INTO CandidateTransactions (CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
 my $selectCurrentChainsId = $dbh->prepare("SELECT ChainStatsId_FK FROM CurrentChains WHERE ChainId = ? AND TransactionId_FK = ?");
 my $selectCurrentChainsStatsId = $dbh->prepare("SELECT MinimumValue, Length, TotalValue, NumberOfMinimumValues FROM CurrentChainsStats WHERE ChainStatsId = ?");
 
-my $selectCandinateTransactionsIdCountSingle = $dbh->prepare("SELECT COUNT(*) FROM CandinateTransactions WHERE CandinateTransactionsId = ?");
+my $selectCandidateTransactionsIdCountSingle = $dbh->prepare("SELECT COUNT(*) FROM CandidateTransactions WHERE CandidateTransactionsId = ?");
 my $selectCurrentChainsIdCountSingle = $dbh->prepare("SELECT COUNT(*) FROM CurrentChains WHERE ChainId = ? AND TransactionId_FK = ?");
 my $selectCurrentChainsStatsIdCountSingle = $dbh->prepare("SELECT COUNT(*) FROM CurrentChainsStats WHERE ChainStatsId = ?");
 my $selectBranchedTransactionsIdCountSingle = $dbh->prepare("SELECT COUNT(*) FROM BranchedTransactions WHERE ChainId_FK = ? AND FromTransactionId_FK = ? AND ToTransactionId_FK = ?");
 
-my $selectCandinateTransactionCountAll = $dbh->prepare("SELECT COUNT(*) FROM CandinateTransactions");
+my $selectCandidateTransactionCountAll = $dbh->prepare("SELECT COUNT(*) FROM CandidateTransactions");
 my $selectCurrentChainsCountAll = $dbh->prepare("SELECT COUNT(*) FROM CurrentChains");
 my $selectCurrentChainsStatsCountAll = $dbh->prepare("SELECT COUNT(*) FROM CurrentChainsStats");
 my $selectBranchedTransactionsCountAll = $dbh->prepare("SELECT COUNT(*) FROM BranchedTransactions");
 
-sub candinateTransactionIdExists {
+sub candidateTransactionIdExists {
   my ($id) = @_;
   
   if ( ! defined $id ) {
     die "inputted id cannot be undefined";
   }
   
-  $selectCandinateTransactionsIdCountSingle->execute($id);
+  $selectCandidateTransactionsIdCountSingle->execute($id);
   
   #1 == exists, 0 == doesn't exist.
-  my ($returnedVal) = $selectCandinateTransactionsIdCountSingle->fetchrow_array();
+  my ($returnedVal) = $selectCandidateTransactionsIdCountSingle->fetchrow_array();
   
   return $returnedVal;
 }
@@ -158,9 +158,9 @@ sub selectCurrentChainStats {
 }
 
 
-sub numCandinateTransactionRows {
-  $selectCandinateTransactionCountAll->execute();
-  my ($num) = $selectCandinateTransactionCountAll->fetchrow_array();
+sub numCandidateTransactionRows {
+  $selectCandidateTransactionCountAll->execute();
+  my ($num) = $selectCandidateTransactionCountAll->fetchrow_array();
   
   return $num;
 }
@@ -194,8 +194,8 @@ sub numBranchedTransactionsRows {
 #- ChainId and TransactionId_FK (Unique)
 #CurrentChainsStats:
 #- ChainStatsId (Unique for the above)
-#CandinateTransactions:
-#- CandinateTransactionsId (Unique)
+#CandidateTransactions:
+#- CandidateTransactionsId (Unique)
 #- ChainId_FK (Null or not null).
 #- TransactionFrom_FK (Null or not null).
 #- TransactionTo_FK (heuristic order sensitive).
@@ -232,21 +232,21 @@ say "Test 1 - Empty table";
   $statementInsertProcessedTransactions->execute(4, 3, 4, 10);
   $statementInsertProcessedTransactions->execute(5, 4, 1, 10);
   
-  is (numCandinateTransactionRows(),0,"There is no candinate transaction rows before invocation.");
+  is (numCandidateTransactionRows(),0,"There is no candidate transaction rows before invocation.");
   is (numCurrentChainsRows(),0,"There is no current chains rows before invocation.");
   is (numCurrentChainsStatsRows(),0,"There is no current chains stats rows before invocation.");
   is (numBranchedTransactionsRows(),0,"There is no branched transaction rows before invocation.");
 
   my $returnVal = undef;
-  my $exception = exception { $returnVal = $main->_getNextBestCandinateTransactionAnalysis($settings, $startLoopId); };
+  my $exception = exception { $returnVal = $main->_getNextBestCandidateTransactionAnalysis($settings, $startLoopId); };
   is ($exception, undef ,"No exception thrown");
   
   my $expectedReturnVal = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
-      noCandinateTransactionsLeft => 1,
+      noCandidateTransactionsLeft => 1,
       loopStartEndUserId => $startLoopId,
   });
 
-  is (numCandinateTransactionRows(), 0, "There is no candinate transaction rows after invocation.");
+  is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows after invocation.");
   is (numCurrentChainsRows(),0,"There is no current chains rows after invocation.");
   is (numCurrentChainsStatsRows(),0,"There is no current chains stats rows after invocation.");
   is (numBranchedTransactionsRows(),0,"There is no branched transaction rows after invocation.");
@@ -267,18 +267,18 @@ say "Test 2 - First transaction selected (with nulls)";
   $statementInsertProcessedTransactions->execute(4, 3, 4, 10);
   $statementInsertProcessedTransactions->execute(5, 4, 1, 10);
   
-  #CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   #Only params 1 - 4 matter.
-  $statementInsertCandinateTransactions->execute(1, undef, undef, 1, 10, 1, 10, 1);
+  $statementInsertCandidateTransactions->execute(1, undef, undef, 1, 10, 1, 10, 1);
  
-  is (numCandinateTransactionRows(),1,"There is one candinate transaction row before invocation.");
+  is (numCandidateTransactionRows(),1,"There is one candidate transaction row before invocation.");
   is (numCurrentChainsRows(),0,"There is no current chains rows before invocation.");
   is (numCurrentChainsStatsRows(),0,"There is no current chains stats rows before invocation.");
   is (numBranchedTransactionsRows(),0,"There is no branched transaction rows before invocation.");
   
 
   my $returnVal = undef;
-  my $exception = exception { $returnVal = $main->_getNextBestCandinateTransactionAnalysis($settings, $startLoopId); };
+  my $exception = exception { $returnVal = $main->_getNextBestCandidateTransactionAnalysis($settings, $startLoopId); };
   is ($exception, undef ,"No exception thrown");
   
   $expectedReturnVal = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
@@ -291,8 +291,8 @@ say "Test 2 - First transaction selected (with nulls)";
     }),
   });
 
-  is (numCandinateTransactionRows(), 0, "There is no candinate transaction rows after invocation.");
-  is (candinateTransactionIdExists(1), 0,"Candinate transaction id 1 has been removed.");
+  is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows after invocation.");
+  is (candidateTransactionIdExists(1), 0,"Candidate transaction id 1 has been removed.");
     
   is (numCurrentChainsRows(),1,"There is one current chains row after invocation.");
   is (currentChainsIdExists(1, 1), 1,"Chain has been added."); #ChainId, TransactionId
@@ -330,18 +330,18 @@ say "Test 3 - Not first transaction selected (non-null), selection of transactio
   #ChainId, TransactionId_FK, ChainStatsId_FK
   $statementInsertCurrentChains->execute(1, 1, 1);
   
-  #CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   #Only params 1 - 4 matter.
-  $statementInsertCandinateTransactions->execute(2, 1, 1, 3, 10, 2, 20, 2);
+  $statementInsertCandidateTransactions->execute(2, 1, 1, 3, 10, 2, 20, 2);
  
-  is (numCandinateTransactionRows(),1,"There is 1 candinate transaction row before invocation.");
+  is (numCandidateTransactionRows(),1,"There is 1 candidate transaction row before invocation.");
   is (numCurrentChainsRows(),1,"There is 1 current chains row before invocation.");
   is (numCurrentChainsStatsRows(),1,"There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(),0,"There is no branched transaction rows before invocation.");
   
 
   my $returnVal = undef;
-  my $exception = exception { $returnVal = $main->_getNextBestCandinateTransactionAnalysis($settings, $startLoopId); };
+  my $exception = exception { $returnVal = $main->_getNextBestCandidateTransactionAnalysis($settings, $startLoopId); };
   is ($exception, undef ,"No exception thrown");
   
   $expectedReturnVal = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
@@ -359,7 +359,7 @@ say "Test 3 - Not first transaction selected (non-null), selection of transactio
   });
   
 
-  is (numCandinateTransactionRows(), 0, "There is no candinate transaction rows after invocation.");
+  is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows after invocation.");
     
   is (numCurrentChainsRows(),2,"There is 2 current chains rows after invocation.");
   is (currentChainsIdExists(1, 1), 1,"Chain remains."); #ChainId, TransactionId. Already existed.
@@ -400,18 +400,18 @@ say "Test 4 - Not first transaction selected (non-null), selection of transactio
   $statementInsertCurrentChains->execute(1, 1, 1);
   $statementInsertCurrentChains->execute(1, 3, 2);
   
-  #CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   #Only params 1 - 4 matter.
-  $statementInsertCandinateTransactions->execute(3, 1, 3, 4, 10, 3, 30, 3);
+  $statementInsertCandidateTransactions->execute(3, 1, 3, 4, 10, 3, 30, 3);
  
-  is (numCandinateTransactionRows(),1,"There is one candinate transaction row before invocation.");
+  is (numCandidateTransactionRows(),1,"There is one candidate transaction row before invocation.");
   is (numCurrentChainsRows(),2,"There is 2 current chains rows before invocation.");
   is (numCurrentChainsStatsRows(),2,"There is 2 current chains stats rows before invocation.");
   is (numBranchedTransactionsRows(),0,"There is no branched transaction rows before invocation.");
   
 
   my $returnVal = undef;
-  my $exception = exception { $returnVal = $main->_getNextBestCandinateTransactionAnalysis($settings, $startLoopId); };
+  my $exception = exception { $returnVal = $main->_getNextBestCandidateTransactionAnalysis($settings, $startLoopId); };
   is ($exception, undef ,"No exception thrown");
   
   $expectedReturnVal = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
@@ -429,7 +429,7 @@ say "Test 4 - Not first transaction selected (non-null), selection of transactio
   });
   
 
-  is (numCandinateTransactionRows(), 0, "There is no candinate transaction rows after invocation.");
+  is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows after invocation.");
     
   is (numCurrentChainsRows(), 3, "There is 2 current chains rows after invocation.");
   is (currentChainsIdExists(1, 1), 1, "Chain remains."); #ChainId, TransactionId. Already existed.
@@ -472,20 +472,20 @@ say "Test 5 - Not first transaction selected (non-null), selection of transactio
   $statementInsertCurrentChains->execute(1, 1, 1);
   $statementInsertCurrentChains->execute(1, 3, 2);
   
-  #CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   #Only params 1 - 4 matter.
-  #Actually another candinate transaction will be here from transacion 3 to 5, but we'll ignore that and 
+  #Actually another candidate transaction will be here from transacion 3 to 5, but we'll ignore that and 
   #force this.
-  $statementInsertCandinateTransactions->execute(4, 1, 1, 4, 10, 2, 30, 1);
+  $statementInsertCandidateTransactions->execute(4, 1, 1, 4, 10, 2, 30, 1);
  
-  is (numCandinateTransactionRows(),1,"There is one candinate transaction row before invocation.");
+  is (numCandidateTransactionRows(),1,"There is one candidate transaction row before invocation.");
   is (numCurrentChainsRows(),2,"There is 2 current chains rows before invocation.");
   is (numCurrentChainsStatsRows(),2,"There is 2 current chains stats rows before invocation.");
   is (numBranchedTransactionsRows(),0,"There is no branched transaction rows before invocation.");
   
 
   my $returnVal = undef;
-  my $exception = exception { $returnVal = $main->_getNextBestCandinateTransactionAnalysis($settings, $startLoopId); };
+  my $exception = exception { $returnVal = $main->_getNextBestCandidateTransactionAnalysis($settings, $startLoopId); };
   is ($exception, undef ,"No exception thrown");
   
   $expectedReturnVal = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
@@ -503,7 +503,7 @@ say "Test 5 - Not first transaction selected (non-null), selection of transactio
   });
 
 
-  is (numCandinateTransactionRows(), 0, "There is no candinate transaction rows after invocation.");
+  is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows after invocation.");
     
   is (numCurrentChainsRows(), 4, "There is 4 current chains rows after invocation.");
   is (currentChainsIdExists(1, 1), 1, "Chain remains."); #ChainId, TransactionId. Already existed.
@@ -554,19 +554,19 @@ say "Test 6 - Not first transaction selected (non-null), select transaction at t
   $statementInsertCurrentChains->execute(1, 3, 2);
   $statementInsertCurrentChains->execute(1, 5, 3);
   
-  #CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   #Only params 1 - 4 matter.
-  #Actually another candinate transactions would be here too but we'll ignore that and force this one.
-  $statementInsertCandinateTransactions->execute(4, 1, 1, 4, 10, 2, 30, 1);
+  #Actually another candidate transactions would be here too but we'll ignore that and force this one.
+  $statementInsertCandidateTransactions->execute(4, 1, 1, 4, 10, 2, 30, 1);
  
-  is (numCandinateTransactionRows(),1,"There is one candinate transaction row before invocation.");
+  is (numCandidateTransactionRows(),1,"There is one candidate transaction row before invocation.");
   is (numCurrentChainsRows(),3,"There is 3 current chains rows before invocation.");
   is (numCurrentChainsStatsRows(),3,"There is 3 current chains stats rows before invocation.");
   is (numBranchedTransactionsRows(),0,"There is no branched transaction rows before invocation.");
   
 
   my $returnVal = undef;
-  my $exception = exception { $returnVal = $main->_getNextBestCandinateTransactionAnalysis($settings, $startLoopId); };
+  my $exception = exception { $returnVal = $main->_getNextBestCandidateTransactionAnalysis($settings, $startLoopId); };
   is ($exception, undef ,"No exception thrown");
   
   $expectedReturnVal = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
@@ -584,7 +584,7 @@ say "Test 6 - Not first transaction selected (non-null), select transaction at t
   });
 
 
-  is (numCandinateTransactionRows(), 0, "There is no candinate transaction rows after invocation.");
+  is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows after invocation.");
     
   is (numCurrentChainsRows(), 5, "There is 5 current chains rows after invocation.");
   is (currentChainsIdExists(1, 1), 1, "Chain remains."); #ChainId, TransactionId. Already existed.
@@ -636,19 +636,19 @@ say "Test 7 - Not first transaction selected (non-null), select transaction in t
   $statementInsertCurrentChains->execute(1, 3, 2);
   $statementInsertCurrentChains->execute(1, 5, 3);
   
-  #CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   #Only params 1 - 4 matter.
-  #Actually another candinate transactions would be here too but we'll ignore that and force this one.
-  $statementInsertCandinateTransactions->execute(4, 1, 3, 6, 10, 3, 40, 2);
+  #Actually another candidate transactions would be here too but we'll ignore that and force this one.
+  $statementInsertCandidateTransactions->execute(4, 1, 3, 6, 10, 3, 40, 2);
  
-  is (numCandinateTransactionRows(),1,"There is one candinate transaction row before invocation.");
+  is (numCandidateTransactionRows(),1,"There is one candidate transaction row before invocation.");
   is (numCurrentChainsRows(),3,"There is 3 current chains rows before invocation.");
   is (numCurrentChainsStatsRows(),3,"There is 3 current chains stats rows before invocation.");
   is (numBranchedTransactionsRows(),0,"There is no branched transaction rows before invocation.");
   
 
   my $returnVal = undef;
-  my $exception = exception { $returnVal = $main->_getNextBestCandinateTransactionAnalysis($settings, $startLoopId); };
+  my $exception = exception { $returnVal = $main->_getNextBestCandidateTransactionAnalysis($settings, $startLoopId); };
   is ($exception, undef ,"No exception thrown");
   
   $expectedReturnVal = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
@@ -666,7 +666,7 @@ say "Test 7 - Not first transaction selected (non-null), select transaction in t
   });
 
 
-  is (numCandinateTransactionRows(), 0, "There is no candinate transaction rows after invocation.");
+  is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows after invocation.");
     
   is (numCurrentChainsRows(), 6, "There is 6 current chains rows after invocation.");
   is (currentChainsIdExists(1, 1), 1, "Chain remains."); #ChainId, TransactionId. Already existed.

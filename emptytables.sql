@@ -4,6 +4,6 @@ DELETE FROM LastUserTransaction;
 DELETE FROM CurrentChainsStats;
 DELETE FROM CurrentChains;
 DELETE FROM BranchedTransactions;
-DELETE FROM CandinateTransactions;
+DELETE FROM CandidateTransactions;
 DELETE FROM LoopInfo;
 DELETE FROM Loops;

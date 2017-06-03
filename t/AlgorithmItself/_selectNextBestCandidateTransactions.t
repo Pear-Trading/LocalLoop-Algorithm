@@ -16,7 +16,7 @@ use v5.10;
 
 use FindBin;
 
-#This is a test for "Pear::LocalLoop::Algorithm::AlgorithmItself::_selectNextBestCandinateTransactions"
+#This is a test for "Pear::LocalLoop::Algorithm::AlgorithmItself::_selectNextBestCandidateTransactions"
 
 Pear::LocalLoop::Algorithm::Main->setTestingMode();
 
@@ -60,18 +60,18 @@ my $settings = Pear::LocalLoop::Algorithm::ProcessingTypeContainer->new({
 my $statementInsertProcessedTransactions = $dbh->prepare("INSERT INTO ProcessedTransactions (TransactionId, FromUserId, ToUserId, Value) VALUES (?, ?, ?, ?)");
 my $statementInsertCurrentStatsId = $dbh->prepare("INSERT INTO CurrentChainsStats (ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
 my $statementInsertCurrentChains = $dbh->prepare("INSERT INTO CurrentChains (ChainId, TransactionId_FK, ChainStatsId_FK) VALUES (?, ?, ?)");
-my $statementInsertCandinateTransactions = $dbh->prepare("INSERT INTO CandinateTransactions (CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+my $statementInsertCandidateTransactions = $dbh->prepare("INSERT INTO CandidateTransactions (CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
-my $selectCandinateTransactionsId = $dbh->prepare("SELECT MinimumValue, Length, TotalValue, NumberOfMinimumValues FROM CandinateTransactions WHERE TransactionFrom_FK = ? AND TransactionTo_FK = ?");
+my $selectCandidateTransactionsId = $dbh->prepare("SELECT MinimumValue, Length, TotalValue, NumberOfMinimumValues FROM CandidateTransactions WHERE TransactionFrom_FK = ? AND TransactionTo_FK = ?");
 
 
-my $selectCandinateTransactionCountAll = $dbh->prepare("SELECT COUNT(*) FROM CandinateTransactions");
+my $selectCandidateTransactionCountAll = $dbh->prepare("SELECT COUNT(*) FROM CandidateTransactions");
 my $selectCurrentChainsCountAll = $dbh->prepare("SELECT COUNT(*) FROM CurrentChains");
 my $selectCurrentChainsStatsCountAll = $dbh->prepare("SELECT COUNT(*) FROM CurrentChainsStats");
 my $selectBranchedTransactionsCountAll = $dbh->prepare("SELECT COUNT(*) FROM BranchedTransactions");
 
 
-sub selectCandinateTransactions {
+sub selectCandidateTransactions {
   #transactionFrom can be null.
   my ($transactionFrom, $transactionTo) = @_;
 
@@ -79,15 +79,15 @@ sub selectCandinateTransactions {
     die "transactionTo cannot be undefined";
   }
   
-  $selectCandinateTransactionsId->execute($transactionFrom, $transactionTo);
-  return $selectCandinateTransactionsId->fetchrow_array();
+  $selectCandidateTransactionsId->execute($transactionFrom, $transactionTo);
+  return $selectCandidateTransactionsId->fetchrow_array();
 }
 
 
 
-sub numCandinateTransactionRows {
-  $selectCandinateTransactionCountAll->execute();
-  my ($num) = $selectCandinateTransactionCountAll->fetchrow_array();
+sub numCandidateTransactionRows {
+  $selectCandidateTransactionCountAll->execute();
+  my ($num) = $selectCandidateTransactionCountAll->fetchrow_array();
   
   return $num;
 }
@@ -144,15 +144,15 @@ say "Test 1 - First transaction with no possible transactions to extend onto.";
     userIdWhichCreatesALoop => $startLoopId,
   });
 
-  is (numCandinateTransactionRows(), 0, "There is no candinate transaction rows before invocation.");
+  is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows before invocation.");
   is (numCurrentChainsRows(), 1, "There is 1 current chains row before invocation.");
   is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
+  my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
-  is (numCandinateTransactionRows(), 0,"There is no candinate transaction rows before invocation.");
+  is (numCandidateTransactionRows(), 0,"There is no candidate transaction rows before invocation.");
   is (numCurrentChainsRows(), 1, "There is 1 current chains row before invocation.");
   is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
@@ -189,17 +189,17 @@ say "Test 2 - First transaction with 1 possible transactions to extend onto.";
     userIdWhichCreatesALoop => $startLoopId,
   });
 
-  is (numCandinateTransactionRows(), 0, "There is no candinate transaction rows before invocation.");
+  is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows before invocation.");
   is (numCurrentChainsRows(), 1, "There is 1 current chains row before invocation.");
   is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
+  my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
-  is (numCandinateTransactionRows(), 1,"There is 1 candinate transaction row after invocation.");
+  is (numCandidateTransactionRows(), 1,"There is 1 candidate transaction row after invocation.");
   #SQL: TransactionFrom_FK, TransactionTo_FK
-  my ($minimumValue, $length, $totalValue, $numberOfMinimumValues) = selectCandinateTransactions(1, 2);
+  my ($minimumValue, $length, $totalValue, $numberOfMinimumValues) = selectCandidateTransactions(1, 2);
   is ($minimumValue, 10, "minimumValue remains the same.");
   is ($length, 2, "length has been updated to account for the new transaction.");
   is ($totalValue, 20, "totalValue has been updated to account for the new transaction.");
@@ -247,23 +247,23 @@ say "Test 3 - First transaction with 2 (or more) possible transactions to extend
     userIdWhichCreatesALoop => $startLoopId,
   });
 
-  is (numCandinateTransactionRows(), 0, "There is no candinate transaction rows before invocation.");
+  is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows before invocation.");
   is (numCurrentChainsRows(), 1, "There is 1 current chains row before invocation.");
   is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
+  my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
-  is (numCandinateTransactionRows(), 2, "There is 2 candinate transaction rows after invocation.");
+  is (numCandidateTransactionRows(), 2, "There is 2 candidate transaction rows after invocation.");
   #SQL: TransactionFrom_FK, TransactionTo_FK
-  my ($minimumValue, $length, $totalValue, $numberOfMinimumValues) = selectCandinateTransactions(1, 2);
+  my ($minimumValue, $length, $totalValue, $numberOfMinimumValues) = selectCandidateTransactions(1, 2);
   is ($minimumValue, 10, "minimumValue remains the same.");
   is ($length, 2, "length has been updated to account for the new transaction.");
   is ($totalValue, 20, "totalValue has been updated to account for the new transaction.");
   is ($numberOfMinimumValues, 2, "numberOfMinimumValues has been updated to account for the new transaction.");
   #SQL: TransactionFrom_FK, TransactionTo_FK
-  ($minimumValue, $length, $totalValue, $numberOfMinimumValues) = selectCandinateTransactions(1, 3);
+  ($minimumValue, $length, $totalValue, $numberOfMinimumValues) = selectCandidateTransactions(1, 3);
   is ($minimumValue, 10, "minimumValue remains the same.");
   is ($length, 2, "length has been updated to account for the new transaction.");
   is ($totalValue, 30, "totalValue has been updated to account for the new transaction.");
@@ -275,7 +275,7 @@ say "Test 3 - First transaction with 2 (or more) possible transactions to extend
 }
 
 
-say "Test 4 - First transaction with 1 possible transactions to extend onto, next candinate has value lower than the minimum value.";
+say "Test 4 - First transaction with 1 possible transactions to extend onto, next candidate has value lower than the minimum value.";
 {
   delete_table_data();
   my $startLoopId = 1;
@@ -305,17 +305,17 @@ say "Test 4 - First transaction with 1 possible transactions to extend onto, nex
     userIdWhichCreatesALoop => $startLoopId,
   });
 
-  is (numCandinateTransactionRows(), 0, "There is no candinate transaction rows before invocation.");
+  is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows before invocation.");
   is (numCurrentChainsRows(), 1, "There is 1 current chains row before invocation.");
   is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
+  my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
-  is (numCandinateTransactionRows(), 1,"There is 1 candinate transaction row after invocation.");
+  is (numCandidateTransactionRows(), 1,"There is 1 candidate transaction row after invocation.");
   #SQL: TransactionFrom_FK, TransactionTo_FK
-  my ($minimumValue, $length, $totalValue, $numberOfMinimumValues) = selectCandinateTransactions(1, 2);
+  my ($minimumValue, $length, $totalValue, $numberOfMinimumValues) = selectCandidateTransactions(1, 2);
   is ($minimumValue, 8, "minimumValue has been reduced.");
   is ($length, 2, "length has been updated to account for the new transaction.");
   is ($totalValue, 18, "totalValue has been updated to account for the new transaction.");
@@ -327,7 +327,7 @@ say "Test 4 - First transaction with 1 possible transactions to extend onto, nex
 }
 
 
-say "Test 5 - First transaction with 1 possible transactions to extend onto, next candinate has value the same as the minimum value.";
+say "Test 5 - First transaction with 1 possible transactions to extend onto, next candidate has value the same as the minimum value.";
 {
   #This is essentially test 2.
   delete_table_data();
@@ -358,17 +358,17 @@ say "Test 5 - First transaction with 1 possible transactions to extend onto, nex
     userIdWhichCreatesALoop => $startLoopId,
   });
 
-  is (numCandinateTransactionRows(), 0, "There is no candinate transaction rows before invocation.");
+  is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows before invocation.");
   is (numCurrentChainsRows(), 1, "There is 1 current chains row before invocation.");
   is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
+  my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
-  is (numCandinateTransactionRows(), 1,"There is 1 candinate transaction row after invocation.");
+  is (numCandidateTransactionRows(), 1,"There is 1 candidate transaction row after invocation.");
   #SQL: TransactionFrom_FK, TransactionTo_FK
-  my ($minimumValue, $length, $totalValue, $numberOfMinimumValues) = selectCandinateTransactions(1, 2);
+  my ($minimumValue, $length, $totalValue, $numberOfMinimumValues) = selectCandidateTransactions(1, 2);
   is ($minimumValue, 10, "minimumValue remains the same.");
   is ($length, 2, "length has been updated to account for the new transaction.");
   is ($totalValue, 20, "totalValue has been updated to account for the new transaction.");
@@ -380,7 +380,7 @@ say "Test 5 - First transaction with 1 possible transactions to extend onto, nex
 }
 
 
-say "Test 6 - First transaction with 1 possible transactions to extend onto, next candinate has value the more than the minimum value.";
+say "Test 6 - First transaction with 1 possible transactions to extend onto, next candidate has value the more than the minimum value.";
 {
   delete_table_data();
   my $startLoopId = 1;
@@ -410,17 +410,17 @@ say "Test 6 - First transaction with 1 possible transactions to extend onto, nex
     userIdWhichCreatesALoop => $startLoopId,
   });
 
-  is (numCandinateTransactionRows(), 0, "There is no candinate transaction rows before invocation.");
+  is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows before invocation.");
   is (numCurrentChainsRows(), 1, "There is 1 current chains row before invocation.");
   is (numCurrentChainsStatsRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
+  my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
-  is (numCandinateTransactionRows(), 1,"There is 1 candinate transaction row after invocation.");
+  is (numCandidateTransactionRows(), 1,"There is 1 candidate transaction row after invocation.");
   #SQL: TransactionFrom_FK, TransactionTo_FK
-  my ($minimumValue, $length, $totalValue, $numberOfMinimumValues) = selectCandinateTransactions(1, 2);
+  my ($minimumValue, $length, $totalValue, $numberOfMinimumValues) = selectCandidateTransactions(1, 2);
   is ($minimumValue, 10, "minimumValue remains the same.");
   is ($length, 2, "length has been updated to account for the new transaction.");
   is ($totalValue, 22, "totalValue has been updated to account for the new transaction.");
@@ -470,23 +470,23 @@ say "Test 7 - Not first transaction with 2 possible transactions to extend onto 
     userIdWhichCreatesALoop => $startLoopId,
   });
 
-  is (numCandinateTransactionRows(), 0, "There is no candinate transaction rows before invocation.");
+  is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows before invocation.");
   is (numCurrentChainsRows(), 2, "There is 1 current chains row before invocation.");
   is (numCurrentChainsStatsRows(), 2, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
+  my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
-  is (numCandinateTransactionRows(), 2,"There is 2 candinate transaction rows after invocation.");
+  is (numCandidateTransactionRows(), 2,"There is 2 candidate transaction rows after invocation.");
   #SQL: TransactionFrom_FK, TransactionTo_FK
-  my ($minimumValue, $length, $totalValue, $numberOfMinimumValues) = selectCandinateTransactions(1, 3);
+  my ($minimumValue, $length, $totalValue, $numberOfMinimumValues) = selectCandidateTransactions(1, 3);
   is ($minimumValue, 10, "minimumValue remains the same.");
   is ($length, 2, "length has been updated to account for the new transaction.");
   is ($totalValue, 20, "totalValue has been updated to account for the new transaction.");
   is ($numberOfMinimumValues, 2, "numberOfMinimumValues has been updated to account for the new transaction.");
   #SQL: TransactionFrom_FK, TransactionTo_FK
-  ($minimumValue, $length, $totalValue, $numberOfMinimumValues) = selectCandinateTransactions(2, 4);
+  ($minimumValue, $length, $totalValue, $numberOfMinimumValues) = selectCandidateTransactions(2, 4);
   is ($minimumValue, 8, "minimumValue has reduced.");
   is ($length, 3, "length has been updated to account for the new transaction.");
   is ($totalValue, 30, "totalValue has been updated to account for the new transaction.");
@@ -498,7 +498,7 @@ say "Test 7 - Not first transaction with 2 possible transactions to extend onto 
 }
 
 
-say "Test 8 - Not first transaction, existing candinate transaction prevents the consideration of another.";
+say "Test 8 - Not first transaction, existing candidate transaction prevents the consideration of another.";
 {
   #Modify the settings to not include the heuristics, as with "None" it results in only 1 -> 3 being selected 
   #instead of both 1 -> 3 and 1 -> 4.
@@ -514,7 +514,7 @@ say "Test 8 - Not first transaction, existing candinate transaction prevents the
   $statementInsertProcessedTransactions->execute(1, 1, 2, 10);
   $statementInsertProcessedTransactions->execute(2, 2, 3, 10); 
   $statementInsertProcessedTransactions->execute(3, 2, 4, 10); 
-  $statementInsertProcessedTransactions->execute(4, 2, 5, 10); #Does not consider this because of the candinate (tx.)
+  $statementInsertProcessedTransactions->execute(4, 2, 5, 10); #Does not consider this because of the candidate (tx.)
   $statementInsertProcessedTransactions->execute(5, 3, 6, 13); #Above minimum value
 
   
@@ -528,8 +528,8 @@ say "Test 8 - Not first transaction, existing candinate transaction prevents the
   
   #Purposefully don't add to transaction 1 -> 4, as we want to make sure this not included. 
   #It's already connected tx. 1 -> 2.
-  #CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
-  $statementInsertCandinateTransactions->execute(1, 1, 1, 3, 10, 2, 20, 2);
+  #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  $statementInsertCandidateTransactions->execute(1, 1, 1, 3, 10, 2, 20, 2);
   
   my $inputTransactionState = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
     extendedTransaction => Pear::LocalLoop::Algorithm::ChainTransaction->new({
@@ -548,24 +548,24 @@ say "Test 8 - Not first transaction, existing candinate transaction prevents the
     userIdWhichCreatesALoop => $startLoopId,
   });
 
-  is (numCandinateTransactionRows(), 1, "There is 1 candinate transaction row before invocation.");
+  is (numCandidateTransactionRows(), 1, "There is 1 candidate transaction row before invocation.");
   is (numCurrentChainsRows(), 2, "There is 2 current chains rows before invocation.");
   is (numCurrentChainsStatsRows(), 2, "There is 2 current chains stats rows before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandinateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
+  my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
-  #Importantly candinate transaction 1 -> 4 does not exist.
-  is (numCandinateTransactionRows(), 2,"There is 2 candinate transaction rows after invocation.");
+  #Importantly candidate transaction 1 -> 4 does not exist.
+  is (numCandidateTransactionRows(), 2,"There is 2 candidate transaction rows after invocation.");
   #SQL: TransactionFrom_FK, TransactionTo_FK
-  my ($minimumValue, $length, $totalValue, $numberOfMinimumValues) = selectCandinateTransactions(1, 3);
+  my ($minimumValue, $length, $totalValue, $numberOfMinimumValues) = selectCandidateTransactions(1, 3);
   is ($minimumValue, 10, "minimumValue remains the same.");
   is ($length, 2, "length has been updated to account for the new transaction.");
   is ($totalValue, 20, "totalValue has been updated to account for the new transaction.");
   is ($numberOfMinimumValues, 2, "numberOfMinimumValues has been updated to account for the new transaction.");
   #SQL: TransactionFrom_FK, TransactionTo_FK
-  ($minimumValue, $length, $totalValue, $numberOfMinimumValues) = selectCandinateTransactions(2, 5);
+  ($minimumValue, $length, $totalValue, $numberOfMinimumValues) = selectCandidateTransactions(2, 5);
   is ($minimumValue, 10, "minimumValue remains the same.");
   is ($length, 3, "length has been updated to account for the new transaction.");
   is ($totalValue, 33, "totalValue has been updated to account for the new transaction.");

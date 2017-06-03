@@ -42,7 +42,7 @@ sub delete_table_data {
 my $statementInsertProcessedTransactions = $dbh->prepare("INSERT INTO ProcessedTransactions (TransactionId, FromUserId, ToUserId, Value) VALUES (?, ?, ?, ?)");
 my $statementInsertCurrentStatsId = $dbh->prepare("INSERT INTO CurrentChainsStats (ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
 my $statementInsertCurrentChains = $dbh->prepare("INSERT INTO CurrentChains (ChainId, TransactionId_FK, ChainStatsId_FK) VALUES (?, ?, ?)");
-my $statementInsertCandinateTransactions = $dbh->prepare("INSERT INTO CandinateTransactions (CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+my $statementInsertCandidateTransactions = $dbh->prepare("INSERT INTO CandidateTransactions (CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 my $statementInsertBranchedTransactions = $dbh->prepare("INSERT INTO BranchedTransactions (ChainId_FK, FromTransactionId_FK, ToTransactionId_FK) VALUES (?, ?, ?)");
 
 my $selectCurrentChainsId = $dbh->prepare("SELECT ChainStatsId_FK FROM CurrentChains WHERE ChainId = ? AND TransactionId_FK = ?");
@@ -216,7 +216,7 @@ say "Test 2 - Generate 1 loop, with deletion test of tables CurrentChains, Curre
   ok (loopsExists($loopId, 4), "Transaction 4 is in loop $loopId.");
 }
 
-say "Test 3 - Generate 1 loop - with random transactions and deletion test of table CandinateTransactions";
+say "Test 3 - Generate 1 loop - with random transactions and deletion test of table CandidateTransactions";
 {
   delete_table_data();
   
@@ -239,11 +239,11 @@ say "Test 3 - Generate 1 loop - with random transactions and deletion test of ta
   
   #More malicious attempts to break the algorithm.
   #This is to attempt to trick the algorithm into thinking a loop does exist as this data is present
-  #hence why it should clear the tables before processing. Test of CandinateTransactions deletion.
+  #hence why it should clear the tables before processing. Test of CandidateTransactions deletion.
   #Enter a "first" transaction right at the end to see if it gets selected as first transactions (ones with
   #the chain id and from transaction id being null) get selected to be first regardless.
-  #CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
-  $statementInsertCandinateTransactions->execute(1, undef, undef, 13, 10, 1, 10, 1);
+  #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+  $statementInsertCandidateTransactions->execute(1, undef, undef, 13, 10, 1, 10, 1);
 
   is(numLoopInfoRows(), 0, "There is no loop info rows before execution.");
   is(numLoopsRows(), 0, "There is no loop rows before execution.");

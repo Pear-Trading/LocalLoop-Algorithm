@@ -80,8 +80,8 @@ sub newChainGenerationContext {
 #Note this ignores that the id's don't match so say in test 3, 2 -> 3 can link to 4 -> 1 despite 3 and 4 being different.
 #This must be restricted with the use of the "DynamicRestriction::AllowOnlyTransactionsWhichFromUserMatchesOurToUser" 
 
-#Test 1 to 14 is applying the heuristic to find a candinate transaction to connect to given our current transaction.
-#Test 15+ is applying the heurstic to those candinate transactions to find the best candinate.
+#Test 1 to 14 is applying the heuristic to find a candidate transaction to connect to given our current transaction.
+#Test 15+ is applying the heurstic to those candidate transactions to find the best candidate.
 
 #Test "Heuristic::None" alone without "DynamicRestriction::AllowOnlyTransactionsWhichFromUserMatchesOurToUser" 
 say "Test 1 - Transaction 1, not first dynamic restriction";
@@ -390,7 +390,7 @@ is (transactionIdIncluded(7),0,"Can't link to id 7.");
 my $statementInsertProcessedTransactions = $dbh->prepare("INSERT INTO ProcessedTransactions (TransactionId, FromUserId, ToUserId, Value) VALUES (?, ?, ?, ?)");
 my $statementInsertCurrentStatsId = $dbh->prepare("INSERT INTO CurrentChainsStats (ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
 my $statementInsertCurrentChains = $dbh->prepare("INSERT INTO CurrentChains (ChainId, TransactionId_FK, ChainStatsId_FK) VALUES (?, ?, ?)");
-my $insertStatementCandinateTransactions = $dbh->prepare("INSERT INTO CandinateTransactions (CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+my $insertStatementCandidateTransactions = $dbh->prepare("INSERT INTO CandidateTransactions (CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
 sub initialise { 
   delete_table_data();
@@ -416,10 +416,10 @@ sub initialise {
 
 }
 
-sub candinateTransactionIdIncluded {
+sub candidateTransactionIdIncluded {
   my ($id) = @_;
   
-  my ($hasIncludedId) = $dbh->selectrow_array("SELECT COUNT(*) FROM CandinateTransactions WHERE CandinateTransactionsId = ? AND Included = 1", undef, ($id));
+  my ($hasIncludedId) = $dbh->selectrow_array("SELECT COUNT(*) FROM CandidateTransactions WHERE CandidateTransactionsId = ? AND Included = 1", undef, ($id));
   
   return $hasIncludedId;
 }
@@ -429,20 +429,20 @@ say "Test 15 - not first dynamic restriction";
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
-#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+#CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #              #
-$insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
 
-my $exception = exception { $testModule->applyCandinateTransactionHeuristic(0); };
+my $exception = exception { $testModule->applyCandidateTransactionHeuristic(0); };
 is ($exception, undef ,"No exception thrown"); #not first restriction
 
-is (candinateTransactionIdIncluded(1),1,"id 1 is included."); 
-is (candinateTransactionIdIncluded(2),0,"id 2 is discounted."); 
-is (candinateTransactionIdIncluded(3),0,"id 3 is discounted."); 
-is (candinateTransactionIdIncluded(4),0,"id 4 is discounted."); 
+is (candidateTransactionIdIncluded(1),1,"id 1 is included."); 
+is (candidateTransactionIdIncluded(2),0,"id 2 is discounted."); 
+is (candidateTransactionIdIncluded(3),0,"id 3 is discounted."); 
+is (candidateTransactionIdIncluded(4),0,"id 4 is discounted."); 
 
 
 
@@ -450,20 +450,20 @@ say "Test 16 - test 15 insertion order shuffled, not first dynamic restriction";
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
-#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+#CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #              #
-$insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
 
-my $exception = exception { $testModule->applyCandinateTransactionHeuristic(0); };
+my $exception = exception { $testModule->applyCandidateTransactionHeuristic(0); };
 is ($exception, undef ,"No exception thrown"); #not first restriction
 
-is (candinateTransactionIdIncluded(1),1,"id 1 is included."); 
-is (candinateTransactionIdIncluded(2),0,"id 2 is discounted."); 
-is (candinateTransactionIdIncluded(3),0,"id 3 is discounted."); 
-is (candinateTransactionIdIncluded(4),0,"id 4 is discounted."); 
+is (candidateTransactionIdIncluded(1),1,"id 1 is included."); 
+is (candidateTransactionIdIncluded(2),0,"id 2 is discounted."); 
+is (candidateTransactionIdIncluded(3),0,"id 3 is discounted."); 
+is (candidateTransactionIdIncluded(4),0,"id 4 is discounted."); 
 
 
 
@@ -471,60 +471,60 @@ say "Test 17 - to transaction ids randomised, not first dynamic restriction";
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
-#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+#CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #               #
-$insertStatementCandinateTransactions->execute(4, 1, 1, 12, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(2, 1, 1, 7,  1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(1, 1, 1, 88, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(3, 1, 1, 4,  1, 1, 1, 1, 1);
-my $exception = exception { $testModule->applyCandinateTransactionHeuristic(0); };
+$insertStatementCandidateTransactions->execute(4, 1, 1, 12, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(2, 1, 1, 7,  1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(1, 1, 1, 88, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(3, 1, 1, 4,  1, 1, 1, 1, 1);
+my $exception = exception { $testModule->applyCandidateTransactionHeuristic(0); };
 is ($exception, undef ,"No exception thrown"); #not first restriction
-is (candinateTransactionIdIncluded(1),0,"id 88 is discounted."); 
-is (candinateTransactionIdIncluded(2),0,"id 7 is discounted."); 
-is (candinateTransactionIdIncluded(3),1,"id 4 is included."); 
-is (candinateTransactionIdIncluded(4),0,"id 12 is discounted."); 
+is (candidateTransactionIdIncluded(1),0,"id 88 is discounted."); 
+is (candidateTransactionIdIncluded(2),0,"id 7 is discounted."); 
+is (candidateTransactionIdIncluded(3),1,"id 4 is included."); 
+is (candidateTransactionIdIncluded(4),0,"id 12 is discounted."); 
 
 
 
-say "Test 18 - best candinate not included, not first dynamic restriction";
+say "Test 18 - best candidate not included, not first dynamic restriction";
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
-#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+#CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #              #
-$insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
-$insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
+$insertStatementCandidateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
 
-my $exception = exception { $testModule->applyCandinateTransactionHeuristic(0); };
+my $exception = exception { $testModule->applyCandidateTransactionHeuristic(0); };
 is ($exception, undef ,"No exception thrown"); #not first restriction
 
-is (candinateTransactionIdIncluded(1),0,"id 1 is not included anyway."); 
-is (candinateTransactionIdIncluded(2),1,"id 2 is included."); 
-is (candinateTransactionIdIncluded(3),0,"id 3 is discounted."); 
-is (candinateTransactionIdIncluded(4),0,"id 4 is discounted."); 
+is (candidateTransactionIdIncluded(1),0,"id 1 is not included anyway."); 
+is (candidateTransactionIdIncluded(2),1,"id 2 is included."); 
+is (candidateTransactionIdIncluded(3),0,"id 3 is discounted."); 
+is (candidateTransactionIdIncluded(4),0,"id 4 is discounted."); 
 
 
 
-say "Test 19 - other non best candinates not included, not first dynamic restriction";
+say "Test 19 - other non best candidates not included, not first dynamic restriction";
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
-#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+#CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #              #
-$insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);
-$insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 0);
+$insertStatementCandidateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);
+$insertStatementCandidateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 0);
 
-my $exception = exception { $testModule->applyCandinateTransactionHeuristic(0); };
+my $exception = exception { $testModule->applyCandidateTransactionHeuristic(0); };
 is ($exception, undef ,"No exception thrown"); #not first restriction
 
-is (candinateTransactionIdIncluded(1),1,"id 1 is included."); 
-is (candinateTransactionIdIncluded(2),0,"id 2 is not included anyway."); 
-is (candinateTransactionIdIncluded(3),0,"id 3 is discounted."); 
-is (candinateTransactionIdIncluded(4),0,"id 4 is not included anyway."); 
+is (candidateTransactionIdIncluded(1),1,"id 1 is included."); 
+is (candidateTransactionIdIncluded(2),0,"id 2 is not included anyway."); 
+is (candidateTransactionIdIncluded(3),0,"id 3 is discounted."); 
+is (candidateTransactionIdIncluded(4),0,"id 4 is not included anyway."); 
 
 
 
@@ -532,20 +532,20 @@ say "Test 20 - none included, not first dynamic restriction";
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
-#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+#CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #              #
-$insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
-$insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);
-$insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 0);
-$insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 0);
+$insertStatementCandidateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
+$insertStatementCandidateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);
+$insertStatementCandidateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 0);
+$insertStatementCandidateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 0);
 
-my $exception = exception { $testModule->applyCandinateTransactionHeuristic(0); };
+my $exception = exception { $testModule->applyCandidateTransactionHeuristic(0); };
 is ($exception, undef ,"No exception thrown"); #not first restriction
 
-is (candinateTransactionIdIncluded(1),0,"id 1 is not included anyway."); 
-is (candinateTransactionIdIncluded(2),0,"id 2 is not included anyway."); 
-is (candinateTransactionIdIncluded(3),0,"id 3 is not included anyway."); 
-is (candinateTransactionIdIncluded(4),0,"id 4 is not included anyway."); 
+is (candidateTransactionIdIncluded(1),0,"id 1 is not included anyway."); 
+is (candidateTransactionIdIncluded(2),0,"id 2 is not included anyway."); 
+is (candidateTransactionIdIncluded(3),0,"id 3 is not included anyway."); 
+is (candidateTransactionIdIncluded(4),0,"id 4 is not included anyway."); 
 
 
 
@@ -554,20 +554,20 @@ say "Test 21 - first dynamic restriction";
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
-#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+#CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #              #
-$insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
 
-my $exception = exception { $testModule->applyCandinateTransactionHeuristic(1); };
+my $exception = exception { $testModule->applyCandidateTransactionHeuristic(1); };
 is ($exception, undef ,"No exception thrown"); #first restriction
 
-is (candinateTransactionIdIncluded(1),1,"id 1 is included."); 
-is (candinateTransactionIdIncluded(2),0,"id 2 is discounted."); 
-is (candinateTransactionIdIncluded(3),0,"id 3 is discounted."); 
-is (candinateTransactionIdIncluded(4),0,"id 4 is discounted."); 
+is (candidateTransactionIdIncluded(1),1,"id 1 is included."); 
+is (candidateTransactionIdIncluded(2),0,"id 2 is discounted."); 
+is (candidateTransactionIdIncluded(3),0,"id 3 is discounted."); 
+is (candidateTransactionIdIncluded(4),0,"id 4 is discounted."); 
 
 
 
@@ -575,20 +575,20 @@ say "Test 22 - test 15 insertion order shuffled, first dynamic restriction";
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
-#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+#CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #              #
-$insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
 
-my $exception = exception { $testModule->applyCandinateTransactionHeuristic(1); };
+my $exception = exception { $testModule->applyCandidateTransactionHeuristic(1); };
 is ($exception, undef ,"No exception thrown"); #first restriction
 
-is (candinateTransactionIdIncluded(1),1,"id 1 is included."); 
-is (candinateTransactionIdIncluded(2),0,"id 2 is discounted."); 
-is (candinateTransactionIdIncluded(3),0,"id 3 is discounted."); 
-is (candinateTransactionIdIncluded(4),0,"id 4 is discounted."); 
+is (candidateTransactionIdIncluded(1),1,"id 1 is included."); 
+is (candidateTransactionIdIncluded(2),0,"id 2 is discounted."); 
+is (candidateTransactionIdIncluded(3),0,"id 3 is discounted."); 
+is (candidateTransactionIdIncluded(4),0,"id 4 is discounted."); 
 
 
 
@@ -596,62 +596,62 @@ say "Test 23 - to transaction ids randomised, first dynamic restriction";
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
-#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+#CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #               #
-$insertStatementCandinateTransactions->execute(4, 1, 1, 12, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(2, 1, 1, 7,  1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(1, 1, 1, 88, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(3, 1, 1, 4,  1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(4, 1, 1, 12, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(2, 1, 1, 7,  1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(1, 1, 1, 88, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(3, 1, 1, 4,  1, 1, 1, 1, 1);
 
-my $exception = exception { $testModule->applyCandinateTransactionHeuristic(1); };
+my $exception = exception { $testModule->applyCandidateTransactionHeuristic(1); };
 is ($exception, undef ,"No exception thrown"); #first restriction
 
-is (candinateTransactionIdIncluded(1),0,"id 88 is discounted."); 
-is (candinateTransactionIdIncluded(2),0,"id 7 is discounted."); 
-is (candinateTransactionIdIncluded(3),1,"id 4 is included."); 
-is (candinateTransactionIdIncluded(4),0,"id 12 is discounted."); 
+is (candidateTransactionIdIncluded(1),0,"id 88 is discounted."); 
+is (candidateTransactionIdIncluded(2),0,"id 7 is discounted."); 
+is (candidateTransactionIdIncluded(3),1,"id 4 is included."); 
+is (candidateTransactionIdIncluded(4),0,"id 12 is discounted."); 
 
 
 
-say "Test 24 - best candinate not included, first dynamic restriction";
+say "Test 24 - best candidate not included, first dynamic restriction";
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
-#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+#CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #              #
-$insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
-$insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
+$insertStatementCandidateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 1);
 
-my $exception = exception { $testModule->applyCandinateTransactionHeuristic(1); };
+my $exception = exception { $testModule->applyCandidateTransactionHeuristic(1); };
 is ($exception, undef ,"No exception thrown"); #first restriction
 
-is (candinateTransactionIdIncluded(1),1,"id 1 is included (resetted)."); 
-is (candinateTransactionIdIncluded(2),0,"id 2 is discounted."); 
-is (candinateTransactionIdIncluded(3),0,"id 3 is discounted."); 
-is (candinateTransactionIdIncluded(4),0,"id 4 is discounted."); 
+is (candidateTransactionIdIncluded(1),1,"id 1 is included (resetted)."); 
+is (candidateTransactionIdIncluded(2),0,"id 2 is discounted."); 
+is (candidateTransactionIdIncluded(3),0,"id 3 is discounted."); 
+is (candidateTransactionIdIncluded(4),0,"id 4 is discounted."); 
 
 
 
-say "Test 25 - other non best candinates included, not first dynamic restriction";
+say "Test 25 - other non best candidates included, not first dynamic restriction";
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
-#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+#CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #              #
-$insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);
-$insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
-$insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 0);
+$insertStatementCandidateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);
+$insertStatementCandidateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 1);
+$insertStatementCandidateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 0);
 
-my $exception = exception { $testModule->applyCandinateTransactionHeuristic(1); };
+my $exception = exception { $testModule->applyCandidateTransactionHeuristic(1); };
 is ($exception, undef ,"No exception thrown"); #first restriction
 
-is (candinateTransactionIdIncluded(1),1,"id 1 is included."); 
-is (candinateTransactionIdIncluded(2),0,"id 2 is not included, but is reset and discounted anyway."); 
-is (candinateTransactionIdIncluded(3),0,"id 3 is discounted."); 
-is (candinateTransactionIdIncluded(4),0,"id 4 is not included, but is reset and discounted anyway."); 
+is (candidateTransactionIdIncluded(1),1,"id 1 is included."); 
+is (candidateTransactionIdIncluded(2),0,"id 2 is not included, but is reset and discounted anyway."); 
+is (candidateTransactionIdIncluded(3),0,"id 3 is discounted."); 
+is (candidateTransactionIdIncluded(4),0,"id 4 is not included, but is reset and discounted anyway."); 
 
 
 
@@ -659,20 +659,20 @@ say "Test 26 - none included, first dynamic restriction";
 initialise();
 #Only the 1st (tuple id), 4th (to transaction) and 9th (included) attributes matter.
 #The 2nd and 3rd however must exist in their respective tables, though they are not taken into consideration.
-#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
+#CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included
 #                                              #        #              #
-$insertStatementCandinateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
-$insertStatementCandinateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);
-$insertStatementCandinateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 0);
-$insertStatementCandinateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 0);
+$insertStatementCandidateTransactions->execute(1, 1, 1, 1, 1, 1, 1, 1, 0);
+$insertStatementCandidateTransactions->execute(2, 1, 1, 2, 1, 1, 1, 1, 0);
+$insertStatementCandidateTransactions->execute(3, 1, 1, 3, 1, 1, 1, 1, 0);
+$insertStatementCandidateTransactions->execute(4, 1, 1, 4, 1, 1, 1, 1, 0);
 
-my $exception = exception { $testModule->applyCandinateTransactionHeuristic(1); };
+my $exception = exception { $testModule->applyCandidateTransactionHeuristic(1); };
 is ($exception, undef ,"No exception thrown"); #first restriction
 
-is (candinateTransactionIdIncluded(1),1,"id 1 is included (resetted)."); 
-is (candinateTransactionIdIncluded(2),0,"id 2 is not included, but is reset and discounted anyway."); 
-is (candinateTransactionIdIncluded(3),0,"id 3 is not included, but is reset and discounted anyway."); 
-is (candinateTransactionIdIncluded(4),0,"id 4 is not included, but is reset and discounted anyway."); 
+is (candidateTransactionIdIncluded(1),1,"id 1 is included (resetted)."); 
+is (candidateTransactionIdIncluded(2),0,"id 2 is not included, but is reset and discounted anyway."); 
+is (candidateTransactionIdIncluded(3),0,"id 3 is not included, but is reset and discounted anyway."); 
+is (candidateTransactionIdIncluded(4),0,"id 4 is not included, but is reset and discounted anyway."); 
 
 
 

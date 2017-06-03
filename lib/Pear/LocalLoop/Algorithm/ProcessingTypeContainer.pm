@@ -161,30 +161,30 @@ sub applyChainDynamicRestrictionsAndHeuristics {
   debugMethodEnd();
 }
 
-has _statementHeuristicsCandinatesReset => (
+has _statementHeuristicsCandidatesReset => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("UPDATE CandinateTransactions SET Included = 1 WHERE Included = 0");
+    return $self->dbh()->prepare("UPDATE CandidateTransactions SET Included = 1 WHERE Included = 0");
   },
   lazy => 1,
 );
 
-sub applyChainHeuristicsCandinates {
+sub applyChainHeuristicsCandidates {
   debugMethodStart();
   my ($self, $loopGenerationContextInstance) = @_;
 
   my $isFirst = 1;
   foreach my $chainHeuristic (@{$self->chainHeuristicArray()}) {
-    $chainHeuristic->applyCandinateTransactionHeuristic($isFirst, $loopGenerationContextInstance);
-    $self->_dumpCandinateTransactionsIncluded();
+    $chainHeuristic->applyCandidateTransactionHeuristic($isFirst, $loopGenerationContextInstance);
+    $self->_dumpCandidateTransactionsIncluded();
     $isFirst = 0;
   }    
   
   #Nothing applied? Reset all of the included values.
   if ($isFirst) {
-    debugMethodMiddle("No heuristics executed. All candinate transactions reset.");
-    $self->_statementHeuristicsCandinatesReset()->execute();
+    debugMethodMiddle("No heuristics executed. All candidate transactions reset.");
+    $self->_statementHeuristicsCandidatesReset()->execute();
   }
   
   debugMethodEnd();
@@ -256,22 +256,22 @@ sub _dumpTransactionsIncluded {
   }
 }
 
-has _statementDumpCandinateTransactionsIncluded => (
+has _statementDumpCandidateTransactionsIncluded => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("SELECT CandinateTransactionsId, Included FROM CandinateTransactions ORDER BY CandinateTransactionsId");
+    return $self->dbh()->prepare("SELECT CandidateTransactionsId, Included FROM CandidateTransactions ORDER BY CandidateTransactionsId");
   },
   lazy => 1,
 );
 
-sub _dumpCandinateTransactionsIncluded {
+sub _dumpCandidateTransactionsIncluded {
   
   if (isDebug()) {
     my ($self) = @_;
     my $dbh = Pear::LocalLoop::Algorithm::Main->dbi();
     
-    my $statement = $self->_statementDumpCandinateTransactionsIncluded();
+    my $statement = $self->_statementDumpCandidateTransactionsIncluded();
     $statement->execute();
     
     my $string = "";
@@ -284,7 +284,7 @@ sub _dumpCandinateTransactionsIncluded {
       }
     }
     
-    debugMethodMiddle("CandinateTransactionsIncludedDump: ".$string);
+    debugMethodMiddle("CandidateTransactionsIncludedDump: ".$string);
   }
 }
 

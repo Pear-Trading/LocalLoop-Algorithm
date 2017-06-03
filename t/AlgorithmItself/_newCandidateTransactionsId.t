@@ -9,7 +9,7 @@ use v5.10;
 
 use FindBin;
 
-#This is a test for "Pear::LocalLoop::Algorithm::AlgorithmItself::_newCandinateTransactionsId"
+#This is a test for "Pear::LocalLoop::Algorithm::AlgorithmItself::_newCandidateTransactionsId"
 
 Pear::LocalLoop::Algorithm::Main->setTestingMode();
 
@@ -39,7 +39,7 @@ sub delete_table_data {
 my $statementInsertProcessedTransactions = $dbh->prepare("INSERT INTO ProcessedTransactions (TransactionId, FromUserId, ToUserId, Value) VALUES (?, ?, ?, ?)");
 my $statementInsertCurrentStatsId = $dbh->prepare("INSERT INTO CurrentChainsStats (ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
 my $statementInsertCurrentChains = $dbh->prepare("INSERT INTO CurrentChains (ChainId, TransactionId_FK, ChainStatsId_FK) VALUES (?, ?, ?)");
-my $statementInsertCandinateTransactions = $dbh->prepare("INSERT INTO CandinateTransactions (CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+my $statementInsertCandidateTransactions = $dbh->prepare("INSERT INTO CandidateTransactions (CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
 sub initialise { 
   delete_table_data();
@@ -66,21 +66,21 @@ sub initialise {
 }
 
 
-my $selectCandinateTransactionsId = $dbh->prepare("SELECT COUNT(CandinateTransactionsId) FROM CandinateTransactions WHERE CandinateTransactionsId = ?");
+my $selectCandidateTransactionsId = $dbh->prepare("SELECT COUNT(CandidateTransactionsId) FROM CandidateTransactions WHERE CandidateTransactionsId = ?");
 
-my $selectAllIdsCount = $dbh->prepare("SELECT COUNT(CandinateTransactionsId) FROM CandinateTransactions");
+my $selectAllIdsCount = $dbh->prepare("SELECT COUNT(CandidateTransactionsId) FROM CandidateTransactions");
 
-sub candinateTransactionIdDoesntExists {
+sub candidateTransactionIdDoesntExists {
   my ($id) = @_;
   
   if ( ! defined $id ) {
     die "inputted id cannot be undefined";
   }
   
-  $selectCandinateTransactionsId->execute($id);
+  $selectCandidateTransactionsId->execute($id);
   
   #1 == exists, 0 == doesn't exist.
-  my ($returnedVal) = $selectCandinateTransactionsId->fetchrow_array();
+  my ($returnedVal) = $selectCandidateTransactionsId->fetchrow_array();
   
   return (! $returnedVal);
 }
@@ -96,16 +96,16 @@ sub numRows {
 
 #Goal create unique id's and allow for the number of transactions to dynamically change.
 
-say "Test 1 - No candinate transactions in the table";
+say "Test 1 - No candidate transactions in the table";
 initialise();
 is (numRows(),0,"There is no rows");
 
 my $integer = undef;
-my $exception = exception { $integer = $main->_newCandinateTransactionsId(); };
+my $exception = exception { $integer = $main->_newCandidateTransactionsId(); };
 is ($exception, undef ,"No exception thrown");
 
 isnt ($integer, undef, "Empty table returns not undef id."); 
-ok (candinateTransactionIdDoesntExists($integer), "Returned id does not exist."); 
+ok (candidateTransactionIdDoesntExists($integer), "Returned id does not exist."); 
 is (numRows(),0,"There still is no rows"); #Make sure nothing is added.
 
 
@@ -114,16 +114,16 @@ is (numRows(),0,"There still is no rows"); #Make sure nothing is added.
 say "Test 2 - Transactions exist - 1 Transaction";
 initialise();
 #2-4 params must exist in other tables. 5th+ params don't matter.
-#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
-$statementInsertCandinateTransactions->execute(1, 1, 2, 3, 10, 10, 10, 10);
+#CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+$statementInsertCandidateTransactions->execute(1, 1, 2, 3, 10, 10, 10, 10);
 is (numRows(),1,"There is only 1 row");
 
 my $integer = undef;
-my $exception = exception { $integer = $main->_newCandinateTransactionsId(); };
+my $exception = exception { $integer = $main->_newCandidateTransactionsId(); };
 is ($exception, undef ,"No exception thrown");
 
 isnt ($integer, undef, "Non-empty table returns not undef id."); 
-ok (candinateTransactionIdDoesntExists($integer), "Returned id does not exist."); 
+ok (candidateTransactionIdDoesntExists($integer), "Returned id does not exist."); 
 is (numRows(),1,"There is still is only 1 row"); #Make sure nothing is added.
 
 
@@ -131,17 +131,17 @@ is (numRows(),1,"There is still is only 1 row"); #Make sure nothing is added.
 say "Test 3 - Transactions exist - 2 Transactions";
 initialise();
 #2-4 params must exist in other tables. 5th+ params don't matter.
-#CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
-$statementInsertCandinateTransactions->execute(3, 1, 2, 3, 10, 10, 10, 10);
-$statementInsertCandinateTransactions->execute(6, 2, 3, 3, 10, 10, 10, 10);
+#CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
+$statementInsertCandidateTransactions->execute(3, 1, 2, 3, 10, 10, 10, 10);
+$statementInsertCandidateTransactions->execute(6, 2, 3, 3, 10, 10, 10, 10);
 is (numRows(),2,"There is only 2 rows");
 
 my $integer = undef;
-my $exception = exception { $integer = $main->_newCandinateTransactionsId(); };
+my $exception = exception { $integer = $main->_newCandidateTransactionsId(); };
 is ($exception, undef ,"No exception thrown");
 
 isnt ($integer, undef, "Non-empty table returns not undef id."); 
-ok (candinateTransactionIdDoesntExists($integer), "Returned id does not exist."); 
+ok (candidateTransactionIdDoesntExists($integer), "Returned id does not exist."); 
 is (numRows(),2,"There is still is only 2 rows"); #Make sure nothing is added.
 
 

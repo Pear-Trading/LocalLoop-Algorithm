@@ -14,8 +14,8 @@ sub applyChainHeuristic {
   die "applyChainHeuristic has not been implemented.";
 };
 
-sub applyCandinateTransactionHeuristic {
-  die "applyCandinateTransactionHeuristic has not been implemented.";
+sub applyCandidateTransactionHeuristic {
+  die "applyCandidateTransactionHeuristic has not been implemented.";
 };
 
 1;

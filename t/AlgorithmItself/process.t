@@ -214,7 +214,7 @@ say "Test 3 - 2 possible loops, both overlapping - order 2";
   is(numProcessedTrasactionRows(), 4, "There are 4 processed transaction rows after execution.");
   
   #This is not present due to the selection ordering of None. So it starts at 1, then extends onto 2 then finished.
-  #Previous it started at 1 extended onto 2, branched to 3 then finished. transaction 4 was a candinate so was added.
+  #Previous it started at 1 extended onto 2, branched to 3 then finished. transaction 4 was a candidate so was added.
   is(numLoopInfoRows(), 1, "There are 1 loop info rows after execution.");  
   is(numLoopsRows(), 2, "There are 2 loop rows after execution.");
   
@@ -249,7 +249,7 @@ say "Test 4 - 3 possible loops, two overlapping one not";
   is(numProcessedTrasactionRows(), 7, "There are 7 processed transaction rows after execution.");
   
   #This is not present due to the selection ordering of None. So it starts at 1, then extends onto 2 then finished.
-  #Previous it started at 1 extended onto 2, branched to 3 then finished. transaction 4 was a candinate so was added.
+  #Previous it started at 1 extended onto 2, branched to 3 then finished. transaction 4 was a candidate so was added.
   is(numLoopInfoRows(), 3, "There are 3 loop info rows after execution.");  
   is(numLoopsRows(), 8, "There are 8 loop rows after execution.");
   

@@ -74,8 +74,8 @@ CREATE TABLE BranchedTransactions (
   FOREIGN KEY (ToTransactionId_FK) REFERENCES ProcessedTransactions (TransactionId)
 );
 
-CREATE TABLE CandinateTransactions (
-  CandinateTransactionsId INTEGER NOT NULL UNIQUE,
+CREATE TABLE CandidateTransactions (
+  CandidateTransactionsId INTEGER NOT NULL UNIQUE,
   ChainId_FK INTEGER,
   TransactionFrom_FK INTEGER,
   TransactionTo_FK INTEGER NOT NULL,
@@ -92,20 +92,20 @@ CREATE TABLE CandinateTransactions (
   CHECK ((ChainId_FK ISNULL AND TransactionFrom_FK ISNULL) OR (ChainId_FK NOTNULL AND TransactionFrom_FK NOTNULL))
 );
 
-CREATE VIEW CandinateTransactions_ViewIncluded AS
-SELECT CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, HeuristicValue
-FROM CandinateTransactions
+CREATE VIEW CandidateTransactions_ViewIncluded AS
+SELECT CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, HeuristicValue
+FROM CandidateTransactions
 WHERE Included = 1;
 
-CREATE VIEW CandinateTransactions_ViewIncludedHerusticAsc AS
-SELECT CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, HeuristicValue
-FROM CandinateTransactions
+CREATE VIEW CandidateTransactions_ViewIncludedHerusticAsc AS
+SELECT CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, HeuristicValue
+FROM CandidateTransactions
 WHERE Included = 1
 ORDER BY HeuristicValue ASC, TransactionTo_FK ASC;
 
-CREATE VIEW CandinateTransactions_ViewIncludedHerusticDesc AS
-SELECT CandinateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, HeuristicValue
-FROM CandinateTransactions
+CREATE VIEW CandidateTransactions_ViewIncludedHerusticDesc AS
+SELECT CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, HeuristicValue
+FROM CandidateTransactions
 WHERE Included = 1
 ORDER BY HeuristicValue DESC, TransactionTo_FK ASC;
 

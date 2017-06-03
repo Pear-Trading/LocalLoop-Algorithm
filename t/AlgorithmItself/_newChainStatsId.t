@@ -36,20 +36,20 @@ sub delete_table_data {
 my $statementInsertCurrentStatsId = $dbh->prepare("INSERT INTO CurrentChainsStats (ChainStatsId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
 
 
-my $selectCandinateTransactionsId = $dbh->prepare("SELECT COUNT(ChainStatsId) FROM CurrentChainsStats WHERE ChainStatsId = ?");
+my $selectCandidateTransactionsId = $dbh->prepare("SELECT COUNT(ChainStatsId) FROM CurrentChainsStats WHERE ChainStatsId = ?");
 my $selectAllIdsCount = $dbh->prepare("SELECT COUNT(ChainStatsId) FROM CurrentChainsStats");
 
-sub candinateTransactionIdDoesntExists {
+sub candidateTransactionIdDoesntExists {
   my ($id) = @_;
   
   if ( ! defined $id ) {
     die "inputted id cannot be undefined";
   }
   
-  $selectCandinateTransactionsId->execute($id);
+  $selectCandidateTransactionsId->execute($id);
   
   #1 == exists, 0 == doesn't exist.
-  my ($returnedVal) = $selectCandinateTransactionsId->fetchrow_array();
+  my ($returnedVal) = $selectCandidateTransactionsId->fetchrow_array();
   
   return (! $returnedVal);
 }
@@ -64,7 +64,7 @@ sub numRows {
 
 #Goal create unique id's and allow for the number of stats tuples to dynamically change.
 
-say "Test 1 - No candinate transactions in the table";
+say "Test 1 - No candidate transactions in the table";
 delete_table_data();
 is (numRows(),0,"There is no tuples");
 
@@ -73,7 +73,7 @@ my $exception = exception { $integer = $main->_newChainStatsId(); };
 is ($exception, undef ,"No exception thrown");
 
 isnt ($integer, undef, "Empty table returns not undef id."); 
-ok (candinateTransactionIdDoesntExists($integer), "Returned id does not exist."); 
+ok (candidateTransactionIdDoesntExists($integer), "Returned id does not exist."); 
 is (numRows(),0,"There still is no tuples"); #Make sure nothing is added.
 
 
@@ -91,7 +91,7 @@ my $exception = exception { $integer = $main->_newChainStatsId(); };
 is ($exception, undef ,"No exception thrown");
 
 isnt ($integer, undef, "Non-empty table returns not undef id."); 
-ok (candinateTransactionIdDoesntExists($integer), "Returned id does not exist."); 
+ok (candidateTransactionIdDoesntExists($integer), "Returned id does not exist."); 
 is (numRows(),1,"There is still is only 1 tuple"); #Make sure nothing is added.
 
 
@@ -109,7 +109,7 @@ my $exception = exception { $integer = $main->_newChainStatsId(); };
 is ($exception, undef ,"No exception thrown");
 
 isnt ($integer, undef, "Non-empty table returns not undef id."); 
-ok (candinateTransactionIdDoesntExists($integer), "Returned id does not exist."); 
+ok (candidateTransactionIdDoesntExists($integer), "Returned id does not exist."); 
 is (numRows(),2,"There is still is only 2 tuples"); #Make sure nothing is added.
 
 
