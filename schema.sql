@@ -28,13 +28,13 @@ SELECT TransactionId, FromUserId, ToUserId, Value, HeuristicValue
 FROM ProcessedTransactions
 WHERE Included = 1;
 
-CREATE VIEW ProcessedTransactions_ViewIncludedHerusticAsc AS
+CREATE VIEW ProcessedTransactions_ViewIncludedHeuristicAsc AS
 SELECT TransactionId, FromUserId, ToUserId, Value, HeuristicValue
 FROM ProcessedTransactions
 WHERE Included = 1
 ORDER BY HeuristicValue ASC, TransactionId ASC;
 
-CREATE VIEW ProcessedTransactions_ViewIncludedHerusticDesc AS
+CREATE VIEW ProcessedTransactions_ViewIncludedHeuristicDesc AS
 SELECT TransactionId, FromUserId, ToUserId, Value, HeuristicValue
 FROM ProcessedTransactions
 WHERE Included = 1
@@ -97,13 +97,13 @@ SELECT CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK
 FROM CandidateTransactions
 WHERE Included = 1;
 
-CREATE VIEW CandidateTransactions_ViewIncludedHerusticAsc AS
+CREATE VIEW CandidateTransactions_ViewIncludedHeuristicAsc AS
 SELECT CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, HeuristicValue
 FROM CandidateTransactions
 WHERE Included = 1
 ORDER BY HeuristicValue ASC, TransactionTo_FK ASC;
 
-CREATE VIEW CandidateTransactions_ViewIncludedHerusticDesc AS
+CREATE VIEW CandidateTransactions_ViewIncludedHeuristicDesc AS
 SELECT CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, HeuristicValue
 FROM CandidateTransactions
 WHERE Included = 1
@@ -147,13 +147,13 @@ SELECT LoopId, FirstTransactionId_FK, LastTransactionId_FK, MinimumValue, Length
 FROM LoopInfo
 WHERE Included = 1 AND Active = 0 ;
 
-CREATE VIEW LoopInfo_ViewIncludedInactiveHerusticAsc AS
+CREATE VIEW LoopInfo_ViewIncludedInactiveHeuristicAsc AS
 SELECT LoopId, FirstTransactionId_FK, LastTransactionId_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, HeuristicValue
 FROM LoopInfo
 WHERE Included = 1 AND Active = 0
 ORDER BY HeuristicValue ASC;
 
-CREATE VIEW LoopInfo_ViewIncludedInactiveHerusticDesc AS
+CREATE VIEW LoopInfo_ViewIncludedInactiveHeuristicDesc AS
 SELECT LoopId, FirstTransactionId_FK, LastTransactionId_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, HeuristicValue
 FROM LoopInfo
 WHERE Included = 1 AND Active = 0
