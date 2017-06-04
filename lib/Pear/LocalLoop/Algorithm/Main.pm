@@ -140,7 +140,7 @@ has _statementSelectLoopIdWhereItsIncluded => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("SELECT LoopId FROM LoopInfo WHERE Included != 0 LIMIT 1");
+    return $self->dbh()->prepare("SELECT LoopId FROM LoopInfo_ViewIncluded LIMIT 1");
   },
   lazy => 1,
 );

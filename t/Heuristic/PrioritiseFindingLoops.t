@@ -51,7 +51,7 @@ my $insertStatementProcessedTransactions = $dbh->prepare("INSERT INTO ProcessedT
 sub transactionIdIncluded {
   my ($id) = @_;
   
-  my ($hasIncludedId) = $dbh->selectrow_array("SELECT COUNT(*) FROM ProcessedTransactions WHERE TransactionId = ? AND Included = 1", undef, ($id));
+  my ($hasIncludedId) = $dbh->selectrow_array("SELECT COUNT(*) FROM ProcessedTransactions_ViewIncluded WHERE TransactionId = ?", undef, ($id));
   
   return $hasIncludedId;
 }
@@ -667,7 +667,7 @@ sub newLoopGenerationContext {
 sub candidateTransactionIdIncluded {
   my ($id) = @_;
   
-  my ($hasIncludedId) = $dbh->selectrow_array("SELECT COUNT(*) FROM CandidateTransactions WHERE CandidateTransactionsId = ? AND Included = 1", undef, ($id));
+  my ($hasIncludedId) = $dbh->selectrow_array("SELECT COUNT(*) FROM CandidateTransactions_ViewIncluded WHERE CandidateTransactionsId = ?", undef, ($id));
   
   return $hasIncludedId;
 }

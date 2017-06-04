@@ -49,7 +49,7 @@ my $insertStatementProcessedTransactions = $dbh->prepare("INSERT INTO ProcessedT
 sub transactionIdIncluded {
   my ($id) = @_;
   
-  my ($hasIncludedId) = $dbh->selectrow_array("SELECT COUNT(*) FROM ProcessedTransactions WHERE TransactionId = ? AND Included = 1", undef, ($id));
+  my ($hasIncludedId) = $dbh->selectrow_array("SELECT COUNT(*) FROM ProcessedTransactions_ViewIncluded WHERE TransactionId = ?", undef, ($id));
   
   return $hasIncludedId;
 }
@@ -419,7 +419,7 @@ sub initialise {
 sub candidateTransactionIdIncluded {
   my ($id) = @_;
   
-  my ($hasIncludedId) = $dbh->selectrow_array("SELECT COUNT(*) FROM CandidateTransactions WHERE CandidateTransactionsId = ? AND Included = 1", undef, ($id));
+  my ($hasIncludedId) = $dbh->selectrow_array("SELECT COUNT(*) FROM CandidateTransactions_ViewIncluded WHERE CandidateTransactionsId = ?", undef, ($id));
   
   return $hasIncludedId;
 }
@@ -685,7 +685,7 @@ my $statementInsertLoops = $dbh->prepare("INSERT INTO Loops (LoopId_FK, Transact
 sub loopIdIncluded {
   my ($id) = @_;
   
-  my ($hasIncludedId) = $dbh->selectrow_array("SELECT COUNT(*) FROM LoopInfo WHERE LoopId = ? AND Included = 1", undef, ($id));
+  my ($hasIncludedId) = $dbh->selectrow_array("SELECT COUNT(*) FROM LoopInfo_ViewIncluded WHERE LoopId = ?", undef, ($id));
   
   return $hasIncludedId;
 }

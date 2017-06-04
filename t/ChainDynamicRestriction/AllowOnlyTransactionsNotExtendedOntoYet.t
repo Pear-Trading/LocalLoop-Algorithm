@@ -47,7 +47,7 @@ my $statementInsertBranchedTransactions = $dbh->prepare("INSERT INTO BranchedTra
 sub transactionIdIncluded {
   my ($id) = @_;
   
-  my ($hasIncludedId) = $dbh->selectrow_array("SELECT COUNT(*) FROM ProcessedTransactions WHERE TransactionId = ? AND Included = 1", undef, ($id));
+  my ($hasIncludedId) = $dbh->selectrow_array("SELECT COUNT(*) FROM ProcessedTransactions_ViewIncluded WHERE TransactionId = ?", undef, ($id));
   
   return $hasIncludedId;
 }

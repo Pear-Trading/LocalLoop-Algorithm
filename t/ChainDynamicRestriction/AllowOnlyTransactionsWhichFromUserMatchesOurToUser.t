@@ -44,7 +44,7 @@ my $insertStatement = $dbh->prepare("INSERT INTO ProcessedTransactions (Transact
 sub transactionIdIncluded {
   my ($id) = @_;
   
-  my $hasIncludedId = @{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions WHERE TransactionId = ? AND Included = 1", undef, ($id))}[0];
+  my $hasIncludedId = @{$dbh->selectrow_arrayref("SELECT COUNT(*) FROM ProcessedTransactions_ViewIncluded WHERE TransactionId = ?", undef, ($id))}[0];
   
   return $hasIncludedId;
 }
