@@ -55,9 +55,8 @@ my $findFirstFinish = Pear::LocalLoop::Algorithm::Heuristic::PrioritiseFindingLo
 my $chainHeuristics = [$findFirstFinish, $none];
 my $loopHeuristics = [$none];
 
-my $disallowSelectedLoops = Pear::LocalLoop::Algorithm::LoopDynamicRestriction::DisallowSelectionOfAlreadySelectedLoops->new();
 my $disallowTransactionsInLoops = Pear::LocalLoop::Algorithm::LoopDynamicRestriction::DisallowLoopsWhichHaveTransactionsInActiveLoops->new();
-my $loopDynamicRestrictions = [$disallowSelectedLoops, $disallowTransactionsInLoops];
+my $loopDynamicRestrictions = [$disallowTransactionsInLoops];
 
 my $hash = {
   transactionOrder => Pear::LocalLoop::Algorithm::TransactionOrder::LargestTransactionValueFirst->new(),
