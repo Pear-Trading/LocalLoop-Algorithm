@@ -176,6 +176,6 @@ ON Loops (LoopId_FK);
 CREATE VIEW Loops_ViewActive AS
 SELECT Loops.LoopId_FK, Loops.TransactionId_FK
 FROM Loops, LoopInfo
-WHERE LoopInfo.Active = 1 AND Loops.LoopId = LoopInfo.LoopId;
+WHERE LoopInfo.Active = 1 AND Loops.LoopId_FK = LoopInfo.LoopId;
 
 
