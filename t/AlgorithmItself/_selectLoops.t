@@ -54,6 +54,12 @@ my $hash = {
 };
 
 my $settings = Pear::LocalLoop::Algorithm::ProcessingTypeContainer->new($hash);
+$none->init();
+$disallowSelectedLoops->init();
+$disallowTransactionsInLoops->init();
+$none->initAfterStaticRestrictions();
+$disallowSelectedLoops->initAfterStaticRestrictions();
+$disallowTransactionsInLoops->initAfterStaticRestrictions();
 
 my $statementInsertProcessedTransactions = $dbh->prepare("INSERT INTO ProcessedTransactions (TransactionId, FromUserId, ToUserId, Value) VALUES (?, ?, ?, ?)");
 my $statementInsertLoopInfoId = $dbh->prepare("INSERT INTO LoopInfo (LoopId, Active, FirstTransactionId_FK, LastTransactionId_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues, Included) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
