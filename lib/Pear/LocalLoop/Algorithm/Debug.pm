@@ -6,7 +6,9 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(&removeStartOfPackageName &debugBraceStart &debugBraceEnd &setDebugMode &clearDebugMode &isDebug &debugMethodStart &debugMethodEnd &debugMethodMiddle &debugError);
 
+#Static variable to determine the indentation of the debug statements.
 my $stackLevel = 0;
+
 
 sub setDebugMode {
   $ENV{'DEBUG'} = "true";
@@ -16,16 +18,13 @@ sub clearDebugMode {
   $ENV{'DEBUG'} = undef;
 }
 
+#Is debugging mode enabled.
 sub isDebug {
   my $mode = $ENV{'DEBUG'};
-  if (defined $mode && $mode eq "true") {
-    return 1;
-  }
-  else {
-    return 0;
-  }
+  return (defined $mode && $mode eq "true");
 }
 
+#Removes the start of a package name so prevent wasting space.
 sub removeStartOfPackageName {
   my ($package) = @_;
   
@@ -36,6 +35,7 @@ sub removeStartOfPackageName {
   return $package;
 }
 
+#Remove the package name from a method name. i.e. "Pear::LocalLoop::Algorithm::Main::SomeMethod" to "SomeMethod".
 sub _removePackageNameMethod {
   my ($functionName) = @_;
   
@@ -45,6 +45,7 @@ sub _removePackageNameMethod {
   return $functionName;
 }
 
+#Print out the package name, method and line with the callees details 
 sub _printPackageMethodLine {
   my ($package, $ignore, $line, $ignore) = caller(1);
   my ($ignore, $ignore, $ignore, $method) = caller(2);
@@ -56,6 +57,7 @@ sub _printPackageMethodLine {
   return $stackLevelSpaces .  "Pack:'" . $package . "' Meth:'" . $method . "' Line:" . $line; 
 }
 
+#Print out the line and comment with the callees details.
 sub _printLineComment {
   my ($comment) = @_;
   my ($package, $ignore, $line, $ignore) = caller(1);
@@ -68,6 +70,7 @@ sub _printLineComment {
   return $stackLevelSpaces .  "Line:" . $line . " Comment:" . $comment; 
 }
 
+#Print out the package name, method, and comment with the callees details.
 sub _printPackageMethodLineComment {
   my ($comment) = @_;
   my ($package, $ignore, $line, $ignore) = caller(1);
@@ -81,6 +84,7 @@ sub _printPackageMethodLineComment {
 }
 
 
+#Print out the start of method debug statement.
 sub debugMethodStart {
 
   if (isDebug()) {
@@ -90,6 +94,7 @@ sub debugMethodStart {
   $stackLevel++;
 }
 
+#Print out the end of method debug statement.
 sub debugMethodEnd {
 
   $stackLevel--;
@@ -99,6 +104,7 @@ sub debugMethodEnd {
   }
 }
 
+#Print out the start of a code block debug statement.
 sub debugBraceStart {
   my ($comment) = @_;
   
@@ -109,6 +115,7 @@ sub debugBraceStart {
   $stackLevel++;
 }
 
+#Print out the end of a code block debug statement.
 sub debugBraceEnd {
   my ($comment) = @_;
   $stackLevel--;
@@ -118,6 +125,7 @@ sub debugBraceEnd {
   }
 }
 
+#Print out a general comment with the indentation,
 sub debugMethodMiddle {
   my ($comment) = @_;
   
@@ -126,6 +134,7 @@ sub debugMethodMiddle {
   }
 }
 
+#Print out an error regardless if debug mode is enabled,
 sub debugError {
   my ($comment) = @_;
   
