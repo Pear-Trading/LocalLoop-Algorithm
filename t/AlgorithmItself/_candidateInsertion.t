@@ -16,7 +16,7 @@ use v5.10;
 
 use FindBin;
 
-#This is a test for "Pear::LocalLoop::Algorithm::AlgorithmItself::_selectNextBestCandidateTransactions"
+#This is a test for "Pear::LocalLoop::Algorithm::AlgorithmItself::_candidateInsertion"
 
 Pear::LocalLoop::Algorithm::Main->setTestingMode();
 
@@ -149,7 +149,7 @@ say "Test 1 - First transaction with no possible transactions to extend onto.";
   is (numChainInfoRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
+  my $exception = exception { $main->_candidateInsertion($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
   is (numCandidateTransactionRows(), 0,"There is no candidate transaction rows before invocation.");
@@ -194,7 +194,7 @@ say "Test 2 - First transaction with 1 possible transactions to extend onto.";
   is (numChainInfoRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
+  my $exception = exception { $main->_candidateInsertion($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
   is (numCandidateTransactionRows(), 1,"There is 1 candidate transaction row after invocation.");
@@ -252,7 +252,7 @@ say "Test 3 - First transaction with 2 (or more) possible transactions to extend
   is (numChainInfoRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
+  my $exception = exception { $main->_candidateInsertion($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
   is (numCandidateTransactionRows(), 2, "There is 2 candidate transaction rows after invocation.");
@@ -310,7 +310,7 @@ say "Test 4 - First transaction with 1 possible transactions to extend onto, nex
   is (numChainInfoRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
+  my $exception = exception { $main->_candidateInsertion($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
   is (numCandidateTransactionRows(), 1,"There is 1 candidate transaction row after invocation.");
@@ -363,7 +363,7 @@ say "Test 5 - First transaction with 1 possible transactions to extend onto, nex
   is (numChainInfoRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
+  my $exception = exception { $main->_candidateInsertion($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
   is (numCandidateTransactionRows(), 1,"There is 1 candidate transaction row after invocation.");
@@ -415,7 +415,7 @@ say "Test 6 - First transaction with 1 possible transactions to extend onto, nex
   is (numChainInfoRows(), 1, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
+  my $exception = exception { $main->_candidateInsertion($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
   is (numCandidateTransactionRows(), 1,"There is 1 candidate transaction row after invocation.");
@@ -475,7 +475,7 @@ say "Test 7 - Not first transaction with 2 possible transactions to extend onto 
   is (numChainInfoRows(), 2, "There is 1 current chains stats row before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
+  my $exception = exception { $main->_candidateInsertion($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
   is (numCandidateTransactionRows(), 2,"There is 2 candidate transaction rows after invocation.");
@@ -553,7 +553,7 @@ say "Test 8 - Not first transaction, existing candidate transaction prevents the
   is (numChainInfoRows(), 2, "There is 2 current chains stats rows before invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
 
-  my $exception = exception { $main->_selectNextBestCandidateTransactions($settings, $inputTransactionState, $inputLoopGenerationContext); };
+  my $exception = exception { $main->_candidateInsertion($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
 
   #Importantly candidate transaction 1 -> 4 does not exist.

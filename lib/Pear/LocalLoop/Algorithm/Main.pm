@@ -339,7 +339,7 @@ sub _loopGeneration {
   
   while ( ! ($extendedTransaction = $self->_candidateSelection($settings, $loopGenerationContext))->hasFinished($loopGenerationContext) ) {
     debugMethodMiddle("1st while loop start");
-    $self->_selectNextBestCandidateTransactions($settings, $extendedTransaction, $loopGenerationContext);
+    $self->_candidateInsertion($settings, $extendedTransaction, $loopGenerationContext);
     
     #sleep (10);
     debugMethodMiddle("1st while loop end");
@@ -431,7 +431,7 @@ has _statementSelectTheNumberOfTransactionsFromTheSamePointInTheChain => (
 #are tested. We assume if it can execute the same code path with just the one transaction (to) it will work
 #when there is 2.
 #If this function is changed structurally in which the assumption becomes false then update the test too.
-sub _selectNextBestCandidateTransactions {
+sub _candidateInsertion {
   debugMethodStart();
   my ($self, $settings, $extendedTransaction, $loopGenerationContextInstance) = @_;
   
