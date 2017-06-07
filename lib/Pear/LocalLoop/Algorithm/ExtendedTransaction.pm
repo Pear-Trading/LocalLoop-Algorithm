@@ -42,12 +42,15 @@ has statementToUserIdOfTransaction => (
   lazy => 1,
 );
 
+
+#Has the extendedTransaction's to user the same at the finishing user id.
 sub hasLoopFormed {
   my ($self, $loopGenerationContext) = @_;
   
   my $dbh = $self->dbh();
   
   my $extendedTrans = $self->extendedTransaction;
+  #If there is no next transaction it cannot be a loop
   if (! defined $extendedTrans) {
     return 0;
   }
@@ -60,18 +63,24 @@ sub hasLoopFormed {
   return ($toUserId == $loopGenerationContext->userIdWhichCreatesALoop());
 }
 
+
+#Has the loop generation sub-algorithm reached a termination condition.
 sub hasFinished {
   my ($self, $loopGenerationContext) = @_;
   
   return ($self->noCandidateTransactionsLeft() || $self->hasLoopFormed($loopGenerationContext));
 }
 
+
+#Can we still attempt to generate loops.
 sub isStillFormingLoops {
   my ($self, $loopGenerationContext) = @_;  
   
   return (! $self->noCandidateTransactionsLeft() && $self->hasLoopFormed($loopGenerationContext));
 }
 
+
+#Check to see if two Extended Transactions are the same (used in testing).
 #TODO we assume $compare is the correct class.
 sub equals {
   my ($self, $compare1, $compare2) = @_;
