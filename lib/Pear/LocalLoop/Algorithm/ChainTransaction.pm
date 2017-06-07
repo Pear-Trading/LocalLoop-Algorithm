@@ -44,6 +44,8 @@ has fromTo => (
   },
 );
 
+
+#Compares if two chain transactions are the same.
 #TODO we assume $compare is the correct class.
 sub equals {
   my ($self, $compare1, $compare2) = @_;
