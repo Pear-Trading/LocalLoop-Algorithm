@@ -579,124 +579,12 @@ has _statementSelectTransactionIdAndChainInfoIdFromTheSpecifiedChainIdAndOnOrBef
   lazy => 1,
 );
 
-#TODO needs a better name.
-sub _getNextBestCandidateTransactionAnalysis {
-  debugMethodStart();  
-  my ($self, $settings, $loopGenerationContextInstance) = @_;
-  
-  my $statementInsertChains = $self->_statementInsertIntoCurrentChainChainIdTransactionIdAndChainInfoId();
-  my $statementInsertChainStats = $self->_statementInsertIntoChainInfoIdMinValueLengthTotalValueAndNumMinValues();
-
-  my ($hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues) = @{$self->_getNextBestCandidateTransaction($settings, $loopGenerationContextInstance)};
-  
-  my $transactionsToAnalyseNext = undef;
-  
-  if ($hasRow == 0) {
-    debugMethodMiddle("No row");
-    $transactionsToAnalyseNext = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
-      noCandidateTransactionsLeft => 1,
-    });
-    
-    debugMethodMiddle("ReturnVals(Finished): " . Dumper($transactionsToAnalyseNext));
-    
-    debugMethodEnd();  
-    return $transactionsToAnalyseNext;
-  }
-  
-  debugMethodMiddle("ReturnVals(Non-null): hasRow:$hasRow chainId:".(defined $chainId ? $chainId : "")." transFrom:".(defined $transactionFrom ? $transactionFrom : "")." transTo:$transactionTo miniValue:$minimumValue Length:$length TotalValue:$totalValue numMinVals:$numberOfMinimumValues");
-
-  
-  my $newChainInfoId = $self->_newChainInfoId();  
-  
-  if (! defined $transactionFrom) {
-    $chainId = $self->_newChainId();
-    $statementInsertChainStats->execute($newChainInfoId, $minimumValue, $length, $totalValue, $numberOfMinimumValues);
-    $statementInsertChains->execute($chainId, $transactionTo, $newChainInfoId);
-    
-    debugMethodMiddle("FirstTransaction: ChainId:$chainId TransactionTo:$transactionTo MinVal:$minimumValue Length:$length TotalValue:$totalValue NumMinValues:$numberOfMinimumValues");
-    
-    my $extendedTransaction = Pear::LocalLoop::Algorithm::ChainTransaction->new({
-      transactionId => $transactionTo,
-      chainId => $chainId,
-      fromTo => 'to',
-    });
-
-    $transactionsToAnalyseNext = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
-      firstTransaction => 1,
-      extendedTransaction => $extendedTransaction,
-    });
-    debugMethodMiddle("ReturnVals(To): " . Dumper($transactionsToAnalyseNext));
-  }
-  else {
-    debugMethodMiddle("AnotherTransaction: ChainId:$chainId TransactionTo:$transactionTo MinVal:$minimumValue Length:$length TotalValue:$totalValue NumMinValues:$numberOfMinimumValues");
-      
-    my $statementMaxTransactionIdForChain = $self->_statementSelectLastTransactionIdInAChain();
-    $statementMaxTransactionIdForChain->execute($chainId);
-    
-    my ($highestTransactionId) = $statementMaxTransactionIdForChain->fetchrow_array();
-
-    #For this specific transaction the chain id must remain consistent thoughout the analysis, otherwise the application of
-    #DynamicRestriction::AllowOnlyTransactionsNotExtendedOntoYet will break;
-    my $fromTransaction = Pear::LocalLoop::Algorithm::ChainTransaction->new({
-      transactionId => $transactionFrom,
-      chainId => $chainId, 
-      fromTo => 'from',
-    });
-   
-        
-    #Adding of this transaction will create a branch in the chain.
-    #Otherwise it will be equal as you can't have a the from transaction ever being higher because of MAX.
-    if ($transactionFrom < $highestTransactionId) {
-      my $branchChainId = $self->_newChainId();
-      debugMethodMiddle("SeparateBranches: PreviousBranchId:$chainId NewBranchId:$branchChainId");
-      
-      my $statementInsertBranch = $self->_statementInserIntoBranchedTransactionChainIdFromTransactionIdAndToTransactionId();
-      $statementInsertBranch->execute($chainId, $transactionFrom, $transactionTo);
-      
-      #TODO add test.
-      my $statementChainsSelect = $self->_statementSelectTransactionIdAndChainInfoIdFromTheSpecifiedChainIdAndOnOrBeforeTheSpecifiedTrasactionId();
-      $statementChainsSelect->execute($chainId, $transactionFrom);
-      
-      while (my ($transactionId, $chainStatsId) = $statementChainsSelect->fetchrow_array()) {
-        $statementInsertChains->execute($branchChainId, $transactionId, $chainStatsId);
-      }
-      
-      #Change the added chain id to the branched one for the insertions below.
-      $chainId = $branchChainId; 
-    }
-
-    #It does not matter that if the chain id was changed because of the creating a new branch above as
-    #there will only be one entry per all of the branches.    
-    my $extendedTransaction = Pear::LocalLoop::Algorithm::ChainTransaction->new({
-      transactionId => $transactionTo,
-      chainId => $chainId,
-      fromTo => 'to',
-    });
-    
-    #Adds the non branched transaction or final branched transaction.
-    $statementInsertChainStats->execute($newChainInfoId, $minimumValue, $length, $totalValue, $numberOfMinimumValues);
-    $statementInsertChains->execute($chainId, $transactionTo, $newChainInfoId);
-    
-    debugMethodMiddle("AnotherTransactionVals: ChainId:$chainId TransactionTo:$transactionTo MinVal:$minimumValue Length:$length TotalValue:$totalValue NumMinValues:$numberOfMinimumValues");
-    
-    $transactionsToAnalyseNext = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
-      extendedTransaction => $extendedTransaction,
-      fromTransaction => $fromTransaction,
-    });
-    debugMethodMiddle("ReturnVals(FromAndTo): " . Dumper($transactionsToAnalyseNext));
-  }
-
-  debugMethodEnd();  
-  return $transactionsToAnalyseNext;
-}
-
-
 
 has _statementSelectCandidateTransactionInformationWhenItsAFirstTransaction => (
   is => 'ro', 
   default => sub {
     my ($self) = @_;
-    return $self->dbh()->prepare("SELECT CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues FROM CandidateTransactions WHERE TransactionFrom_FK = NULL");
+    return $self->dbh()->prepare("SELECT CandidateTransactionsId, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues FROM CandidateTransactions WHERE TransactionFrom_FK IS NULL AND ChainId_FK IS NULL");
   },
   lazy => 1,
 );
@@ -719,55 +607,143 @@ has _statementSelectCandidateTransactionInformationWhenItsIncluded => (
   lazy => 1,
 );
 
-sub _getNextBestCandidateTransaction {  
+#TODO needs a better name.
+sub _getNextBestCandidateTransactionAnalysis {
   debugMethodStart();  
   my ($self, $settings, $loopGenerationContextInstance) = @_;
   
-  my $dbh = $self->dbh;
+  my $statementInsertChains = $self->_statementInsertIntoCurrentChainChainIdTransactionIdAndChainInfoId();
+  my $statementInsertChainStats = $self->_statementInsertIntoChainInfoIdMinValueLengthTotalValueAndNumMinValues();
+  my $statementDelete = $self->_statementDeleteCandidateTransactionBasedOnItsId();
   
   my $statementSelectNullFrom = $self->_statementSelectCandidateTransactionInformationWhenItsAFirstTransaction();
   $statementSelectNullFrom->execute();
-  my ($candidateTransactionId, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues) = $statementSelectNullFrom->fetchrow_array();
+  my $nullResult = $statementSelectNullFrom->fetchrow_arrayref();
   
-  my $statementDelete = $self->_statementDeleteCandidateTransactionBasedOnItsId();
   
   #There is at least one first transaction.
-  if (defined $candidateTransactionId) {
+  if (defined $nullResult) {
+    debugMethodMiddle("Has first transaction");
+    my ($candidateTransactionId, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues) = @{$nullResult};
+    
     my $numberRowsDeleted = $statementDelete->execute($candidateTransactionId);
+    debugMethodMiddle("Deleted CandidateTransactionId:$candidateTransactionId");    
     
-    debugMethodMiddle("Deleted CandidateTransactionId:$candidateTransactionId");
-    debugMethodMiddle("ReturnVals(Nulls): hasRow:1 chainId:$chainId transFrom:$transactionFrom transTo:$transactionTo miniValue:$minimumValue Length:$length TotalValue:$totalValue numMinVals:$numberOfMinimumValues");
+    my $chainId = $self->_newChainId();
+    my $newChainInfoId = $self->_newChainInfoId();  
+    $statementInsertChainStats->execute($newChainInfoId, $minimumValue, $length, $totalValue, $numberOfMinimumValues);
+    $statementInsertChains->execute($chainId, $transactionTo, $newChainInfoId);
     
-    debugMethodEnd();
-    #1 is it has a transaction.
-    #Don't return CandidateTransactionsId as it's not needed and is just used to identify and remove one row.
-    return [1, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues];
+    debugMethodMiddle("FirstTransaction: ChainId:$chainId TransactionTo:$transactionTo MinVal:$minimumValue Length:$length TotalValue:$totalValue NumMinValues:$numberOfMinimumValues");
+    
+    my $extendedTransaction = Pear::LocalLoop::Algorithm::ChainTransaction->new({
+      transactionId => $transactionTo,
+      chainId => $chainId,
+      fromTo => 'to',
+    });
+
+    my $transactionsToAnalyseNext = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
+      firstTransaction => 1,
+      extendedTransaction => $extendedTransaction,
+    });
+    
+    debugMethodMiddle("Nulls Finished: " . Dumper($transactionsToAnalyseNext));
+    debugMethodEnd();  
+    return $transactionsToAnalyseNext;
   }
   else {
+    debugMethodMiddle("Hasn't first transaction");
   
     $settings->applyChainHeuristicsCandidates($loopGenerationContextInstance);
     
     my $statementSelectRows = $self->_statementSelectCandidateTransactionInformationWhenItsIncluded();
     $statementSelectRows->execute();
     
-    my ($candidateTransactionId, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues) = $statementSelectRows->fetchrow_array();
+    my $rowRef = $statementSelectRows->fetchrow_arrayref();
+    #say "Ref: " . Dumper ($rowRef);
     
-    my $hasRow = (defined $transactionTo ? 1 : 0);
-    if ($hasRow) {
-      $statementDelete->execute($candidateTransactionId);
-      debugMethodMiddle("Deleted CandidateTransactionId:$candidateTransactionId");
-      debugMethodMiddle("ReturnVals(Non-null): hasRow:$hasRow chainId:".(defined $chainId ? $chainId : "")." transFrom:".(defined $transactionFrom ? $transactionFrom : "")." transTo:$transactionTo miniValue:$minimumValue Length:$length TotalValue:$totalValue numMinVals:$numberOfMinimumValues");
+    #hasn't got a row
+    if (! defined $rowRef) {
+      debugMethodMiddle("No row");
+      my $transactionsToAnalyseNext = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
+        noCandidateTransactionsLeft => 1,
+      });
+      
+      debugMethodMiddle("No row finished: " . Dumper($transactionsToAnalyseNext));
+      debugMethodEnd();  
+      return $transactionsToAnalyseNext;
     }
     else {
-      debugMethodMiddle("ReturnVals: Empty row");
-    }
+      debugMethodMiddle("Row");
+      my ($candidateTransactionId, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues) =
+        @{$rowRef};
+      debugMethodMiddle("Row values: chainId:$chainId transFrom:$transactionFrom transTo:$transactionTo miniValue:$minimumValue Length:$length TotalValue:$totalValue numMinVals:$numberOfMinimumValues");
+        
+      my $newChainInfoId = $self->_newChainInfoId();  
     
+      $statementDelete->execute($candidateTransactionId);
+      debugMethodMiddle("Deleted CandidateTransactionId:$candidateTransactionId");
+      
+      my $statementMaxTransactionIdForChain = $self->_statementSelectLastTransactionIdInAChain();
+      $statementMaxTransactionIdForChain->execute($chainId);
+      
+      my ($highestTransactionId) = $statementMaxTransactionIdForChain->fetchrow_array();
 
-    #Don't return CandidateTransactionsId as it's not needed and is just used to identify and remove one row.
-    debugMethodEnd();
-    return [$hasRow, $chainId, $transactionFrom, $transactionTo, $minimumValue, $length, $totalValue, $numberOfMinimumValues];
+      #For this specific transaction the chain id must remain consistent thoughout the analysis, otherwise the application of
+      #DynamicRestriction::AllowOnlyTransactionsNotExtendedOntoYet will break;
+      my $fromTransaction = Pear::LocalLoop::Algorithm::ChainTransaction->new({
+        transactionId => $transactionFrom,
+        chainId => $chainId, 
+        fromTo => 'from',
+      });
+     
+          
+      #Adding of this transaction will create a branch in the chain.
+      #Otherwise it will be equal as you can't have a the from transaction ever being higher because of MAX.
+      if ($transactionFrom < $highestTransactionId) {
+        my $branchChainId = $self->_newChainId();
+        debugMethodMiddle("SeparateBranches: PreviousBranchId:$chainId NewBranchId:$branchChainId");
+        
+        my $statementInsertBranch = $self->_statementInserIntoBranchedTransactionChainIdFromTransactionIdAndToTransactionId();
+        $statementInsertBranch->execute($chainId, $transactionFrom, $transactionTo);
+        
+        my $statementChainsSelect = $self->_statementSelectTransactionIdAndChainInfoIdFromTheSpecifiedChainIdAndOnOrBeforeTheSpecifiedTrasactionId();
+        $statementChainsSelect->execute($chainId, $transactionFrom);
+        
+        while (my ($transactionId, $chainStatsId) = $statementChainsSelect->fetchrow_array()) {
+          $statementInsertChains->execute($branchChainId, $transactionId, $chainStatsId);
+        }
+        
+        #Change the added chain id to the branched one for the insertions below.
+        $chainId = $branchChainId; 
+      }
+
+      #It does not matter that if the chain id was changed because of the creating a new branch above as
+      #there will only be one entry per all of the branches.    
+      my $extendedTransaction = Pear::LocalLoop::Algorithm::ChainTransaction->new({
+        transactionId => $transactionTo,
+        chainId => $chainId,
+        fromTo => 'to',
+      });
+      
+      #Adds the non branched transaction or final branched transaction.
+      $statementInsertChainStats->execute($newChainInfoId, $minimumValue, $length, $totalValue, $numberOfMinimumValues);
+      $statementInsertChains->execute($chainId, $transactionTo, $newChainInfoId);
+      
+      debugMethodMiddle("AnotherTransactionVals: ChainId:$chainId TransactionTo:$transactionTo MinVal:$minimumValue Length:$length TotalValue:$totalValue NumMinValues:$numberOfMinimumValues");
+      
+      my $transactionsToAnalyseNext = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
+        extendedTransaction => $extendedTransaction,
+        fromTransaction => $fromTransaction,
+      });
+      
+      debugMethodMiddle("ReturnVals(FromAndTo): " . Dumper($transactionsToAnalyseNext));
+      debugMethodEnd();         
+      return $transactionsToAnalyseNext;
+    }
   }
 }
+
 
 
 
