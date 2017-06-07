@@ -337,7 +337,7 @@ sub _loopGeneration {
   
   my $extendedTransaction = undef;
   
-  while ( ! ($extendedTransaction = $self->_getNextBestCandidateTransactionAnalysis($settings, $loopGenerationContext))->hasFinished($loopGenerationContext) ) {
+  while ( ! ($extendedTransaction = $self->_candidateSelection($settings, $loopGenerationContext))->hasFinished($loopGenerationContext) ) {
     debugMethodMiddle("1st while loop start");
     $self->_selectNextBestCandidateTransactions($settings, $extendedTransaction, $loopGenerationContext);
     
@@ -350,7 +350,7 @@ sub _loopGeneration {
   #care of this. Also as we have processed the loops we may as well store them it would a waste of resouces 
   #not to, as some other loop may become inactive which results in these poor loops becoming active.
   while ( ! $extendedTransaction->noCandidateTransactionsLeft() ) {
-    $extendedTransaction = $self->_getNextBestCandidateTransactionAnalysis($settings, $loopGenerationContext);
+    $extendedTransaction = $self->_candidateSelection($settings, $loopGenerationContext);
   }
   
 
@@ -608,7 +608,7 @@ has _statementSelectCandidateTransactionInformationWhenItsIncluded => (
 );
 
 #TODO needs a better name.
-sub _getNextBestCandidateTransactionAnalysis {
+sub _candidateSelection {
   debugMethodStart();  
   my ($self, $settings, $loopGenerationContextInstance) = @_;
   

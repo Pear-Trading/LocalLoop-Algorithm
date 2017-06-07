@@ -12,7 +12,7 @@ use v5.10;
 
 use FindBin;
 
-#This is a test for "Pear::LocalLoop::Algorithm::AlgorithmItself::_getNextBestCandidateTransactionAnalysis"
+#This is a test for "Pear::LocalLoop::Algorithm::AlgorithmItself::_candidateSelection"
 
 Pear::LocalLoop::Algorithm::Main->setTestingMode();
 
@@ -238,7 +238,7 @@ say "Test 1 - Empty table";
   is (numBranchedTransactionsRows(),0,"There is no branched transaction rows before invocation.");
 
   my $returnVal = undef;
-  my $exception = exception { $returnVal = $main->_getNextBestCandidateTransactionAnalysis($settings, $startLoopId); };
+  my $exception = exception { $returnVal = $main->_candidateSelection($settings, $startLoopId); };
   is ($exception, undef ,"No exception thrown");
   
   my $expectedReturnVal = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
@@ -278,7 +278,7 @@ say "Test 2 - First transaction selected (with nulls)";
   
 
   my $returnVal = undef;
-  my $exception = exception { $returnVal = $main->_getNextBestCandidateTransactionAnalysis($settings, $startLoopId); };
+  my $exception = exception { $returnVal = $main->_candidateSelection($settings, $startLoopId); };
   is ($exception, undef ,"No exception thrown");
   
   $expectedReturnVal = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
@@ -341,7 +341,7 @@ say "Test 3 - Not first transaction selected (non-null), selection of transactio
   
 
   my $returnVal = undef;
-  my $exception = exception { $returnVal = $main->_getNextBestCandidateTransactionAnalysis($settings, $startLoopId); };
+  my $exception = exception { $returnVal = $main->_candidateSelection($settings, $startLoopId); };
   is ($exception, undef ,"No exception thrown");
   
   $expectedReturnVal = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
@@ -411,7 +411,7 @@ say "Test 4 - Not first transaction selected (non-null), selection of transactio
   
 
   my $returnVal = undef;
-  my $exception = exception { $returnVal = $main->_getNextBestCandidateTransactionAnalysis($settings, $startLoopId); };
+  my $exception = exception { $returnVal = $main->_candidateSelection($settings, $startLoopId); };
   is ($exception, undef ,"No exception thrown");
   
   $expectedReturnVal = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
@@ -485,7 +485,7 @@ say "Test 5 - Not first transaction selected (non-null), selection of transactio
   
 
   my $returnVal = undef;
-  my $exception = exception { $returnVal = $main->_getNextBestCandidateTransactionAnalysis($settings, $startLoopId); };
+  my $exception = exception { $returnVal = $main->_candidateSelection($settings, $startLoopId); };
   is ($exception, undef ,"No exception thrown");
   
   $expectedReturnVal = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
@@ -566,7 +566,7 @@ say "Test 6 - Not first transaction selected (non-null), select transaction at t
   
 
   my $returnVal = undef;
-  my $exception = exception { $returnVal = $main->_getNextBestCandidateTransactionAnalysis($settings, $startLoopId); };
+  my $exception = exception { $returnVal = $main->_candidateSelection($settings, $startLoopId); };
   is ($exception, undef ,"No exception thrown");
   
   $expectedReturnVal = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
@@ -648,7 +648,7 @@ say "Test 7 - Not first transaction selected (non-null), select transaction in t
   
 
   my $returnVal = undef;
-  my $exception = exception { $returnVal = $main->_getNextBestCandidateTransactionAnalysis($settings, $startLoopId); };
+  my $exception = exception { $returnVal = $main->_candidateSelection($settings, $startLoopId); };
   is ($exception, undef ,"No exception thrown");
   
   $expectedReturnVal = Pear::LocalLoop::Algorithm::ExtendedTransaction->new({
