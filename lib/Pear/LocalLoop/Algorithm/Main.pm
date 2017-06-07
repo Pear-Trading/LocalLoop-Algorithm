@@ -607,7 +607,7 @@ has _statementSelectCandidateTransactionInformationWhenItsIncluded => (
   lazy => 1,
 );
 
-#TODO needs a better name.
+
 sub _candidateSelection {
   debugMethodStart();  
   my ($self, $settings, $loopGenerationContextInstance) = @_;
