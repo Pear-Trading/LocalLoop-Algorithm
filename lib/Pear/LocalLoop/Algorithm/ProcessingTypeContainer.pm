@@ -43,6 +43,8 @@ has loopHeuristicArray => (
 #  lazy => 1,
 );
 
+
+#Initialise all of the modules, this happens before static restrictions.
 sub init {
   debugMethodStart();
   my ($self) = @_;
@@ -72,6 +74,8 @@ sub init {
   debugMethodEnd();
 }
 
+
+#Apply the static restrictions.
 sub applyStaticRestrictions {
   debugMethodStart();
   my ($self) = @_;
@@ -83,6 +87,8 @@ sub applyStaticRestrictions {
   debugMethodEnd();
 }
 
+
+#Call the "initAfterStaticRestrictions" on all instances.
 sub initAfterStaticRestrictions {
   debugMethodStart();
   my ($self) = @_;
@@ -109,6 +115,7 @@ sub initAfterStaticRestrictions {
 }
 
 
+#Get the next transaction id.
 sub nextTransactionId {
   debugMethodStart();
   my ($self) = @_;
@@ -119,6 +126,8 @@ sub nextTransactionId {
   return $nextId;
 }
 
+
+
 has _statementDynamicRestrictionsAndHeuristicsReset => (
   is => 'ro', 
   default => sub {
@@ -128,7 +137,7 @@ has _statementDynamicRestrictionsAndHeuristicsReset => (
   lazy => 1,
 );
   
-
+#Apply the chain dynamic restrictions and heuristics,
 sub applyChainDynamicRestrictionsAndHeuristics {
   debugMethodStart();
   my ($self, $chainGenerationContextInstance) = @_;
@@ -149,7 +158,7 @@ sub applyChainDynamicRestrictionsAndHeuristics {
   foreach my $chainHeuristic (@{$self->chainHeuristicArray()}) {
     $chainHeuristic->applyChainHeuristic($isFirst, $chainGenerationContextInstance);
     $self->_dumpTransactionsIncluded();
-    $isFirst = 0;
+    $isFirst = 0; #Assume the above may be blank.
   }    
   
   #Nothing applied? Reset all of the included values
@@ -161,6 +170,8 @@ sub applyChainDynamicRestrictionsAndHeuristics {
   debugMethodEnd();
 }
 
+
+
 has _statementHeuristicsCandidatesReset => (
   is => 'ro', 
   default => sub {
@@ -170,6 +181,7 @@ has _statementHeuristicsCandidatesReset => (
   lazy => 1,
 );
 
+#Apply the candidate transaction  heuristics.
 sub applyChainHeuristicsCandidates {
   debugMethodStart();
   my ($self, $loopGenerationContextInstance) = @_;
@@ -200,6 +212,7 @@ has _statementLoopDynamicRestrictionsAndHeuristicsReset => (
   lazy => 1,
 );
 
+#Apply the loop dynamic restrictions and heuristics
 sub applyLoopDynamicRestrictionsAndHeuristics {
   debugMethodStart();
   my ($self) = @_;
@@ -207,12 +220,12 @@ sub applyLoopDynamicRestrictionsAndHeuristics {
   my $isFirst = 1;
   foreach my $loopDynamicRestriction (@{$self->loopDynamicRestrictionsArray()}) {
     $loopDynamicRestriction->applyLoopDynamicRestriction($isFirst);
-    $isFirst = 0;
+    $isFirst = 0; 
   }    
   
   foreach my $loopHeuristic (@{$self->loopHeuristicArray()}) {
     $loopHeuristic->applyLoopHeuristic($isFirst);
-    $isFirst = 0;
+    $isFirst = 0; #Assume the above may be blank.
   }    
   
   #Nothing applied? Reset all of the included values.
@@ -224,6 +237,8 @@ sub applyLoopDynamicRestrictionsAndHeuristics {
   debugMethodEnd();
 }
 
+
+
 has _statementDumpTransactionsIncluded => (
   is => 'ro', 
   default => sub {
@@ -233,6 +248,8 @@ has _statementDumpTransactionsIncluded => (
   lazy => 1,
 );
 
+
+#Dump all included transactions to the console during debugging.
 sub _dumpTransactionsIncluded {
 
   if (isDebug()) {
@@ -256,6 +273,8 @@ sub _dumpTransactionsIncluded {
   }
 }
 
+
+
 has _statementDumpCandidateTransactionsIncluded => (
   is => 'ro', 
   default => sub {
@@ -265,6 +284,7 @@ has _statementDumpCandidateTransactionsIncluded => (
   lazy => 1,
 );
 
+#Dump all active candidate transactions to the console during debugging.
 sub _dumpCandidateTransactionsIncluded {
   
   if (isDebug()) {
