@@ -48,7 +48,7 @@ my $staticRestrictions = [$rst];
 my $matchId = Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyTransactionsWhichFromUserMatchesOurToUser->new();
 my $afterCurrent = Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyAfterCurrentTransaction->new();
 my $extendedOnto = Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyTransactionsNotExtendedOntoYet->new();
-my $chainDynamicRestrictions = [$matchId, $extendedOnto, $afterCurrent];
+my $chainDynamicRestrictions = [$matchId, $afterCurrent, $extendedOnto];  
 
 my $none = Pear::LocalLoop::Algorithm::Heuristic::None->new();
 my $findFirstFinish = Pear::LocalLoop::Algorithm::Heuristic::PrioritiseFindingLoops->new();
