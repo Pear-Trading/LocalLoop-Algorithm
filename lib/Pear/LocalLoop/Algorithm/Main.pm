@@ -128,7 +128,7 @@ sub process {
   }
   
   #This may be here or the last line in the for loop, depending on when you want the loops to be selected.
-  $self->_selectLoops($settings);
+  $self->_loopSelection($settings);
   
   $dbh->commit();
   $dbh->{AutoCommit} = 1;
@@ -163,7 +163,7 @@ has _statementUpdateLoopInfoSetActiveToZeroWhereActiveIsNotZero => (
   lazy => 1,
 );
 
-sub _selectLoops {
+sub _loopSelection {
   debugMethodStart();
   my ($self, $settings) = @_;
   my $dbh = $self->dbh;

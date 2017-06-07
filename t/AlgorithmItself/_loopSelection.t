@@ -103,7 +103,7 @@ say "Test 1 - Empty table";
   is(numLoopInfoRows(), 0, "There is no loop info rows before execution.");
   is(numLoopsRows(), 0, "There is no loop rows before execution.");
 
-  my $exception = exception { $main->_selectLoops($settings); };
+  my $exception = exception { $main->_loopSelection($settings); };
   is ($exception, undef, "No exeception thrown.");
   
   is(numLoopInfoRows(), 0, "There is no loop info rows after execution.");  
@@ -139,7 +139,7 @@ say "Test 2 - 2 possible loops, 1 loop selected, all loops initially inactive an
   is(numLoopInfoRows(), 2, "There are 2 loop info rows before execution.");  
   is(numLoopsRows(), 5, "There are 5 loop rows before execution.");
 
-  my $exception = exception { $main->_selectLoops($settings); };
+  my $exception = exception { $main->_loopSelection($settings); };
   is ($exception, undef, "No exeception thrown.");
   
   is(numLoopInfoRows(), 2, "There are 2 loop info rows after execution.");  
@@ -178,7 +178,7 @@ say "Test 3 - 2 possible loops, 1 loop selected, all loops initially inactive an
   is(numLoopInfoRows(), 2, "There are 2 loop info rows before execution.");  
   is(numLoopsRows(), 5, "There are 5 loop rows before execution.");
 
-  my $exception = exception { $main->_selectLoops($settings); };
+  my $exception = exception { $main->_loopSelection($settings); };
   is ($exception, undef, "No exeception thrown.");
   
   is(numLoopInfoRows(), 2, "There are 2 loop info rows after execution.");  
@@ -217,7 +217,7 @@ say "Test 4 - 2 possible loops, 1 loop selected, all loops initially active";
   is(numLoopInfoRows(), 2, "There are 2 loop info rows before execution.");  
   is(numLoopsRows(), 5, "There are 5 loop rows before execution.");
 
-  my $exception = exception { $main->_selectLoops($settings); };
+  my $exception = exception { $main->_loopSelection($settings); };
   is ($exception, undef, "No exeception thrown.");
   
   is(numLoopInfoRows(), 2, "There are 2 loop info rows after execution.");  
@@ -256,7 +256,7 @@ say "Test 5 - 2 possible loops, 1 loop selected, best loop inactive";
   is(numLoopInfoRows(), 2, "There are 2 loop info rows before execution.");  
   is(numLoopsRows(), 5, "There are 5 loop rows before execution.");
 
-  my $exception = exception { $main->_selectLoops($settings); };
+  my $exception = exception { $main->_loopSelection($settings); };
   is ($exception, undef, "No exeception thrown.");
   
   is(numLoopInfoRows(), 2, "There are 2 loop info rows after execution.");  
@@ -303,7 +303,7 @@ say "Test 6 - 3 possible loops, 2 loops selected, 2 loops overlap and 1 doesn't"
   is(numLoopInfoRows(), 3, "There are 3 loop info rows before execution.");  
   is(numLoopsRows(), 8, "There are 8 loop rows before execution.");
 
-  my $exception = exception { $main->_selectLoops($settings); };
+  my $exception = exception { $main->_loopSelection($settings); };
   is ($exception, undef, "No exeception thrown.");
   
   is(numLoopInfoRows(), 3, "There are 3 loop info rows after execution.");  
