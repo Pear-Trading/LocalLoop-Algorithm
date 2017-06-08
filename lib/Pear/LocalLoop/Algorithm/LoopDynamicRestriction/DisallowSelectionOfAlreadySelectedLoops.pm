@@ -11,6 +11,7 @@ with ('Pear::LocalLoop::Algorithm::Role::ILoopDynamicRestriction');
 
 #Prevent the selection of any loops that have been selected previously.
 
+#Exclude included loops that are active.
 has _statementDisallowSelectionOfAlreadySelectedLoops => (
   is => 'ro',
   default => sub {
@@ -20,6 +21,7 @@ has _statementDisallowSelectionOfAlreadySelectedLoops => (
   lazy => 1,
 );
 
+#Include excluded loops that are inactive
 has _statementDisallowSelectionOfAlreadySelectedLoopsFirstRestriction => (
   is => 'ro',
   default => sub {
@@ -37,9 +39,11 @@ sub applyLoopDynamicRestriction {
     die "isFirstRestriction cannot be undefined";
   }
   
+  #Exclude included loops that are active.
   $self->_statementDisallowSelectionOfAlreadySelectedLoops->execute();
   
   if ($isFirstRestriction){
+    #Include excluded loops that are inactive
     $self->_statementDisallowSelectionOfAlreadySelectedLoopsFirstRestriction->execute();
   }
   
