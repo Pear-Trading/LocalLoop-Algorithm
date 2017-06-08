@@ -8,6 +8,9 @@ use Data::Dumper;
 extends("Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier");
 with ('Pear::LocalLoop::Algorithm::Role::IChainHeuristic');
 
+#This heuristic tries to select the transactions and candidate transactions that will form loops, otherwise
+#it does nothing.
+
 has _selectChainHasFinishUserId => (
   is => 'ro',
   default => sub {
@@ -68,6 +71,7 @@ sub applyChainHeuristic {
   
   my $finishingUserId = $chainGenerationContextInstance->userIdWhichCreatesALoop();
   
+  #Check to see whether it can actually finish or not
   my $statementHasFinishUseId = ($isFirst ? $self->_selectChainHasFinishUserIdFirst() : $self->_selectChainHasFinishUserId());
   $statementHasFinishUseId->execute($finishingUserId);
   
@@ -77,9 +81,11 @@ sub applyChainHeuristic {
   #There is at least one next transaction id.
   if (defined $hasFinishingTransaction)
   {
+    #Exclude all transactions to users that don't match the user id.
     $self->_selectChainPrioritiseFindingLoops()->execute($finishingUserId);
     
     if ($isFirst) {
+      #Include all transactions to users that match the user id.
       $self->_selectChainPrioritiseFindingLoopsFirst()->execute($finishingUserId);
     }
   }
@@ -89,7 +95,6 @@ sub applyChainHeuristic {
   }
   
   #If none is found this heuristic has no effect.
-
   
   debugMethodEnd();
 };
@@ -161,9 +166,11 @@ sub applyCandidateTransactionHeuristic {
   #If this is undef all are not included anyway.  
   #There is at least one next transaction id. We only need the candidate transaction id as that identifies one row.
   if (defined $hasCandidateTransactions) {
+    #Exclude all included transactions that don't have the specified user id.
     $self->_statementCandidatesPrioritiseFindingLoops()->execute($loopUserId);
     
     if ($isFirst) {
+      #Include all excluded transactions that have the specified user id.
       $self->_statementCandidatesPrioritiseFindingLoopsFirst()->execute($loopUserId);
     }
   }
