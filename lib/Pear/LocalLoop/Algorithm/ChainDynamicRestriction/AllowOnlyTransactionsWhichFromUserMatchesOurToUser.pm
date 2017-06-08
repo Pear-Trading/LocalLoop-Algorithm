@@ -56,9 +56,9 @@ sub applyChainDynamicRestriction {
   
   my $transactionId = $chainGenerationContextInstance->currentTransactionId();
   
+  #Get to user id of this transaction.
   my $statementSelectToUserOfATransaction = $self->_statementSelectToUserOfATransaction();
   $statementSelectToUserOfATransaction->execute($transactionId);
-  
   my ($fromUserId) = $statementSelectToUserOfATransaction->fetchrow_array();
   
   #Set all after the max transaction id to not be included.
