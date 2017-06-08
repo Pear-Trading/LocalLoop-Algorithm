@@ -7,6 +7,8 @@ use Pear::LocalLoop::Algorithm::Debug;
 extends("Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier");
 with ('Pear::LocalLoop::Algorithm::Role::ILoopHeuristic');
 
+#This heuristic selects one of the earliest transactions possible.
+
 has _selectChainMinimumTransactionId => (
   is => 'ro',
   default => sub {
@@ -70,6 +72,7 @@ sub applyChainHeuristic {
   my $statementMinTransaction = ($isFirst ? $self->_selectChainMinimumTransactionIdFirst() : $self->_selectChainMinimumTransactionId());
   $statementMinTransaction->execute($transactionId);
   
+  #Select the next transaction
   my ($nextTransactionId) = $statementMinTransaction->fetchrow_array();
  
   #say "next: $nextTransactionId";
@@ -77,8 +80,10 @@ sub applyChainHeuristic {
   #There is at least one next transaction id.
   if (defined $nextTransactionId)
   {
+    #Exclude all of the other included transactions except this one.
     $self->_selectChainNone()->execute($nextTransactionId);
     
+    #Include the selected transaction if excluded.
     if ($isFirst) {
       $self->_selectChainNoneFirst()->execute($nextTransactionId);
     }
@@ -135,15 +140,18 @@ sub applyCandidateTransactionHeuristic {
 
   my $statementMinTransaction = ($isFirst ? $self->statementCandidatesMinimumTransactionIdFirst() : $self->statementCandidatesMinimumTransactionId());
   $statementMinTransaction->execute();
+  #Candidate transaction and and minimum "TransactionTo_FK" that goes with it.
   my ($candidateTransactionsId, $nextTransactionId) = $statementMinTransaction->fetchrow_array();
 
   #If this is undef all are not included anyway.  
   #There is at least one next transaction id. We only need the candidate transaction id as that identifies one row.
   if (defined $candidateTransactionsId)
   {
+    #Exclude all candidate transactions except the specified one.
     $self->statementCandidatesNone()->execute($candidateTransactionsId);
     
     if ($isFirst) {
+      #Include the specfied candidate transaction if it's excluded.
       $self->statementCandidatesNoneFirst()->execute($candidateTransactionsId);
     }
   }
@@ -196,12 +204,17 @@ sub applyLoopHeuristic {
 
   my $statementEarliestLoop = ($isFirst ? $self->statementLoopsMinimumTransactionIdFirst() : $self->statementLoopsMinimumTransactionId());
   $statementEarliestLoop->execute();
+  
+  #What's the earliest starting loop
   my ($earliestLoop) = $statementEarliestLoop->fetchrow_array();
   
+  #If no loops exist we cannot change the state of them
   if (defined $earliestLoop) {
+    #Exclude all loops except the one specified.
     $self->statementLoopsNone()->execute($earliestLoop);
   
     if ($isFirst) {
+      #Include the specified loop if it's exluded.
       $self->statementLoopsNoneFirst()->execute($earliestLoop);
     }
   }
