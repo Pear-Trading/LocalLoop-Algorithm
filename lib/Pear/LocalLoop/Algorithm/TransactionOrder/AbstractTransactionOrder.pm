@@ -28,6 +28,7 @@ has _statementDropTable => (
   lazy => 1, 
 );
 
+#Table used to store the ordering of the transactions and whether it has been selected or not.
 has _statementCreateTable => (
   is => 'ro',
   default => sub {
@@ -64,6 +65,8 @@ has _statementSelectInsertionOrder => (
   lazy => 1, 
 );
 
+
+#Get a 1 column SQL statement to select the ordering of transactions.
 sub getOrderSqlString {
   die "getOrderSqlString has not been implemented"; 
 }
