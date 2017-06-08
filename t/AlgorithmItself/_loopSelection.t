@@ -69,6 +69,7 @@ my $statementSelectLoopActive = $dbh->prepare("SELECT Active FROM LoopInfo WHERE
 
 my $selectLoopsCountAll = $dbh->prepare("SELECT COUNT(*) FROM Loops");
 my $selectLoopInfoCountAll = $dbh->prepare("SELECT COUNT(*) FROM LoopInfo");
+my $selectProcessedTransactionsCountAll = $dbh->prepare("SELECT COUNT(*) FROM ProcessedTransactions");
 
 sub selectLoopActive {
   my ($loopId) = @_;
@@ -95,17 +96,26 @@ sub numLoopInfoRows {
   return $num;
 }
 
+sub numProcessedTransactionsRows {
+  $selectProcessedTransactionsCountAll->execute();
+  my ($num) = $selectProcessedTransactionsCountAll->fetchrow_array();
+  
+  return $num;
+}
+
 
 say "Test 1 - Empty table";
 {
   delete_table_data();
   
+  is(numProcessedTransactionsRows(), 0, "There are 0 processed transaction rows before execution.");
   is(numLoopInfoRows(), 0, "There is no loop info rows before execution.");
   is(numLoopsRows(), 0, "There is no loop rows before execution.");
 
   my $exception = exception { $main->_loopSelection($settings); };
   is ($exception, undef, "No exeception thrown.");
   
+  is(numProcessedTransactionsRows(), 0, "There are 0 processed transaction rows after execution.");
   is(numLoopInfoRows(), 0, "There is no loop info rows after execution.");  
   is(numLoopsRows(), 0, "There is no loop rows after execution.");
   
@@ -135,13 +145,14 @@ say "Test 2 - 2 possible loops, 1 loop selected, all loops initially inactive an
   $statementInsertLoops->execute(2, 3);
   $statementInsertLoops->execute(2, 4);
 
-  
+  is(numProcessedTransactionsRows(), 4, "There are 4 processed transaction rows before execution.");
   is(numLoopInfoRows(), 2, "There are 2 loop info rows before execution.");  
   is(numLoopsRows(), 5, "There are 5 loop rows before execution.");
 
   my $exception = exception { $main->_loopSelection($settings); };
   is ($exception, undef, "No exeception thrown.");
   
+  is(numProcessedTransactionsRows(), 4, "There are 4 processed transaction rows after execution.");
   is(numLoopInfoRows(), 2, "There are 2 loop info rows after execution.");  
   is(numLoopsRows(), 5, "There are 5 loop rows after execution.");
   
@@ -174,13 +185,14 @@ say "Test 3 - 2 possible loops, 1 loop selected, all loops initially inactive an
   $statementInsertLoops->execute(2, 3);
   $statementInsertLoops->execute(2, 4);
 
-  
+  is(numProcessedTransactionsRows(), 4, "There are 4 processed transaction rows before execution.");
   is(numLoopInfoRows(), 2, "There are 2 loop info rows before execution.");  
   is(numLoopsRows(), 5, "There are 5 loop rows before execution.");
 
   my $exception = exception { $main->_loopSelection($settings); };
   is ($exception, undef, "No exeception thrown.");
   
+  is(numProcessedTransactionsRows(), 4, "There are 4 processed transaction rows after execution.");
   is(numLoopInfoRows(), 2, "There are 2 loop info rows after execution.");  
   is(numLoopsRows(), 5, "There are 5 loop rows after execution.");
   
@@ -213,13 +225,14 @@ say "Test 4 - 2 possible loops, 1 loop selected, all loops initially active";
   $statementInsertLoops->execute(2, 3);
   $statementInsertLoops->execute(2, 4);
 
-  
+  is(numProcessedTransactionsRows(), 4, "There are 4 processed transaction rows before execution.");
   is(numLoopInfoRows(), 2, "There are 2 loop info rows before execution.");  
   is(numLoopsRows(), 5, "There are 5 loop rows before execution.");
 
   my $exception = exception { $main->_loopSelection($settings); };
   is ($exception, undef, "No exeception thrown.");
   
+  is(numProcessedTransactionsRows(), 4, "There are 4 processed transaction rows after execution."); 
   is(numLoopInfoRows(), 2, "There are 2 loop info rows after execution.");  
   is(numLoopsRows(), 5, "There are 5 loop rows after execution.");
   
@@ -252,13 +265,14 @@ say "Test 5 - 2 possible loops, 1 loop selected, best loop inactive";
   $statementInsertLoops->execute(2, 3);
   $statementInsertLoops->execute(2, 4);
 
-  
+  is(numProcessedTransactionsRows(), 4, "There are 4 processed transaction rows before execution.");
   is(numLoopInfoRows(), 2, "There are 2 loop info rows before execution.");  
   is(numLoopsRows(), 5, "There are 5 loop rows before execution.");
 
   my $exception = exception { $main->_loopSelection($settings); };
   is ($exception, undef, "No exeception thrown.");
   
+  is(numProcessedTransactionsRows(), 4, "There are 4 processed transaction rows after execution.");
   is(numLoopInfoRows(), 2, "There are 2 loop info rows after execution.");  
   is(numLoopsRows(), 5, "There are 5 loop rows after execution.");
   
@@ -300,12 +314,14 @@ say "Test 6 - 3 possible loops, 2 loops selected, 2 loops overlap and 1 doesn't"
   $statementInsertLoops->execute(3, 6);
   $statementInsertLoops->execute(3, 7);
   
+  is(numProcessedTransactionsRows(), 7, "There are 7 processed transaction rows before execution.");
   is(numLoopInfoRows(), 3, "There are 3 loop info rows before execution.");  
   is(numLoopsRows(), 8, "There are 8 loop rows before execution.");
 
   my $exception = exception { $main->_loopSelection($settings); };
   is ($exception, undef, "No exeception thrown.");
   
+  is(numProcessedTransactionsRows(), 7, "There are 7 processed transaction rows after execution.");
   is(numLoopInfoRows(), 3, "There are 3 loop info rows after execution.");  
   is(numLoopsRows(), 8, "There are 8 loop rows after execution.");
   

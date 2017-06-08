@@ -134,7 +134,19 @@ sub clear_tables {
 #so we have a known state to test with.
 delete_table_data();
 
-say "Test 1 - Empty table";
+say "Test 1 - Missing settings";
+{
+  my $exception = exception { $main->process(); };
+  isnt ($exception, undef, "No exeception thrown.");
+}
+
+say "Test 2 - Undef settings";
+{
+  my $exception = exception { $main->process(undef); };
+  isnt ($exception, undef, "No exeception thrown.");
+}
+
+say "Test 3 - Empty table";
 {
   clear_tables(); #Read comments in this function.
 
@@ -155,7 +167,7 @@ say "Test 1 - Empty table";
 
 
 
-say "Test 2 - 2 possible loops, both overlapping - order 1";
+say "Test 4 - 2 possible loops, both overlapping - order 1";
 {
   clear_tables(); #Read comments in this function.
   
@@ -189,7 +201,7 @@ say "Test 2 - 2 possible loops, both overlapping - order 1";
 
 
 
-say "Test 3 - 2 possible loops, both overlapping - order 2";
+say "Test 5 - 2 possible loops, both overlapping - order 2";
 {
   clear_tables(); #Read comments in this function.
   
@@ -223,7 +235,7 @@ say "Test 3 - 2 possible loops, both overlapping - order 2";
 
 
 
-say "Test 4 - 3 possible loops, two overlapping one not";
+say "Test 6 - 3 possible loops, two overlapping one not";
 {
   clear_tables(); #Read comments in this function.
   

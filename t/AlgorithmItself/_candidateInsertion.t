@@ -69,6 +69,7 @@ my $selectCandidateTransactionCountAll = $dbh->prepare("SELECT COUNT(*) FROM Can
 my $selectChainsCountAll = $dbh->prepare("SELECT COUNT(*) FROM Chains");
 my $selectChainInfoCountAll = $dbh->prepare("SELECT COUNT(*) FROM ChainInfo");
 my $selectBranchedTransactionsCountAll = $dbh->prepare("SELECT COUNT(*) FROM BranchedTransactions");
+my $selectProcessedTransactionsCountAll = $dbh->prepare("SELECT COUNT(*) FROM ProcessedTransactions");
 
 
 sub selectCandidateTransactions {
@@ -113,6 +114,13 @@ sub numBranchedTransactionsRows {
   return $num;
 }
 
+sub numProcessedTransactionsRows {
+  $selectProcessedTransactionsCountAll->execute();
+  my ($num) = $selectProcessedTransactionsCountAll->fetchrow_array();
+  
+  return $num;
+}
+
 
 say "Test 1 - First transaction with no possible transactions to extend onto.";
 {
@@ -144,6 +152,7 @@ say "Test 1 - First transaction with no possible transactions to extend onto.";
     userIdWhichCreatesALoop => $startLoopId,
   });
 
+  is (numProcessedTransactionsRows(), 4, "There are 4 processed transaction rows before invocation.");
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows before invocation.");
   is (numChainsRows(), 1, "There is 1 current chains row before invocation.");
   is (numChainInfoRows(), 1, "There is 1 current chains stats row before invocation.");
@@ -151,11 +160,12 @@ say "Test 1 - First transaction with no possible transactions to extend onto.";
 
   my $exception = exception { $main->_candidateInsertion($settings, $inputTransactionState, $inputLoopGenerationContext); };
   is ($exception, undef ,"No exception thrown");
-
-  is (numCandidateTransactionRows(), 0,"There is no candidate transaction rows before invocation.");
-  is (numChainsRows(), 1, "There is 1 current chains row before invocation.");
-  is (numChainInfoRows(), 1, "There is 1 current chains stats row before invocation.");
-  is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows before invocation.");
+  
+  is (numProcessedTransactionsRows(), 4, "There are 4 processed transaction rows after invocation.");
+  is (numCandidateTransactionRows(), 0,"There is no candidate transaction rows after invocation.");
+  is (numChainsRows(), 1, "There is 1 current chains row after invocation.");
+  is (numChainInfoRows(), 1, "There is 1 current chains stats row after invocation.");
+  is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows after invocation.");
 }
 
 
@@ -189,6 +199,7 @@ say "Test 2 - First transaction with 1 possible transactions to extend onto.";
     userIdWhichCreatesALoop => $startLoopId,
   });
 
+  is (numProcessedTransactionsRows(), 4, "There are 4 processed transaction rows before invocation.");
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows before invocation.");
   is (numChainsRows(), 1, "There is 1 current chains row before invocation.");
   is (numChainInfoRows(), 1, "There is 1 current chains stats row before invocation.");
@@ -205,6 +216,7 @@ say "Test 2 - First transaction with 1 possible transactions to extend onto.";
   is ($totalValue, 20, "totalValue has been updated to account for the new transaction.");
   is ($numberOfMinimumValues, 2, "numberOfMinimumValues has been updated to account for the new transaction.");
       
+  is (numProcessedTransactionsRows(), 4, "There are 4 processed transaction rows after invocation.");
   is (numChainsRows(), 1, "There is 1 current chains row after invocation.");
   is (numChainInfoRows(), 1, "There is 1 current chains stats row after invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows after` invocation.");
@@ -247,6 +259,7 @@ say "Test 3 - First transaction with 2 (or more) possible transactions to extend
     userIdWhichCreatesALoop => $startLoopId,
   });
 
+  is (numProcessedTransactionsRows(), 4, "There are 4 processed transaction rows before invocation.");
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows before invocation.");
   is (numChainsRows(), 1, "There is 1 current chains row before invocation.");
   is (numChainInfoRows(), 1, "There is 1 current chains stats row before invocation.");
@@ -269,6 +282,7 @@ say "Test 3 - First transaction with 2 (or more) possible transactions to extend
   is ($totalValue, 30, "totalValue has been updated to account for the new transaction.");
   is ($numberOfMinimumValues, 1, "numberOfMinimumValues has been updated to account for the new transaction.");
       
+  is (numProcessedTransactionsRows(), 4, "There are 4 processed transaction rows after invocation.");
   is (numChainsRows(), 1, "There is 1 current chains row after invocation.");
   is (numChainInfoRows(), 1, "There is 1 current chains stats row after invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows after` invocation.");
@@ -305,6 +319,7 @@ say "Test 4 - First transaction with 1 possible transactions to extend onto, nex
     userIdWhichCreatesALoop => $startLoopId,
   });
 
+  is (numProcessedTransactionsRows(), 4, "There are 4 processed transaction rows before invocation.");
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows before invocation.");
   is (numChainsRows(), 1, "There is 1 current chains row before invocation.");
   is (numChainInfoRows(), 1, "There is 1 current chains stats row before invocation.");
@@ -321,6 +336,7 @@ say "Test 4 - First transaction with 1 possible transactions to extend onto, nex
   is ($totalValue, 18, "totalValue has been updated to account for the new transaction.");
   is ($numberOfMinimumValues, 1, "numberOfMinimumValues remains the same.");
       
+  is (numProcessedTransactionsRows(), 4, "There are 4 processed transaction rows after invocation.");
   is (numChainsRows(), 1, "There is 1 current chains row after invocation.");
   is (numChainInfoRows(), 1, "There is 1 current chains stats row after invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows after` invocation.");
@@ -358,6 +374,7 @@ say "Test 5 - First transaction with 1 possible transactions to extend onto, nex
     userIdWhichCreatesALoop => $startLoopId,
   });
 
+  is (numProcessedTransactionsRows(), 4, "There are 4 processed transaction rows before invocation.");
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows before invocation.");
   is (numChainsRows(), 1, "There is 1 current chains row before invocation.");
   is (numChainInfoRows(), 1, "There is 1 current chains stats row before invocation.");
@@ -374,6 +391,7 @@ say "Test 5 - First transaction with 1 possible transactions to extend onto, nex
   is ($totalValue, 20, "totalValue has been updated to account for the new transaction.");
   is ($numberOfMinimumValues, 2, "numberOfMinimumValues has been updated to account for the new transaction.");
       
+  is (numProcessedTransactionsRows(), 4, "There are 4 processed transaction rows after invocation.");
   is (numChainsRows(), 1, "There is 1 current chains row after invocation.");
   is (numChainInfoRows(), 1, "There is 1 current chains stats row after invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows after` invocation.");
@@ -410,6 +428,7 @@ say "Test 6 - First transaction with 1 possible transactions to extend onto, nex
     userIdWhichCreatesALoop => $startLoopId,
   });
 
+  is (numProcessedTransactionsRows(), 4, "There are 4 processed transaction rows before invocation.");
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows before invocation.");
   is (numChainsRows(), 1, "There is 1 current chains row before invocation.");
   is (numChainInfoRows(), 1, "There is 1 current chains stats row before invocation.");
@@ -426,6 +445,7 @@ say "Test 6 - First transaction with 1 possible transactions to extend onto, nex
   is ($totalValue, 22, "totalValue has been updated to account for the new transaction.");
   is ($numberOfMinimumValues, 1, "numberOfMinimumValues remains the same.");
       
+  is (numProcessedTransactionsRows(), 4, "There are 4 processed transaction rows after invocation.");
   is (numChainsRows(), 1, "There is 1 current chains row after invocation.");
   is (numChainInfoRows(), 1, "There is 1 current chains stats row after invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows after` invocation.");
@@ -470,6 +490,7 @@ say "Test 7 - Not first transaction with 2 possible transactions to extend onto 
     userIdWhichCreatesALoop => $startLoopId,
   });
 
+  is (numProcessedTransactionsRows(), 6, "There are 6 processed transaction rows before invocation.");
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows before invocation.");
   is (numChainsRows(), 2, "There is 1 current chains row before invocation.");
   is (numChainInfoRows(), 2, "There is 1 current chains stats row before invocation.");
@@ -492,6 +513,7 @@ say "Test 7 - Not first transaction with 2 possible transactions to extend onto 
   is ($totalValue, 30, "totalValue has been updated to account for the new transaction.");
   is ($numberOfMinimumValues, 1, "numberOfMinimumValues remains the same.");
       
+  is (numProcessedTransactionsRows(), 6, "There are 6 processed transaction rows after invocation.");
   is (numChainsRows(), 2, "There is 1 current chains row after invocation.");
   is (numChainInfoRows(), 2, "There is 1 current chains stats row after invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows after` invocation.");
@@ -548,6 +570,7 @@ say "Test 8 - Not first transaction, existing candidate transaction prevents the
     userIdWhichCreatesALoop => $startLoopId,
   });
 
+  is (numProcessedTransactionsRows(), 5, "There are 5 processed transaction rows before invocation.");
   is (numCandidateTransactionRows(), 1, "There is 1 candidate transaction row before invocation.");
   is (numChainsRows(), 2, "There is 2 current chains rows before invocation.");
   is (numChainInfoRows(), 2, "There is 2 current chains stats rows before invocation.");
@@ -571,6 +594,7 @@ say "Test 8 - Not first transaction, existing candidate transaction prevents the
   is ($totalValue, 33, "totalValue has been updated to account for the new transaction.");
   is ($numberOfMinimumValues, 2, "numberOfMinimumValues remains the same.");
       
+  is (numProcessedTransactionsRows(), 5, "There are 5 processed transaction rows after invocation.");
   is (numChainsRows(), 2, "There is 1 current chains row after invocation.");
   is (numChainInfoRows(), 2, "There is 1 current chains stats row after invocation.");
   is (numBranchedTransactionsRows(), 0, "There is no branched transaction rows after` invocation.");

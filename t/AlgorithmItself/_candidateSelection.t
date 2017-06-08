@@ -62,6 +62,7 @@ my $selectCandidateTransactionCountAll = $dbh->prepare("SELECT COUNT(*) FROM Can
 my $selectChainsCountAll = $dbh->prepare("SELECT COUNT(*) FROM Chains");
 my $selectChainInfoCountAll = $dbh->prepare("SELECT COUNT(*) FROM ChainInfo");
 my $selectBranchedTransactionsCountAll = $dbh->prepare("SELECT COUNT(*) FROM BranchedTransactions");
+my $selectProcessedTransactionsCountAll = $dbh->prepare("SELECT COUNT(*) FROM ProcessedTransactions");
 
 sub candidateTransactionIdExists {
   my ($id) = @_;
@@ -186,6 +187,13 @@ sub numBranchedTransactionsRows {
   return $num;
 }
 
+sub numProcessedTransactionsRows {
+  $selectProcessedTransactionsCountAll->execute();
+  my ($num) = $selectProcessedTransactionsCountAll->fetchrow_array();
+  
+  return $num;
+}
+
 
 #The only things that matter are:
 #ProcessedTransactions:
@@ -232,6 +240,7 @@ say "Test 1 - Empty table";
   $statementInsertProcessedTransactions->execute(4, 3, 4, 10);
   $statementInsertProcessedTransactions->execute(5, 4, 1, 10);
   
+  is (numProcessedTransactionsRows(), 5, "There are 5 processed transaction rows before invocation.");
   is (numCandidateTransactionRows(),0,"There is no candidate transaction rows before invocation.");
   is (numChainsRows(),0,"There is no current chains rows before invocation.");
   is (numChainInfoRows(),0,"There is no current chains stats rows before invocation.");
@@ -246,6 +255,7 @@ say "Test 1 - Empty table";
       loopStartEndUserId => $startLoopId,
   });
 
+  is (numProcessedTransactionsRows(), 5, "There are 5 processed transaction rows after invocation.");
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows after invocation.");
   is (numChainsRows(),0,"There is no current chains rows after invocation.");
   is (numChainInfoRows(),0,"There is no current chains stats rows after invocation.");
@@ -271,6 +281,7 @@ say "Test 2 - First transaction selected (with nulls)";
   #Only params 1 - 4 matter.
   $statementInsertCandidateTransactions->execute(1, undef, undef, 1, 10, 1, 10, 1);
  
+  is (numProcessedTransactionsRows(), 5, "There are 5 processed transaction rows before invocation.");
   is (numCandidateTransactionRows(),1,"There is one candidate transaction row before invocation.");
   is (numChainsRows(),0,"There is no current chains rows before invocation.");
   is (numChainInfoRows(),0,"There is no current chains stats rows before invocation.");
@@ -291,6 +302,7 @@ say "Test 2 - First transaction selected (with nulls)";
     }),
   });
 
+  is (numProcessedTransactionsRows(), 5, "There are 5 processed transaction rows after invocation.");
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows after invocation.");
   is (candidateTransactionIdExists(1), 0,"Candidate transaction id 1 has been removed.");
     
@@ -334,6 +346,7 @@ say "Test 3 - Not first transaction selected (non-null), selection of transactio
   #Only params 1 - 4 matter.
   $statementInsertCandidateTransactions->execute(2, 1, 1, 3, 10, 2, 20, 2);
  
+  is (numProcessedTransactionsRows(), 5, "There are 5 processed transaction rows before invocation.");
   is (numCandidateTransactionRows(),1,"There is 1 candidate transaction row before invocation.");
   is (numChainsRows(),1,"There is 1 current chains row before invocation.");
   is (numChainInfoRows(),1,"There is 1 current chains stats row before invocation.");
@@ -359,6 +372,7 @@ say "Test 3 - Not first transaction selected (non-null), selection of transactio
   });
   
 
+  is (numProcessedTransactionsRows(), 5, "There are 5 processed transaction rows after invocation.");
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows after invocation.");
     
   is (numChainsRows(),2,"There is 2 current chains rows after invocation.");
@@ -404,6 +418,7 @@ say "Test 4 - Not first transaction selected (non-null), selection of transactio
   #Only params 1 - 4 matter.
   $statementInsertCandidateTransactions->execute(3, 1, 3, 4, 10, 3, 30, 3);
  
+  is (numProcessedTransactionsRows(), 5, "There are 5 processed transaction rows before invocation.");
   is (numCandidateTransactionRows(),1,"There is one candidate transaction row before invocation.");
   is (numChainsRows(),2,"There is 2 current chains rows before invocation.");
   is (numChainInfoRows(),2,"There is 2 current chains stats rows before invocation.");
@@ -428,7 +443,7 @@ say "Test 4 - Not first transaction selected (non-null), selection of transactio
     loopStartEndUserId => $startLoopId,
   });
   
-
+  is (numProcessedTransactionsRows(), 5, "There are 5 processed transaction rows after invocation.");
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows after invocation.");
     
   is (numChainsRows(), 3, "There is 2 current chains rows after invocation.");
@@ -478,6 +493,7 @@ say "Test 5 - Not first transaction selected (non-null), selection of transactio
   #force this.
   $statementInsertCandidateTransactions->execute(4, 1, 1, 4, 10, 2, 30, 1);
  
+  is (numProcessedTransactionsRows(), 6, "There are 6 processed transaction rows before invocation.");
   is (numCandidateTransactionRows(),1,"There is one candidate transaction row before invocation.");
   is (numChainsRows(),2,"There is 2 current chains rows before invocation.");
   is (numChainInfoRows(),2,"There is 2 current chains stats rows before invocation.");
@@ -502,7 +518,7 @@ say "Test 5 - Not first transaction selected (non-null), selection of transactio
     loopStartEndUserId => $startLoopId,
   });
 
-
+  is (numProcessedTransactionsRows(), 6, "There are 6 processed transaction rows after invocation.");
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows after invocation.");
     
   is (numChainsRows(), 4, "There is 4 current chains rows after invocation.");
@@ -559,6 +575,7 @@ say "Test 6 - Not first transaction selected (non-null), select transaction at t
   #Actually another candidate transactions would be here too but we'll ignore that and force this one.
   $statementInsertCandidateTransactions->execute(4, 1, 1, 4, 10, 2, 30, 1);
  
+  is (numProcessedTransactionsRows(), 6, "There are 6 processed transaction rows before invocation.");
   is (numCandidateTransactionRows(),1,"There is one candidate transaction row before invocation.");
   is (numChainsRows(),3,"There is 3 current chains rows before invocation.");
   is (numChainInfoRows(),3,"There is 3 current chains stats rows before invocation.");
@@ -584,6 +601,7 @@ say "Test 6 - Not first transaction selected (non-null), select transaction at t
   });
 
 
+  is (numProcessedTransactionsRows(), 6, "There are 6 processed transaction rows after invocation.");
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows after invocation.");
     
   is (numChainsRows(), 5, "There is 5 current chains rows after invocation.");
@@ -641,6 +659,7 @@ say "Test 7 - Not first transaction selected (non-null), select transaction in t
   #Actually another candidate transactions would be here too but we'll ignore that and force this one.
   $statementInsertCandidateTransactions->execute(4, 1, 3, 6, 10, 3, 40, 2);
  
+  is (numProcessedTransactionsRows(), 7, "There are 7 processed transaction rows before invocation.");
   is (numCandidateTransactionRows(),1,"There is one candidate transaction row before invocation.");
   is (numChainsRows(),3,"There is 3 current chains rows before invocation.");
   is (numChainInfoRows(),3,"There is 3 current chains stats rows before invocation.");
@@ -666,6 +685,7 @@ say "Test 7 - Not first transaction selected (non-null), select transaction in t
   });
 
 
+  is (numProcessedTransactionsRows(), 7, "There are 7 processed transaction rows after invocation.");
   is (numCandidateTransactionRows(), 0, "There is no candidate transaction rows after invocation.");
     
   is (numChainsRows(), 6, "There is 6 current chains rows after invocation.");

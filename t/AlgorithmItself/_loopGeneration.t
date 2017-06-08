@@ -54,6 +54,7 @@ my $selectLoopCountSingle = $dbh->prepare("SELECT COUNT(*) FROM Loops WHERE Loop
 
 my $selectLoopsCountAll = $dbh->prepare("SELECT COUNT(*) FROM Loops");
 my $selectLoopInfoCountAll = $dbh->prepare("SELECT COUNT(*) FROM LoopInfo");
+my $selectProcessedTransactionsCountAll = $dbh->prepare("SELECT COUNT(*) FROM ProcessedTransactions");
 
 sub selectLoopInfo {
   my ($fromTransactionId, $toTransactionId) = @_;
@@ -97,6 +98,13 @@ sub numLoopsRows {
 sub numLoopInfoRows {
   $selectLoopInfoCountAll->execute();
   my ($num) = $selectLoopInfoCountAll->fetchrow_array();
+  
+  return $num;
+}
+
+sub numProcessedTransactionsRows {
+  $selectProcessedTransactionsCountAll->execute();
+  my ($num) = $selectProcessedTransactionsCountAll->fetchrow_array();
   
   return $num;
 }
@@ -147,7 +155,7 @@ say "Test 1 - Generates no loops, with deletion test of tables Chains and ChainI
   $statementInsertChains->execute(1, 2, 2);
   $statementInsertChains->execute(1, 3, 3);
 
-
+  is(numProcessedTransactionsRows(), 3, "There are 3 processed transaction rows before execution.");
   is(numLoopInfoRows(), 0, "There is no loop info rows before execution.");
   is(numLoopsRows(), 0, "There is no loop rows before execution.");
   
@@ -158,6 +166,7 @@ say "Test 1 - Generates no loops, with deletion test of tables Chains and ChainI
   isnt ($returnedValue, undef, "It generated at least an empty array ref.");  
   is (scalar @$returnedValue, 0, "The array ref is of size 0.");
 
+  is(numProcessedTransactionsRows(), 3, "There are 3 processed transaction rows after execution.");
   is(numLoopInfoRows(), 0, "There are no loop info rows after execution.");  
   is(numLoopsRows(), 0, "There is no loop rows after execution.");
 }
@@ -192,6 +201,7 @@ say "Test 2 - Generate 1 loop, with deletion test of tables Chains, ChainInfo an
   #ChainId_FK, FromTransactionId_FK, ToTransactionId_FK
   $statementInsertBranchedTransactions->execute(1, 3, 4);
 
+  is(numProcessedTransactionsRows(), 4, "There are 4 processed transaction rows before execution.");
   is(numLoopInfoRows(), 0, "There is no loop info rows before execution.");
   is(numLoopsRows(), 0, "There is no loop rows before execution.");
   
@@ -202,6 +212,7 @@ say "Test 2 - Generate 1 loop, with deletion test of tables Chains, ChainInfo an
   isnt ($returnedValue, undef, "It generated at least an empty array ref.");  
   is (scalar @$returnedValue, 1, "The array ref is of size 1.");
   
+  is(numProcessedTransactionsRows(), 4, "There are 4 processed transaction rows after execution.");
   is(numLoopInfoRows(), 1, "There is 1 loop info row after execution.");  
   is(numLoopsRows(), 4, "There are 4 loop rows after execution.");
 
@@ -245,6 +256,7 @@ say "Test 3 - Generate 1 loop - with random transactions and deletion test of ta
   #CandidateTransactionsId, ChainId_FK, TransactionFrom_FK, TransactionTo_FK, MinimumValue, Length, TotalValue, NumberOfMinimumValues
   $statementInsertCandidateTransactions->execute(1, undef, undef, 13, 10, 1, 10, 1);
 
+  is(numProcessedTransactionsRows(), 13, "There are 13 processed transaction rows before execution.");
   is(numLoopInfoRows(), 0, "There is no loop info rows before execution.");
   is(numLoopsRows(), 0, "There is no loop rows before execution.");
   
@@ -255,6 +267,7 @@ say "Test 3 - Generate 1 loop - with random transactions and deletion test of ta
   isnt ($returnedValue, undef, "It generated at least an empty array ref.");  
   is (scalar @$returnedValue, 1, "The array ref is of size 1.");
 
+  is(numProcessedTransactionsRows(), 13, "There are 13 processed transaction rows after execution.");
   is(numLoopInfoRows(), 1, "There is 1 loop info row after execution.");  
   is(numLoopsRows(), 4, "There are 4 loop rows after execution.");
 
@@ -286,6 +299,7 @@ say "Test 4 - Generates more than 2 loops";
   $statementInsertProcessedTransactions->execute(7, 20,  1, 10); # Loop 3  
   $statementInsertProcessedTransactions->execute(8,  4,  1,  8); # Loop 1
 
+  is(numProcessedTransactionsRows(), 8, "There are 8 processed transaction rows before execution.");
   is(numLoopInfoRows(), 0, "There is no loop info rows before execution.");
   is(numLoopsRows(), 0, "There is no loop rows before execution.");
   
@@ -296,6 +310,7 @@ say "Test 4 - Generates more than 2 loops";
   isnt ($returnedValue, undef, "It generated at least an empty array ref.");  
   is (scalar @$returnedValue, 3, "The array ref is of size 1.");
 
+  is(numProcessedTransactionsRows(), 8, "There are 8 processed transaction rows after execution.");
   is(numLoopInfoRows(), 3, "There are 3 loop info rows after execution.");  
   is(numLoopsRows(), 11, "There is 11 loop rows after execution.");
 
@@ -335,6 +350,8 @@ say "Test 4 - Generates more than 2 loops";
   ok (loopsExists($loopId, 7), "Transaction 3 is in loop $loopId.");
   ($loopId, $minimumValue, $length, $totalValue, $numberOfMinimumValues) = (undef, undef, undef, undef, undef);
 }
+
+
 
 done_testing();
 

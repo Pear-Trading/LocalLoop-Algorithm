@@ -38,6 +38,9 @@ my $statementInsertProcessedTransactions = $dbh->prepare("INSERT INTO ProcessedT
 my $statementInsertCurrentStatsId = $dbh->prepare("INSERT INTO ChainInfo (ChainInfoId, MinimumValue, Length, TotalValue, NumberOfMinimumValues) VALUES (?, ?, ?, ?, ?)");
 my $statementInsertChains = $dbh->prepare("INSERT INTO Chains (ChainId, TransactionId_FK, ChainInfoId_FK) VALUES (?, ?, ?)");
 
+my $selectProcessedTransactionsCountAll = $dbh->prepare("SELECT COUNT(*) FROM ProcessedTransactions");
+my $selectChainInfoCountAll = $dbh->prepare("SELECT COUNT(*) FROM ChainInfo");
+
 sub initialise { 
   delete_table_data();
   #TransactionId, FromUserId, ToUserId, Value
@@ -54,9 +57,26 @@ sub initialise {
   $statementInsertCurrentStatsId->execute(2, 10, 1, 10, 1);
   $statementInsertCurrentStatsId->execute(3, 10, 1, 10, 1);
   $statementInsertCurrentStatsId->execute(4, 10, 1, 10, 1);
+}
+
+sub numProcessedTransactionsRows {
+  $selectProcessedTransactionsCountAll->execute();
+  my ($num) = $selectProcessedTransactionsCountAll->fetchrow_array();
   
+  return $num;
+}
 
+sub numChainInfoRows {
+  $selectChainInfoCountAll->execute();
+  my ($num) = $selectChainInfoCountAll->fetchrow_array();
+  
+  return $num;
+}
 
+sub checkConsistency {
+  my ($beforeAfter) = @_;
+  is(numProcessedTransactionsRows(), 6, "There are 6 processed transaction rows ".$beforeAfter." execution.");
+  is(numChainInfoRows(), 4, "There is 4 chain info rows ".$beforeAfter." execution.");
 }
 
 
@@ -92,11 +112,13 @@ sub numRows {
 say "Test 1 - No chains in the table";
 initialise();
 is (numRows(),0,"There is no rows");
+checkConsistency("before");
 
 my $integer = undef;
 my $exception = exception { $integer = $main->_newChainId(); };
 is ($exception, undef ,"No exception thrown");
 
+checkConsistency("after");
 isnt ($integer, undef, "Empty table returns not undef id."); 
 ok (chainIdDoesntExists($integer), "Returned id does not exist."); 
 is (numRows(),0,"There still is no rows"); #Make sure nothing is added.
@@ -112,11 +134,13 @@ $statementInsertChains->execute(1, 1, 1);
 $statementInsertChains->execute(1, 2, 1);
 $statementInsertChains->execute(1, 3, 1);
 is (numRows(),3,"There is only 3 rows");
+checkConsistency("before");
 
 my $integer = undef;
 my $exception = exception { $integer = $main->_newChainId(); };
 is ($exception, undef ,"No exception thrown");
 
+checkConsistency("after");
 isnt ($integer, undef, "Non-empty table returns not undef id."); 
 ok (chainIdDoesntExists($integer), "Returned id does not exist."); 
 is (numRows(),3,"There is still is only 3 rows"); #Make sure nothing is added.
@@ -137,11 +161,13 @@ $statementInsertChains->execute(2, 4, 1);
 $statementInsertChains->execute(2, 5, 1);
 $statementInsertChains->execute(2, 6, 1);
 is (numRows(),9,"There is only 9 rows");
+checkConsistency("before");
 
 my $integer = undef;
 my $exception = exception { $integer = $main->_newChainId(); };
 is ($exception, undef ,"No exception thrown");
 
+checkConsistency("after");
 isnt ($integer, undef, "Non-empty table returns not undef id."); 
 ok (chainIdDoesntExists($integer), "Returned id does not exist."); 
 is (numRows(),9,"There is still is only 9 rows"); #Make sure nothing is added.
