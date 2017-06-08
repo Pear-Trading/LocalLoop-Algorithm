@@ -10,11 +10,9 @@ sub initAfterStaticRestrictions {
   debugMethodEnd();
 }
 
-#Similar to "IStaticRestriction" but the restriction is dependent on the transaction
-#context it's working with.
 #1st param $self.
-#2rd param whether this is the first dynamic restriction called, hence 
-#any previous state in the "Included" column of the "ProcessedTransactions" table.
+#2rd param whether this is the first chain dynamic restriction called, hence any previous state 
+#in the "Included" column of the "ProcessedTransactions" table should be ignored.
 #3rd param ChainGenerationContext instance.
 sub applyChainDynamicRestriction {
   die "applyChainDynamicRestriction has not been implemented.";
