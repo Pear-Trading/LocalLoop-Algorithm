@@ -13,7 +13,8 @@ with ('Pear::LocalLoop::Algorithm::Role::IChainDynamicRestriction');
 #connecting to them again in future. This includes the next transaction in this chain and all branches from 
 #this transaction.
 
-#This allows to connect back to yourself. TODO
+#This allows to connect back to yourself, but this can be excluded with:
+#Pear::LocalLoop::Algorithm::ChainDynamicRestriction::AllowOnlyAfterCurrentTransaction
 
 has _statementSelectNextTransactionInChain => (
   is => 'ro', 
@@ -81,11 +82,12 @@ sub applyChainDynamicRestriction {
   #say "# tx:$transactionId ch:$chainId 1st:$isFirst";
 
   #Select next transaction in the chain, if undefined that means the inputted transaction id is the last in the chain.  
-  #FIXME BUG IN SQLite DBI? Does the the aggregate functions require group by. In the "None" heuristic they don't...
+  #FIXME BUG IN SQLite DBD? Does the the aggregate functions require group by. In the "None" heuristic they don't...
   #my $statementNextTransactionInChain = $dbh->prepare("SELECT MIN(TransactionId_FK) FROM Chains WHERE ChainId = ? AND ? < TransactionId_FK ");
   #my $statementNextTransactionInChain = $dbh->prepare("SELECT ChainInfoId_FK, MIN(TransactionId_FK) FROM Chains WHERE ChainId = ? AND ? < TransactionId_FK ");
   #my $minTransactionId = @{$dbh->selectrow_arrayref("SELECT ChainInfoId_FK, MIN(TransactionId_FK) FROM Chains WHERE ChainId = ? AND ? < TransactionId_FK ", undef, ($chainId, $transactionId))}[0];
   
+  #Try to get the next transaction in the chain, if available. 
   my $statementNextTransactionInChain = $self->_statementSelectNextTransactionInChain();
   $statementNextTransactionInChain->execute($chainId, $transactionId);
   my ($minTransactionId) = $statementNextTransactionInChain->fetchrow_array();
