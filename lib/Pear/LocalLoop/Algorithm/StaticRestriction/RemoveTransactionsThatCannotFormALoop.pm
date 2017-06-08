@@ -7,6 +7,9 @@ use Pear::LocalLoop::Algorithm::Debug;
 extends("Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier");
 with ('Pear::LocalLoop::Algorithm::Role::IStaticRestriction');
 
+# This removes users transactions that don't have at least one transaction where they are 
+# spending money and one transction where they are receiving money.
+
 has _tableName => (
   is => 'ro',
   default => sub {
@@ -26,6 +29,7 @@ has _statementDropTable => (
   lazy => 1, 
 );
 
+#Table to hold all of the user id's which are present in only "to" or "from" in a user.
 has _statementCreateTable => (
   is => 'ro',
   default => sub {
@@ -36,6 +40,7 @@ has _statementCreateTable => (
   lazy => 1, 
 );
 
+#Seleect all user ids that are present in the to user but not the from user of transactions.
 has _statementInsertUserIdsOnlyInToUserIdAttribute => (
   is => 'ro',
   default => sub {
@@ -46,6 +51,7 @@ has _statementInsertUserIdsOnlyInToUserIdAttribute => (
   lazy => 1, 
 );
 
+#Seleect all user ids that are present in the from user but not the to user of transactions.
 has _statementInsertUserIdsOnlyInFromUserIdAttribute => (
   is => 'ro',
   default => sub {
@@ -56,6 +62,7 @@ has _statementInsertUserIdsOnlyInFromUserIdAttribute => (
   lazy => 1, 
 );
 
+#Delete transctions from the ProcessedTransactions table.
 has _statementDeleteTransactionsThatCantFormLoops => (
   is => 'ro',
   default => sub {
@@ -70,6 +77,7 @@ sub applyStaticRestriction{
   debugMethodStart();
   my ($self) = @_;
   
+  #(Drop and) create the temporary table.
   $self->_statementDropTable()->execute();
   $self->_statementCreateTable()->execute();
 
@@ -77,12 +85,14 @@ sub applyStaticRestriction{
   while ($loop != 0) {
     $loop = 0;
     
+    #Find unique user ids
     $self->_statementInsertUserIdsOnlyInToUserIdAttribute()->execute();
     $self->_statementInsertUserIdsOnlyInFromUserIdAttribute()->execute();
     
+    #Delete transactions
     my $del1 = $self->_statementDeleteTransactionsThatCantFormLoops()->execute(); 
     
-    #If there was more than 1 deleted keep on deleting.
+    #If there was more than 1 deleted keep on deleting, as they may be dependencies.
     if (0 < $del1) {
       $loop = 1;
     }
