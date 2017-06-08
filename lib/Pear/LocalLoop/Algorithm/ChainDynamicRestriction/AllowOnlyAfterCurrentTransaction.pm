@@ -14,7 +14,7 @@ with ('Pear::LocalLoop::Algorithm::Role::IChainDynamicRestriction');
 #If it's not the first restriction then set included in all of the transactions 
 #before itself and itself to 0.
 
-
+#Exclude transactions before on the current one.
 has _statementAllowOnlyAfterCurrentTransaction => (
   is => 'ro', 
   default => sub {
@@ -24,6 +24,7 @@ has _statementAllowOnlyAfterCurrentTransaction => (
   lazy => 1,
 );
 
+#Include transactions after this transaction if they have been excluded
 has _statementAllowOnlyAfterCurrentTransactionFirst => (
   is => 'ro', 
   default => sub {
@@ -40,7 +41,6 @@ sub applyChainDynamicRestriction {
   my ($self, $isFirst, $chainGenerationContextInstance) = @_;
   my $dbh = $self->dbh();
   
-  #We don't care if chainId is undefined as we don't use it.
   if ( ! defined $isFirst ) {
     die "isFirst cannot be undefined";
   }
@@ -50,9 +50,11 @@ sub applyChainDynamicRestriction {
   
   my $transactionId = $chainGenerationContextInstance->currentTransactionId();
   
+  #Exclude included transactions before or on this transaction.
   $self->_statementAllowOnlyAfterCurrentTransaction()->execute($transactionId);
   
   if ($isFirst){
+    #Include transactions after this transaction if they are excluded.
     $self->_statementAllowOnlyAfterCurrentTransactionFirst()->execute($transactionId);
   }
   
