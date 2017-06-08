@@ -9,7 +9,7 @@ use Pear::LocalLoop::Algorithm::Debug;
 extends("Pear::LocalLoop::Algorithm::Role::AbstractDatabaseModifier");
 with ('Pear::LocalLoop::Algorithm::Role::ILoopDynamicRestriction');
 
-#Prevent the selection of any loops that have been selected previously.
+#Prevent the selection of any loops that have active transactions in them.
 
 has _tableNameAllActiveTransactions => (
   is => 'ro',
@@ -30,6 +30,7 @@ has _statementDropTableAllActiveTransactions => (
   lazy => 1, 
 );
 
+#Table for all transactions that are active in loops.
 has _statementCreateTableAllActiveTransactions => (
   is => 'ro',
   default => sub {
@@ -60,6 +61,7 @@ has _statementDropTableLoopsWithAnyActiveTransactions => (
   lazy => 1, 
 );
 
+#Table for all loops with any active transactions in.
 has _statementCreateTableLoopsWithAnyActiveTransactions => (
   is => 'ro',
   default => sub {
@@ -75,6 +77,7 @@ sub init {
   debugMethodStart();
   my ($self) = @_;
   
+  #(Drop and) create the processing tables.
   $self->_statementDropTableAllActiveTransactions()->execute();
   $self->_statementCreateTableAllActiveTransactions()->execute();
   
@@ -106,6 +109,7 @@ has _statementClearTableLoopsWithAnyActiveTransactions => (
 );
 
 
+#Insert all transactions that are present in active loops.
 has _statementInsertAllActiveTransactions => (
   is => 'ro', 
   default => sub {
@@ -116,6 +120,7 @@ has _statementInsertAllActiveTransactions => (
   lazy => 1,
 );
 
+#Insert all loops that have active transactions in them.
 has _statementInsertLoopsWithAnyActiveTransactions => (
   is => 'ro', 
   default => sub {
@@ -126,7 +131,6 @@ has _statementInsertLoopsWithAnyActiveTransactions => (
   },
   lazy => 1,
 );
-
 
 has _statementDisallowLoopsWhichHaveTransactionInActiveLoops => (
   is => 'ro', 
@@ -162,15 +166,19 @@ sub applyLoopDynamicRestriction {
   # SELECT DISTINCT Loops.TransactionId_FK FROM Loops, LoopInfo  WHERE Loops.LoopId_FK = LoopInfo.LoopId AND LoopInfo.Active != 0
   # SELECT DISTINCT Loops.LoopId_FK FROM Loops WHERE Loops.TransactionId_FK IN (SELECT DISTINCT Loops.TransactionId_FK FROM Loops, LoopInfo  WHERE Loops.LoopId_FK = LoopInfo.LoopId AND LoopInfo.Active != 0)
   
+  #Clear previous tables
   $self->_statementClearTableAllActiveTransactions()->execute();
   $self->_statementClearTableLoopsWithAnyActiveTransactions()->execute();
   
+  #Select which loops have any active transaction in them
   $self->_statementInsertAllActiveTransactions()->execute();
   $self->_statementInsertLoopsWithAnyActiveTransactions()->execute();
   
+  #Exclude included loops that have active transactions in
   $self->_statementDisallowLoopsWhichHaveTransactionInActiveLoops()->execute();
   
   if ($isFirstRestriction){
+    #Include excluded loops that don't have transactions in
     $self->_statementDisallowLoopsWhichHaveTransactionInActiveLoopsFirstRestriction()->execute();
   }
   
